@@ -7,6 +7,7 @@ use App\Repository\SujetForumRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -19,10 +20,19 @@ use Symfony\Component\Routing\Annotation\Route;
 class SujetForumController extends AbstractController
 {
     #[Route('/forum/sujets', name: 'sujet_forum_index', methods: ['GET'])]
-    public function index(SujetForumRepository $repository): Response
+    public function index(Request $request, SujetForumRepository $repository): Response
     {
+        $query = trim((string) $request->query->get('q', ''));
+        $status = (string) $request->query->get('status', '');
+        if ($status === '' || !in_array($status, SujetForum::getStatusValues(), true)) {
+            $status = '';
+        }
+
         return $this->render('forum/sujet/index.html.twig', [
-            'sujets' => $repository->findBy([], ['dateCreation' => 'DESC']),
+            'sujets' => $repository->findBySearch($query !== '' ? $query : null, $status !== '' ? $status : null),
+            'q' => $query,
+            'status' => $status,
+            'statusChoices' => SujetForum::getStatusChoices(),
         ]);
     }
 
@@ -30,13 +40,13 @@ class SujetForumController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $sujet = new SujetForum();
+        $sujet->setStatus(SujetForum::STATUS_VISIBLE);
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
             ->add('idUser', IntegerType::class)
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
-            ->add('status', TextType::class, ['required' => false])
             ->add('category', TextType::class, ['required' => false])
             ->add('attachmentFile', FileType::class, ['mapped' => false, 'required' => false])
             ->getForm();
@@ -72,7 +82,11 @@ class SujetForumController extends AbstractController
             ->add('idUser', IntegerType::class)
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
-            ->add('status', TextType::class, ['required' => false])
+            ->add('status', ChoiceType::class, [
+                'choices' => SujetForum::getStatusChoices(),
+                'placeholder' => 'Aucun statut',
+                'required' => false,
+            ])
             ->add('category', TextType::class, ['required' => false])
             ->add('attachmentFile', FileType::class, ['mapped' => false, 'required' => false])
             ->getForm();

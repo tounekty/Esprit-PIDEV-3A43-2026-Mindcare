@@ -200,12 +200,17 @@
                 <div style="margin-top: 60px;">
                     <h3 class="section-title">
                         <i class="ti-comments" style="margin-right: 10px;"></i>
-                        Réponses ({{ sujet.messages|length }})
+                        Réponses ({{ messages|length }})
                     </h3>
+
+                    <form method="get" action="{{ path('front_forum_show', {id: sujet.id}) }}" style="margin: 15px 0 25px; display: flex; gap: 10px;">
+                        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher un message" class="form-control" style="max-width: 420px;">
+                        <button type="submit" class="boxed-btn3" style="padding: 10px 18px;">Rechercher</button>
+                    </form>
                     
-                    {% if sujet.messages|length > 0 %}
+                    {% if messages|length > 0 %}
                         <div style="margin-top: 30px;">
-                            {% for message in sujet.messages %}
+                            {% for message in messages %}
                                 <div class="message-card">
                                     <div class="message-header">
                                         <div class="message-author">

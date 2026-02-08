@@ -19,10 +19,13 @@ use Symfony\Component\Routing\Annotation\Route;
 class MessageForumController extends AbstractController
 {
     #[Route('/forum/messages', name: 'message_forum_index', methods: ['GET'])]
-    public function index(MessageForumRepository $repository): Response
+    public function index(Request $request, MessageForumRepository $repository): Response
     {
+        $query = trim((string) $request->query->get('q', ''));
+
         return $this->render('forum/message/index.html.twig', [
-            'messages' => $repository->findBy([], ['dateMessage' => 'DESC']),
+            'messages' => $repository->findBySearch($query !== '' ? $query : null),
+            'q' => $query,
         ]);
     }
 

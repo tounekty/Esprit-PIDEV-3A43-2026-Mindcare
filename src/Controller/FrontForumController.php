@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\MessageForum;
 use App\Entity\SujetForum;
+use App\Repository\MessageForumRepository;
 use App\Repository\SujetForumRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,10 +21,19 @@ use Symfony\Component\Routing\Annotation\Route;
 class FrontForumController extends AbstractController
 {
     #[Route('/forum', name: 'front_forum_index', methods: ['GET'])]
-    public function index(SujetForumRepository $repository): Response
+    public function index(Request $request, SujetForumRepository $repository): Response
     {
+        $query = trim((string) $request->query->get('q', ''));
+        $status = (string) $request->query->get('status', '');
+        if ($status === '' || !in_array($status, SujetForum::getStatusValues(), true)) {
+            $status = '';
+        }
+
         return $this->render('front/forum/index.html.twig', [
-            'sujets' => $repository->findBy([], ['dateCreation' => 'DESC']),
+            'sujets' => $repository->findBySearch($query !== '' ? $query : null, $status !== '' ? $status : null),
+            'q' => $query,
+            'status' => $status,
+            'statusChoices' => SujetForum::getStatusChoices(),
         ]);
     }
 
@@ -31,6 +41,7 @@ class FrontForumController extends AbstractController
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $sujet = new SujetForum();
+        $sujet->setStatus(SujetForum::STATUS_VISIBLE);
 
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class, [
@@ -49,10 +60,6 @@ class FrontForumController extends AbstractController
             ])
             ->add('isPinned', CheckboxType::class, [
                 'label' => 'Épingler le sujet',
-                'required' => false,
-            ])
-            ->add('status', TextType::class, [
-                'label' => 'Statut',
                 'required' => false,
             ])
             ->add('category', TextType::class, [
@@ -81,10 +88,13 @@ class FrontForumController extends AbstractController
     }
 
     #[Route('/forum/sujet/{id}', name: 'front_forum_show', methods: ['GET', 'POST'])]
-    public function show(Request $request, SujetForum $sujet, EntityManagerInterface $entityManager): Response
+    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, EntityManagerInterface $entityManager): Response
     {
         $message = new MessageForum();
         $message->setSujet($sujet);
+
+        $query = trim((string) $request->query->get('q', ''));
+        $messages = $messageRepository->findBySujetAndSearch($sujet, $query !== '' ? $query : null);
 
         $form = $this->createFormBuilder($message)
             ->add('contenu', TextareaType::class, [
@@ -111,6 +121,8 @@ class FrontForumController extends AbstractController
 
         return $this->render('front/forum/show.html.twig', [
             'sujet' => $sujet,
+            'messages' => $messages,
+            'q' => $query,
             'form' => $form->createView(),
         ]);
     }
