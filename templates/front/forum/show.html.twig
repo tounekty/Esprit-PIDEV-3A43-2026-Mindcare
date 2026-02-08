@@ -249,16 +249,22 @@
                         <i class="ti-pencil-alt" style="margin-right: 10px;"></i>
                         Ajouter une réponse
                     </h3>
-                    {{ form_start(form, {'attr': {'style': 'margin-top: 30px;'}}) }}
+                    {{ form_start(form, {'attr': {'style': 'margin-top: 30px;', 'novalidate': 'novalidate'}}) }}
                         <div class="mb-4">
-                            {{ form_row(form.contenu, {'attr': {'rows': 6, 'placeholder': 'Écrivez votre réponse ici...'}}) }}
+                            {{ form_label(form.contenu) }}
+                            {{ form_widget(form.contenu, {'attr': {'rows': 6, 'placeholder': 'Ecrivez votre reponse ici...'}}) }}
+                            {{ form_errors(form.contenu) }}
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                {{ form_row(form.idUser, {'attr': {'placeholder': 'Votre ID'}}) }}
+                                {{ form_label(form.idUser) }}
+                                {{ form_widget(form.idUser, {'attr': {'placeholder': 'Votre ID'}}) }}
+                                {{ form_errors(form.idUser) }}
                             </div>
                             <div class="col-md-6 mb-3">
-                                {{ form_row(form.attachmentFile) }}
+                                {{ form_label(form.attachmentFile) }}
+                                {{ form_widget(form.attachmentFile) }}
+                                {{ form_errors(form.attachmentFile) }}
                             </div>
                         </div>
                         <div style="display: flex; gap: 15px; margin-top: 20px;">

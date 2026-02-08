@@ -6,6 +6,7 @@ use App\Repository\SujetForumRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SujetForumRepository::class)]
 #[ORM\Table(name: 'sujet_forum')]
@@ -17,15 +18,31 @@ class SujetForum
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\NotBlank(message: 'Le titre est obligatoire.')]
+    #[Assert\Length(
+        min: 5,
+        max: 120,
+        minMessage: 'Le titre doit contenir au moins {{ limit }} caracteres.',
+        maxMessage: 'Le titre ne peut pas depasser {{ limit }} caracteres.'
+    )]
     private string $titre;
 
     #[ORM\Column(type: 'text')]
+    #[Assert\NotBlank(message: 'La description est obligatoire.')]
+    #[Assert\Length(
+        min: 10,
+        max: 1000,
+        minMessage: 'La description doit contenir au moins {{ limit }} caracteres.',
+        maxMessage: 'La description ne peut pas depasser {{ limit }} caracteres.'
+    )]
     private string $description;
 
     #[ORM\Column(name: 'date_creation', type: 'datetime_immutable')]
     private \DateTimeImmutable $dateCreation;
 
     #[ORM\Column(name: 'id_user', type: 'integer')]
+    #[Assert\NotBlank(message: "L'identifiant utilisateur est obligatoire.")]
+    #[Assert\Positive(message: "L'identifiant utilisateur doit etre un nombre positif.")]
     private int $idUser;
 
     #[ORM\Column(name: 'image_url', type: 'string', length: 255, nullable: true)]
@@ -35,9 +52,17 @@ class SujetForum
     private bool $isPinned = false;
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[Assert\Length(
+        max: 30,
+        maxMessage: 'Le statut ne peut pas depasser {{ limit }} caracteres.'
+    )]
     private ?string $status = null;
 
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    #[Assert\Length(
+        max: 60,
+        maxMessage: 'La categorie ne peut pas depasser {{ limit }} caracteres.'
+    )]
     private ?string $category = null;
 
     #[ORM\Column(name: 'attachment_path', type: 'string', length: 255, nullable: true)]
