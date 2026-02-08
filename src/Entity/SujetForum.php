@@ -12,6 +12,29 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Table(name: 'sujet_forum')]
 class SujetForum
 {
+    public const STATUS_VISIBLE = 'VISIBLE';
+    public const STATUS_HIDDEN = 'HIDDEN';
+    public const STATUS_REPORTED = 'REPORTED';
+    public const STATUS_PENDING_APPROVAL = 'PENDING_APPROVAL';
+    public const STATUS_EDITED_BY_MODERATOR = 'EDITED_BY_MODERATOR';
+    public const STATUS_DELETED = 'DELETED';
+
+    public static function getStatusChoices(): array
+    {
+        return [
+            'VISIBLE -> message visible par tous' => self::STATUS_VISIBLE,
+            'HIDDEN -> masque temporairement' => self::STATUS_HIDDEN,
+            'REPORTED -> signale (contenu choquant / dangereux)' => self::STATUS_REPORTED,
+            'PENDING_APPROVAL -> en attente de validation' => self::STATUS_PENDING_APPROVAL,
+            'EDITED_BY_MODERATOR -> modifie par un admin' => self::STATUS_EDITED_BY_MODERATOR,
+            'DELETED -> supprime (soft delete)' => self::STATUS_DELETED,
+        ];
+    }
+
+    public static function getStatusValues(): array
+    {
+        return array_values(self::getStatusChoices());
+    }
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(type: 'integer')]
