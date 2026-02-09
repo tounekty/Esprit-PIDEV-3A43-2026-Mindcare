@@ -13,7 +13,10 @@
 
     {% block stylesheets %}
         <link rel="stylesheet" href="{{ asset('front/css/bootstrap.min.css') }}">
+<<<<<<< HEAD
         <link rel="stylesheet" href="{{ asset('front/css/login.css') }}">
+=======
+>>>>>>> origin/gestion_forum
         <link rel="stylesheet" href="{{ asset('front/css/owl.carousel.min.css') }}">
         <link rel="stylesheet" href="{{ asset('front/css/magnific-popup.css') }}">
         <link rel="stylesheet" href="{{ asset('front/css/font-awesome.min.css') }}">
@@ -24,6 +27,7 @@
         <link rel="stylesheet" href="{{ asset('front/css/animate.css') }}">
         <link rel="stylesheet" href="{{ asset('front/css/slicknav.css') }}">
         <link rel="stylesheet" href="{{ asset('front/css/style.css') }}">
+<<<<<<< HEAD
 
         {# Banned Popup Styles #}
         <style>
@@ -75,10 +79,13 @@
                 to { opacity: 0; transform: translateX(100%); }
             }
         </style>
+=======
+>>>>>>> origin/gestion_forum
     {% endblock %}
 </head>
 
 <body>
+<<<<<<< HEAD
 
     {# Main page content #}
     {% block body %}{% endblock %}
@@ -91,12 +98,22 @@
             <button id="close-banned-popup">Fermer</button>
         </div>
     {% endfor %}
+=======
+    {% include 'front/partials/header.html.twig' %}
+
+    {% block body %}{% endblock %}
+
+    {% include 'front/partials/footer.html.twig' %}
+>>>>>>> origin/gestion_forum
 
     {% block javascripts %}
         <script src="{{ asset('front/js/vendor/modernizr-3.5.0.min.js') }}"></script>
         <script src="{{ asset('front/js/vendor/jquery-1.12.4.min.js') }}"></script>
         <script src="{{ asset('front/js/popper.min.js') }}"></script>
+<<<<<<< HEAD
         <script src="{{ asset('front/js/login.js') }}"></script>
+=======
+>>>>>>> origin/gestion_forum
         <script src="{{ asset('front/js/bootstrap.min.js') }}"></script>
         <script src="{{ asset('front/js/owl.carousel.min.js') }}"></script>
         <script src="{{ asset('front/js/isotope.pkgd.min.js') }}"></script>
@@ -118,6 +135,7 @@
         <script src="{{ asset('front/js/jquery.validate.min.js') }}"></script>
         <script src="{{ asset('front/js/mail-script.js') }}"></script>
         <script src="{{ asset('front/js/main.js') }}"></script>
+<<<<<<< HEAD
 
         {# Banned Popup Script #}
         <script>
@@ -140,6 +158,8 @@
                 }
             });
         </script>
+=======
+>>>>>>> origin/gestion_forum
     {% endblock %}
 </body>
 
