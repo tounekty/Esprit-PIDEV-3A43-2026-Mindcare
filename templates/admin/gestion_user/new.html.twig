@@ -1,0 +1,60 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Add New User{% endblock %}
+{% block page_title %}Add New User{% endblock %}
+
+{% block body %}
+<div class="card p-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Add New User</h5>
+    </div>
+    
+    <div class="card-body">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.firstName) }}
+                    {{ form_widget(form.firstName, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.firstName) }}
+                </div>
+                <div class="col-md-6 mb-3">
+                    {{ form_label(form.lastName) }}
+                    {{ form_widget(form.lastName, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.lastName) }}
+                </div>
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.email) }}
+                {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.email) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.password) }}
+                {{ form_widget(form.password, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.password) }}
+            </div>
+
+            {% for child in form.children %}
+                {% if child.vars.name not in ['firstName', 'lastName', 'email', 'password', '_token'] %}
+                    <div class="mb-3">
+                        {{ form_label(child) }}
+                        {{ form_widget(child, {'attr': {'class': 'form-control'}}) }}
+                        {{ form_errors(child) }}
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+            <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                <a href="{{ path('admin_users_index') }}" class="btn btn-outline-secondary btn-sm" style="min-width: 120px;">
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary btn-sm" style="min-width: 120px;">
+                    Add User
+                </button>
+            </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
