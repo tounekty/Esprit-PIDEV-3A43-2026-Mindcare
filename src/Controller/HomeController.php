@@ -1,7 +1,10 @@
 <?php
 
+<<<<<<< HEAD
 // src/Controller/HomeController.php
 
+=======
+>>>>>>> origin/gestion_forum
 namespace App\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -13,6 +16,7 @@ class HomeController extends AbstractController
     #[Route('/home', name: 'app_home')]
     public function index(): Response
     {
+<<<<<<< HEAD
         $user = $this->getUser();
         $bannedUntil = null;
 
@@ -26,3 +30,8 @@ class HomeController extends AbstractController
     }
 }
 
+=======
+        return $this->render('home/index.html.twig');
+    }
+}
+>>>>>>> origin/gestion_forum

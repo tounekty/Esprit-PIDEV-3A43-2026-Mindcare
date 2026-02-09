@@ -1,3 +1,9 @@
 controllers:
+<<<<<<< HEAD
     resource: ../src/Controller/
+=======
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+>>>>>>> origin/gestion_forum
     type: attribute
