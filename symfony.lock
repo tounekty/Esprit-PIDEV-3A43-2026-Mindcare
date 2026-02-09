@@ -35,7 +35,6 @@
             "./migrations/.gitignore"
         ]
     },
-<<<<<<< HEAD
     "karser/karser-recaptcha3-bundle": {
         "version": "0.3",
         "recipe": {
@@ -48,8 +47,6 @@
             "./config/packages/karser_recaptcha3.yaml"
         ]
     },
-=======
->>>>>>> origin/gestion_forum
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {

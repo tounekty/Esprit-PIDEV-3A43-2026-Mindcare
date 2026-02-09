@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
     "content-hash": "cea4445fb8768392cc63bf3c1e32ab43",
-=======
-    "content-hash": "ab9f2ceb51860a0b8665e2df4b5cce6e",
->>>>>>> origin/gestion_forum
     "packages": [
         {
             "name": "composer/semver",
@@ -1268,7 +1264,6 @@
             "time": "2025-03-06T22:45:56+00:00"
         },
         {
-<<<<<<< HEAD
             "name": "karser/karser-recaptcha3-bundle",
             "version": "v0.3.0",
             "source": {
@@ -1351,8 +1346,6 @@
             "time": "2025-12-08T11:25:16+00:00"
         },
         {
-=======
->>>>>>> origin/gestion_forum
             "name": "monolog/monolog",
             "version": "3.10.0",
             "source": {
@@ -10148,9 +10141,5 @@
         "ext-iconv": "*"
     },
     "platform-dev": {},
-<<<<<<< HEAD
     "plugin-api-version": "2.9.0"
-=======
-    "plugin-api-version": "2.6.0"
->>>>>>> origin/gestion_forum
 }

@@ -25,7 +25,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column(type: 'string', length: 50)]
-    private string $role = 'etudiant'; // default role
+    private string $role = 'etudiant';
 
     #[ORM\Column(type: 'string')]
     private ?string $password = null;
@@ -45,7 +45,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // Returns true if the user is currently banned
     public function isBanned(): bool
     {
         return $this->bannedUntil !== null && $this->bannedUntil > new \DateTime();
@@ -99,9 +98,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRole(string $role): self
     {
         $allowedRoles = ['etudiant', 'psychologue', 'admin'];
-        if (!in_array($role, $allowedRoles)) {
+
+        if (!in_array($role, $allowedRoles, true)) {
             throw new \InvalidArgumentException("Invalid role: $role");
         }
+
         $this->role = $role;
         return $this;
     }
@@ -110,13 +111,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getRoles(): array
     {
-        $roleMap = [
-            'etudiant' => 'ROLE_ETUDIANT',
-            'psychologue' => 'ROLE_PSYCHOLOGUE',
-            'admin' => 'ROLE_ADMIN',
-        ];
-
-        return [$roleMap[$this->role] ?? 'ROLE_USER'];
+        return match ($this->role) {
+            'admin' => ['ROLE_ADMIN'],
+            'psychologue' => ['ROLE_PSYCHOLOGUE'],
+            'etudiant' => ['ROLE_ETUDIANT'],
+            default => ['ROLE_USER'],
+        };
     }
 
     public function getUserIdentifier(): string
@@ -135,8 +135,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
-        // Clear temporary sensitive data if any
+        // nothing to erase
     }
 }

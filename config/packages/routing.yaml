@@ -10,7 +10,3 @@ when@prod:
     framework:
         router:
             strict_requirements: null
-<<<<<<< HEAD
-
-=======
->>>>>>> origin/gestion_forum
