@@ -51,27 +51,23 @@ class AuthController extends AbstractController
         return $this->redirectToRoute('app_login');
     }
 
-    #[Route('/login', name: 'app_login')]
-    public function login(AuthenticationUtils $authenticationUtils, ManagerRegistry $doctrine): Response
-    {
-        $error = $authenticationUtils->getLastAuthenticationError();
-        $lastUsername = $authenticationUtils->getLastUsername();
+ #[Route('/login', name: 'app_login')]
+public function login(AuthenticationUtils $authenticationUtils): Response
+{
+    $error = $authenticationUtils->getLastAuthenticationError();
+    $lastUsername = $authenticationUtils->getLastUsername();
 
-        // Check if user exists and is banned (used to display popup)
-        $bannedUntil = null;
-        if ($lastUsername) {
-            $user = $doctrine->getRepository(User::class)->findOneBy(['email' => $lastUsername]);
-            if ($user && method_exists($user, 'isBanned') && $user->isBanned()) {
-                $bannedUntil = $user->getBannedUntil() ? $user->getBannedUntil()->format('d/m/Y H:i') : null;
-            }
-        }
+    // default banned_until to null if not available
+    $bannedUntil = null;
 
-        return $this->render('login/login.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
-            'banned_until' => $bannedUntil,
-        ]);
-    }
+    return $this->render('login/login.html.twig', [
+        'last_username' => $lastUsername,
+        'error' => $error,
+        'recaptcha_site_key' => $_ENV['RECAPTCHA_SITE_KEY'],
+        'banned_until' => $bannedUntil, // <-- add this
+    ]);
+}
+
 
     #[Route('/logout', name: 'app_logout')]
     public function logout(): void

@@ -28,6 +28,10 @@
           </div>
         {% endif %}
 
+        {% for message in app.flashes('error') %}
+            <div style="color:red; margin-bottom:10px;">{{ message }}</div>
+        {% endfor %}
+
         <div class="field">
             <input type="email"
                    name="email"
@@ -43,6 +47,11 @@
                    placeholder="Password"
                    required
                    autocomplete="new-password">
+        </div>
+
+        <!-- CAPTCHA -->
+        <div class="field">
+            <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
         </div>
 
         <!-- CSRF TOKEN -->
@@ -117,7 +126,6 @@
           animation: slideIn 0.5s ease forwards;
           max-width: 300px;
       }
-
       .banned-popup h3 { margin: 0 0 5px 0; font-size: 16px; }
       .banned-popup p { margin: 0 0 10px 0; font-size: 14px; }
       .banned-popup button {
@@ -128,15 +136,11 @@
           border-radius: 5px;
           cursor: pointer;
       }
-
       @keyframes slideIn {
           from { opacity: 0; transform: translateX(100%); }
           to { opacity: 1; transform: translateX(0); }
       }
-
-      .banned-popup.fade-out {
-          animation: fadeOut 0.5s forwards;
-      }
+      .banned-popup.fade-out { animation: fadeOut 0.5s forwards; }
       @keyframes fadeOut {
           from { opacity: 1; transform: translateX(0); }
           to { opacity: 0; transform: translateX(100%); }
@@ -159,4 +163,5 @@
   </script>
 {% endif %}
 
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 {% endblock %}
