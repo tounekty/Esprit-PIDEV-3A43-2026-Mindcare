@@ -1,0 +1,68 @@
+{% extends "admin/base_admin.html.twig" %}
+
+{% block title %}Gestion des Utilisateurs - Admin{% endblock %}
+
+{% block content %}
+<div class="nxl-content-body">
+    <div class="nxl-content-top">
+        <div class="nxl-content-header">
+            <h3 class="nxl-content-title">Gestion des Utilisateurs</h3>
+            <a href="#" class="btn btn-primary btn-sm">+ Ajouter un utilisateur</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th>Date d'inscription</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Jean Dupont</td>
+                            <td>jean@example.com</td>
+                            <td><span class="badge badge-success">Utilisateur</span></td>
+                            <td><span class="badge badge-success">Actif</span></td>
+                            <td>01/02/2026</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-info">Éditer</a>
+                                <a href="#" class="btn btn-sm btn-danger">Supprimer</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Marie Martin</td>
+                            <td>marie@example.com</td>
+                            <td><span class="badge badge-info">Psychologue</span></td>
+                            <td><span class="badge badge-success">Actif</span></td>
+                            <td>15/01/2026</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-info">Éditer</a>
+                                <a href="#" class="btn btn-sm btn-danger">Supprimer</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Pierre Bernard</td>
+                            <td>pierre@example.com</td>
+                            <td><span class="badge badge-warning">Modérateur</span></td>
+                            <td><span class="badge badge-secondary">Inactif</span></td>
+                            <td>20/12/2025</td>
+                            <td>
+                                <a href="#" class="btn btn-sm btn-info">Éditer</a>
+                                <a href="#" class="btn btn-sm btn-danger">Supprimer</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

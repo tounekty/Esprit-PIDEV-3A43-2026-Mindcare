@@ -1,0 +1,325 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .welcome-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        .stat-card {
+            transition: transform 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .quick-action-btn {
+            height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: inherit;
+        }
+        .breathing-card {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2f5ea 100%);
+            border-radius: 18px;
+            box-shadow: 0 8px 24px rgba(16,185,129,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .breathing-card:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 16px 32px rgba(16,185,129,0.15);
+        }
+        .breathing-illustration svg {
+            display: block;
+            margin: 0 auto;
+        }
+        .breathing-list li {
+            margin-bottom: 0.5rem;
+            padding-left: 0.5rem;
+            border-left: 3px solid #10b981;
+            background: rgba(16,185,129,0.05);
+            border-radius: 6px;
+        }
+        .breathing-btn {
+            background: #10b981;
+            color: #fff;
+            border-radius: 12px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.12);
+        }
+        .breathing-btn:hover {
+            background: #059669;
+            color: #fff;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <!-- Welcome Section -->
+    <div class="card welcome-card shadow mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-6">Bonjour 👋</h1>
+                    <p class="lead">Suivez votre bien-être mental au quotidien</p>
+                    <p>Votre santé mentale est importante. Prenez un moment pour évaluer votre humeur aujourd'hui.</p>
+                </div>
+                <div class="col-md-4 text-center">
+                    <i class="fas fa-brain fa-6x opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card h-100 shadow-sm border-start border-primary border-4">
+                <a href="{{ path('app_mood_new') }}" class="quick-action-btn">
+                    <i class="fas fa-plus-circle fa-3x text-primary mb-3"></i>
+                    <h5>Ajouter une Humeur</h5>
+                    <small class="text-muted">Comment vous sentez-vous ?</small>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card h-100 shadow-sm border-start border-success border-4">
+                <a href="{{ path('app_journal_emotionnel_new') }}" class="quick-action-btn">
+                    <i class="fas fa-book-medical fa-3x text-success mb-3"></i>
+                    <h5>Écrire dans le Journal</h5>
+                    <small class="text-muted">Exprimez vos pensées</small>
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card stat-card h-100 shadow-sm border-start border-danger border-4">
+                <a href="#consultation" class="quick-action-btn btn-consultation">
+                    <i class="fas fa-comment-medical fa-3x text-danger mb-3"></i>
+                    <h5>Parler à un Expert</h5>
+                    <small class="text-muted">Besoin d'aide ?</small>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-smile fa-2x text-success mb-2"></i>
+                    <div class="stat-number">{{ moodStats.heureux }}</div>
+                    <small>Jours heureux</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
+                    <div class="stat-number">{{ moodStats|reduce((carry, item) => carry + item) }}</div>
+                    <small>Humeurs enregistrées</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-book fa-2x text-info mb-2"></i>
+                    <div class="stat-number">{{ recentJournals|length }}</div>
+                    <small>Entrées journal</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-check fa-2x text-warning mb-2"></i>
+                    <div class="stat-number">7</div>
+                    <small>Jours consécutifs</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Recent Activity -->
+    <div class="row">
+        <!-- Mood Distribution Chart -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-chart-pie me-2"></i>Répartition des Humeurs
+                    </h5>
+                    <canvas id="moodDistributionChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Moods -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">
+                        <i class="fas fa-history me-2"></i>Humeurs Récentes
+                    </h5>
+                    <div class="list-group list-group-flush">
+                        {% for mood in recentMoods %}
+                        <div class="list-group-item">
+                            <div class="d-flex align-items-center">
+                                {% set moodIcon = mood.humeur == 'heureux' ? '😊' : 
+                                                 mood.humeur == 'triste' ? '😢' : 
+                                                 mood.humeur == 'colere' ? '😠' : 
+                                                 mood.humeur == 'stresse' ? '😰' : '😐' %}
+                                <div class="me-3" style="font-size: 1.5rem;">{{ moodIcon }}</div>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between">
+                                        <strong>{{ mood.humeur|capitalize }}</strong>
+                                        <small class="text-muted">{{ mood.datemood|date('d/m') }}</small>
+                                    </div>
+                                    <div class="progress mt-1" style="height: 8px;">
+                                        <div class="progress-bar" style="width: {{ mood.intensite * 20 }}%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Journal Entries -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-book-open me-2"></i>Dernières Entrées du Journal
+                </h5>
+                <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-sm btn-outline-primary">
+                    Voir tout <i class="fas fa-arrow-right ms-1"></i>
+                </a>
+            </div>
+            <div class="row">
+                {% for journal in recentJournals %}
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100 border">
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                <i class="far fa-calendar me-1"></i>{{ journal.dateecriture|date('d/m/Y') }}
+                            </h6>
+                            <p class="card-text">{{ journal.contenu|slice(0, 100) }}...</p>
+                        </div>
+                        <div class="card-footer bg-transparent border-top-0">
+                            <a href="{{ path('app_journal_emotionnel_show', {'id': journal.id}) }}" class="btn btn-sm btn-outline-secondary">
+                                Lire la suite
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12 text-center py-4">
+                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Aucune entrée dans le journal</p>
+                    <a href="{{ path('app_journal_emotionnel_new') }}" class="btn btn-primary">
+                        Commencer à écrire
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Resources Section -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title mb-4">
+                <i class="fas fa-hands-helping me-2"></i>Ressources Utiles
+            </h5>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <a href="{{ path('app_dashboard_sleep') }}" style="text-decoration:none">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-bed fa-2x text-blue mb-3"></i>
+                                <h6>Guide du Sommeil</h6>
+                                <p class="small text-muted">Améliorez votre qualité de sommeil</p>
+                                <span class="btn btn-sm btn-outline-primary">Voir le guide</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <a href="{{ path('app_dashboard_breathing') }}" style="text-decoration:none">
+                        <div class="card h-100 border-0 bg-gradient bg-light shadow breathing-card">
+                            <div class="card-body text-center d-flex flex-column justify-content-center align-items-center">
+                                <div class="breathing-illustration mb-3">
+                                    <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="30" cy="30" r="28" stroke="#10b981" stroke-width="4" fill="#e0f7fa" />
+                                        <path d="M30 18c6 0 12 6 12 12s-6 12-12 12-12-6-12-12 6-12 12-12z" fill="#b2f5ea" />
+                                        <path d="M30 24c3 0 6 3 6 6s-3 6-6 6-6-3-6-6 3-6 6-6z" fill="#10b981" />
+                                    </svg>
+                                </div>
+                                <h6 class="mb-2 text-success fw-bold">Exercices de Respiration</h6>
+                                <span class="btn btn-sm btn-success mt-2 px-3 breathing-btn">Essayez maintenant <i class="fas fa-play ms-1"></i></span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mood Distribution Chart
+        const moodCtx = document.getElementById('moodDistributionChart').getContext('2d');
+        const moodColors = {
+            'heureux': '#10b981',
+            'triste': '#3b82f6',
+            'colere': '#ef4444',
+            'stresse': '#f59e0b',
+            'neutre': '#6b7280'
+        };
+        
+        const backgroundColors = Object.keys(moodColors).map(key => moodColors[key]);
+        
+        new Chart(moodCtx, {
+            type: 'doughnut',
+            data: {
+                labels: {{ moodLabels|raw }},
+                datasets: [{
+                    data: {{ moodCounts|raw }},
+                    backgroundColor: backgroundColors,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ${context.raw} entrée(s)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+{% endblock %}

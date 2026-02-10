@@ -1,0 +1,577 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi Mood & Journal | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Page Header with Tabs */
+        .page-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(127, 191, 255, 0.2);
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .page-header p {
+            opacity: 0.95;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        /* Tabs Navigation */
+        .tabs-nav {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 1rem;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 0;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            opacity: 0.9;
+        }
+
+        .tab-btn.active {
+            opacity: 1;
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1rem;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: white;
+            border-radius: 2px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Section Header */
+        .section-header {
+            background: white;
+            border: 1px solid #D4E8FF;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(127, 191, 255, 0.15);
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .section-header p {
+            color: #718096;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* Stats Grid */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #D4E8FF;
+            border-radius: 12px;
+            padding: 1.2rem;
+            box-shadow: 0 4px 12px rgba(127, 191, 255, 0.15);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.2);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #7FBFFF;
+        }
+
+        .stat-icon {
+            font-size: 1.3rem;
+            opacity: 0.2;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Cards */
+        .card-modern {
+            background: white;
+            border: 1px solid #D4E8FF;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(127, 191, 255, 0.15);
+            transition: all 0.3s;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .card-modern:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(127, 191, 255, 0.25);
+        }
+
+        .card-modern-header {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.1) 0%, rgba(168, 216, 255, 0.1) 100%);
+            border-bottom: 1px solid #D4E8FF;
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-modern-body {
+            padding: 1.5rem;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%) !important;
+            border: none !important;
+            color: #1a365d !important;
+            font-weight: 600 !important;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3) !important;
+        }
+
+        .btn-outline-secondary {
+            color: #7FBFFF !important;
+            border-color: #D4E8FF !important;
+        }
+
+        .btn-outline-secondary:hover {
+            background-color: #E8F0FF !important;
+            border-color: #A8D8FF !important;
+        }
+
+        /* Item Grids */
+        .mood-grid, .journal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .mood-item, .journal-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Intensity Bar */
+        .intensity-bar {
+            height: 6px;
+            background: #E8F0FF;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .intensity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7FBFFF, #A8D8FF);
+            transition: width 0.3s;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #CBD5E0;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .empty-state h3 {
+            color: #4A5568;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #A0AEC0;
+            margin-bottom: 1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <!-- Page Header with Tabs -->
+    <div class="page-header">
+        <h1><i class="fas fa-chart-line me-2"></i>Suivi & Journal</h1>
+        <p>Gérez vos humeurs et votre journal émotionnel</p>
+        
+        <div class="tabs-nav">
+            <button class="tab-btn active" onclick="showTab('moods')">
+                <i class="fas fa-heartbeat me-2"></i>Mes Humeurs
+            </button>
+            <button class="tab-btn" onclick="showTab('journal')">
+                <i class="fas fa-book me-2"></i>Journal Émotionnel
+            </button>
+        </div>
+    </div>
+
+    <!-- MOODS TAB -->
+    <div id="moods-tab" class="tab-content active">
+        <div class="section-header">
+            <h2><i class="fas fa-heartbeat"></i>Mes Humeurs</h2>
+            <p>Suivi de votre bien-être émotionnel</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card" style="position: relative;">
+                <span class="stat-label">Total</span>
+                <span class="stat-value">{{ moods|length }}</span>
+                <i class="fas fa-heart stat-icon"></i>
+            </div>
+            <div class="stat-card" style="position: relative;">
+                <span class="stat-label">Intensité Moy.</span>
+                <span class="stat-value">
+                    {% set total = 0 %}
+                    {% for mood in moods %}
+                        {% set total = total + mood.intensite %}
+                    {% endfor %}
+                    {{ moods|length > 0 ? (total / moods|length)|round(1) : 0 }}
+                </span>
+                <i class="fas fa-gauge stat-icon"></i>
+            </div>
+            <div class="stat-card" style="position: relative;">
+                <span class="stat-label">Dominante</span>
+                <span class="stat-value">
+                    {% set counts = {} %}
+                    {% for mood in moods %}
+                        {% set counts = counts|merge({(mood.humeur): counts[mood.humeur]|default(0) + 1}) %}
+                    {% endfor %}
+                    {% if counts|length > 0 %}
+                        {% set max_count = 0 %}
+                        {% set dominant = '' %}
+                        {% for humeur, count in counts %}
+                            {% if count > max_count %}
+                                {% set max_count = count %}
+                                {% set dominant = humeur %}
+                            {% endif %}
+                        {% endfor %}
+                        {{ dominant == 'heureux' ? '😊' : dominant == 'triste' ? '😢' : dominant == 'colere' ? '😠' : dominant == 'stresse' ? '😰' : '😐' }}
+                    {% endif %}
+                </span>
+                <i class="fas fa-smile stat-icon"></i>
+            </div>
+        </div>
+
+        <!-- Add Button -->
+        <div class="mb-4">
+            <a href="{{ path('app_mood_new') }}" class="btn btn-primary btn-lg w-100">
+                <i class="fas fa-plus me-2"></i>Nouvelle Humeur
+            </a>
+        </div>
+
+        <!-- Moods List -->
+        {% if moods|length > 0 %}
+                <div class="mood-grid">
+                    {% for mood in moods %}
+                    <div class="mood-item">
+                        <div class="card-modern">
+                            <div class="card-modern-header">
+                                <div>
+                                    <div style="font-size: 1.3rem; margin-bottom: 0.3rem;">
+                                        {% if mood.humeur == 'heureux' %} 😊
+                                        {% elseif mood.humeur == 'triste' %} 😢
+                                        {% elseif mood.humeur == 'colere' %} 😠
+                                        {% elseif mood.humeur == 'stresse' %} 😰
+                                        {% elseif mood.humeur == 'neutre' %} 😐
+                                        {% else %} 😐
+                                        {% endif %}
+                                    </div>
+                                    <h5 class="mb-0" style="font-size: 0.95rem; font-weight: 600;">
+                                        {% if mood.humeur == 'heureux' %} Heureux
+                                        {% elseif mood.humeur == 'triste' %} Triste
+                                        {% elseif mood.humeur == 'colere' %} En colère
+                                        {% elseif mood.humeur == 'stresse' %} Stressé
+                                        {% elseif mood.humeur == 'neutre' %} Neutre
+                                        {% else %} {{ mood.humeur|capitalize }}
+                                        {% endif %}
+                                    </h5>
+                                </div>
+                                <span class="badge bg-info">{{ mood.intensite }}/5</span>
+                            </div>
+                            
+                            <div class="card-modern-body">
+                                <p class="text-muted mb-2" style="font-size: 0.85rem;">
+                                    <i class="far fa-calendar me-1"></i>
+                                    {{ mood.datemood|date('d/m/Y H:i') }}
+                                </p>
+                                
+                                <div class="mb-2">
+                                    <small class="text-muted d-block mb-1">Intensité</small>
+                                    <div class="intensity-bar">
+                                        <div class="intensity-fill" style="width: {{ mood.intensite * 20 }}%;"></div>
+                                    </div>
+                                </div>
+                                
+                                {% if mood.journals|length > 0 %}
+                                <p class="text-muted small mb-2">
+                                    <i class="fas fa-book me-1" style="color: #7FBFFF;"></i>
+                                    {{ mood.journals|length }} entrée{{ mood.journals|length > 1 ? 's' : '' }}
+                                </p>
+                                {% endif %}
+                                
+                                <div class="d-flex gap-2 mt-2">
+                                    <a href="{{ path('app_mood_show', {'id': mood.id}) }}" class="btn btn-sm btn-primary flex-grow-1">
+                                        <i class="fas fa-eye me-1"></i> Voir
+                                    </a>
+                                    <a href="{{ path('app_mood_edit', {'id': mood.id}) }}" class="btn btn-sm btn-outline-secondary flex-grow-1">
+                                        <i class="fas fa-edit me-1"></i> Modifier
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+            <div class="card-modern">
+                <div class="card-modern-body">
+                    <div class="empty-state">
+                        <i class="fas fa-chart-line"></i>
+                        <h3>Aucune humeur enregistrée</h3>
+                        <p>Commencez à suivre votre bien-être!</p>
+                        <a href="{{ path('app_mood_new') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-1"></i> Créer une Humeur
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+    </div>
+
+    <!-- JOURNAL TAB -->
+    <div id="journal-tab" class="tab-content">
+        <div class="section-header">
+            <h2><i class="fas fa-book"></i>Journal Émotionnel</h2>
+            <p>Vos pensées et réflexions</p>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-row">
+            <div class="stat-card" style="position: relative;">
+                <span class="stat-label">Total Entrées</span>
+                <span class="stat-value">{{ journal_emotionnels|length }}</span>
+                <i class="fas fa-feather stat-icon"></i>
+            </div>
+            <div class="stat-card" style="position: relative;">
+                <span class="stat-label">Mots Totaux</span>
+                <span class="stat-value">
+                    {% set word_count = 0 %}
+                    {% for entry in journal_emotionnels %}
+                        {% set word_count = word_count + (entry.contenu|split(' ')|length) %}
+                    {% endfor %}
+                    {{ word_count }}
+                </span>
+                <i class="fas fa-pen stat-icon"></i>
+            </div>
+            <div class="stat-card" style="position: relative;">
+                <span class="stat-label">Dernière</span>
+                <span class="stat-value">
+                    {% if journal_emotionnels|length > 0 %}
+                        {% set last_date = journal_emotionnels[0].dateecriture %}
+                        {% set now = "now"|date('U') %}
+                        {% set diff = (now - last_date|date('U')) %}
+                        {% if diff < 86400 %}
+                            Aujourd'hui
+                        {% elseif diff < 172800 %}
+                            Hier
+                        {% else %}
+                            {{ (diff / 86400)|round }}j
+                        {% endif %}
+                    {% else %}
+                        -
+                    {% endif %}
+                </span>
+                <i class="fas fa-hourglass stat-icon"></i>
+            </div>
+        </div>
+
+        <!-- Add Button -->
+        <div class="mb-4">
+            <a href="{{ path('app_journal_emotionnel_new') }}" class="btn btn-primary btn-lg w-100">
+                <i class="fas fa-plus me-2"></i>Nouvelle Entrée
+            </a>
+        </div>
+
+        <!-- Journal List -->
+        {% if journal_emotionnels|length > 0 %}
+            <div class="mood-grid">
+                {% for entry in journal_emotionnels %}
+                <div class="journal-item">
+                    <div class="card-modern">
+                        <div class="card-modern-header">
+                            <div>
+                                <h5 style="margin: 0; font-size: 0.95rem; font-weight: 600;">Entrée #{{ entry.id }}</h5>
+                                <span class="text-muted" style="font-size: 0.85rem;">
+                                    <i class="far fa-calendar me-1"></i>
+                                    {{ entry.dateecriture|date('d/m/Y à H:i') }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="card-modern-body">
+                            <!-- Mood Badge -->
+                            {% if entry.mood %}
+                            <div class="mb-3">
+                                <span class="badge bg-info" style="font-size: 0.85rem; padding: 0.5rem 0.8rem;">
+                                    {% if entry.mood.humeur == 'heureux' %} 😊 Heureux
+                                    {% elseif entry.mood.humeur == 'triste' %} 😢 Triste
+                                    {% elseif entry.mood.humeur == 'colere' %} 😠 En colère
+                                    {% elseif entry.mood.humeur == 'stresse' %} 😰 Stressé
+                                    {% else %} 😐 Neutre
+                                    {% endif %}
+                                </span>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Content Preview -->
+                            <p style="margin-bottom: 1rem; font-size: 0.9rem; line-height: 1.5;">
+                                {% if entry.contenu|length > 150 %}
+                                    {{ entry.contenu|slice(0, 150) }}...
+                                {% else %}
+                                    {{ entry.contenu }}
+                                {% endif %}
+                            </p>
+                            
+                            <!-- Word Count -->
+                            <small class="text-muted d-block mb-3">
+                                <i class="fas fa-pencil me-1" style="color: #7FBFFF;"></i>
+                                {{ (entry.contenu|split(' ')|length) }} mots
+                            </small>
+                            
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_journal_emotionnel_show', {'id': entry.id}) }}" class="btn btn-sm btn-primary flex-grow-1">
+                                    <i class="fas fa-eye me-1"></i> Lire
+                                </a>
+                                <a href="{{ path('app_journal_emotionnel_edit', {'id': entry.id}) }}" class="btn btn-sm btn-outline-secondary flex-grow-1">
+                                    <i class="fas fa-edit me-1"></i> Modifier
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card-modern">
+                <div class="card-modern-body">
+                    <div class="empty-state">
+                        <i class="fas fa-feather"></i>
+                        <h3>Aucune entrée de journal</h3>
+                        <p>Commencez à écrire vos pensées et émotions!</p>
+                        <a href="{{ path('app_journal_emotionnel_new') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-1"></i> Créer une Entrée
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function showTab(tabName) {
+        // Get all tabs and buttons
+        const moodsTab = document.getElementById('moods-tab');
+        const journalTab = document.getElementById('journal-tab');
+        const buttons = document.querySelectorAll('.tab-btn');
+        
+        // Hide all tabs and deactivate all buttons
+        moodsTab.classList.remove('active');
+        journalTab.classList.remove('active');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        // Show selected tab and activate button
+        if (tabName === 'moods') {
+            moodsTab.classList.add('active');
+            buttons[0].classList.add('active');
+        } else if (tabName === 'journal') {
+            journalTab.classList.add('active');
+            buttons[1].classList.add('active');
+        }
+    }
+</script>
+{% endblock %}

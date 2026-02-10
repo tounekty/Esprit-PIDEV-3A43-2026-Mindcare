@@ -1,0 +1,223 @@
+<!doctype html>
+<html class="no-js" lang="fr">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>{% block title %}MoodTracker - Suivi Émotionnel{% endblock %}</title>
+    <meta name="description" content="{% block meta_description %}Suivez votre bien-être émotionnel avec MoodTracker{% endblock %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('front_assets/img/favicon.png') }}">
+
+    {% block stylesheets %}
+        <!-- CSS here -->
+        <link rel="stylesheet" href="{{ asset('front_assets/css/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('front_assets/css/owl.carousel.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('front_assets/css/magnific-popup.css') }}">
+        <link rel="stylesheet" href="{{ asset('front_assets/css/font-awesome.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('front_assets/css/themify-icons.css') }}">
+        <link rel="stylesheet" href="{{ asset('front_assets/css/nice-select.css') }}">
+        <link rel="stylesheet" href="{{ asset('front_assets/css/flaticon.css') }}">
+        <link rel="stylesheet" href="{{ asset('front_assets/css/gijgo.css') }}">
+        <link rel="stylesheet" href="{{ asset('front_assets/css/animate.css') }}">
+        <link rel="stylesheet" href="{{ asset('front_assets/css/slicknav.css') }}">
+        <link rel="stylesheet" href="{{ asset('front_assets/css/style.css') }}">
+        <style>
+            /* Enhanced Header Navigation */
+            .header-bottom_area {
+                padding: 12px 0 !important;
+            }
+
+            .header-bottom_area .container {
+                padding: 0 20px;
+            }
+
+            .logo a {
+                font-size: 1.3rem;
+                font-weight: 700;
+                text-decoration: none;
+                color: #131313;
+            }
+
+            .logo a:hover {
+                color: #7FBFFF;
+            }
+
+            .main-menu nav ul#navigation {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                display: flex;
+                gap: 20px;
+                align-items: center;
+            }
+
+            .main-menu nav ul#navigation li {
+                margin: 0;
+                padding: 0;
+            }
+
+            .main-menu nav ul#navigation li a {
+                display: block;
+                color: #333;
+                font-weight: 500;
+                font-size: 0.95rem;
+                text-decoration: none;
+                padding: 5px 0;
+                border-bottom: 2px solid transparent;
+                transition: all 0.3s ease;
+                white-space: nowrap;
+            }
+
+            .main-menu nav ul#navigation li a:hover {
+                color: #7FBFFF;
+                border-bottom-color: #7FBFFF;
+            }
+
+            .boxed-btn {
+                background: linear-gradient(135deg, #A8D8FF 0%, #7FBFFF 100%) !important;
+                color: #1a365d !important;
+                padding: 10px 24px !important;
+                border-radius: 8px !important;
+                font-weight: 600 !important;
+                text-decoration: none !important;
+                display: inline-block !important;
+                font-size: 0.9rem !important;
+                transition: all 0.3s ease !important;
+                white-space: nowrap !important;
+            }
+
+            .boxed-btn:hover {
+                transform: translateY(-2px) !important;
+                box-shadow: 0 6px 20px rgba(127, 191, 255, 0.3) !important;
+                color: #1a365d !important;
+                text-decoration: none !important;
+            }
+        </style>
+    {% endblock %}
+</head>
+
+<body>
+    <!-- header-start -->
+    <header>
+        <div class="header-area">
+            <div class="header-top_area">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-md-6">
+                            <div class="social_media_links">
+                                <a href="#"><i class="fa fa-linkedin"></i></a>
+                                <a href="#"><i class="fa fa-facebook"></i></a>
+                                <a href="#"><i class="fa fa-google-plus"></i></a>
+                                <a href="#"><i class="fa fa-twitter"></i></a>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-md-6">
+                            <div class="header_link d-flex">
+                                {% if app.user %}
+                                    <a href="{{ path('app_logout') }}" class="header_link_item">Déconnexion</a>
+                                {% else %}
+                                    <a href="#" class="header_link_item">Connexion</a>
+                                    <a href="#" class="header_link_item">S'inscrire</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-bottom_area">
+                <div class="container">
+                    <div class="row align-items-center" style="margin: 0;">
+                        <div class="col-xl-2 col-lg-3 col-md-6 col-sm-6 col-6">
+                            <div class="logo">
+                                <a href="{{ path('app_home') }}">
+                                    <span>MoodTracker</span>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-lg-5 col-md-12 d-none d-lg-block">
+                            <div class="main-menu">
+                                <nav>
+                                    <ul id="navigation">
+                                        <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                                        <li><a href="{{ path('app_about') }}">À propos</a></li>
+                                        <li><a href="{{ path('app_mood_index') }}">Mood & Journal</a></li>
+                                        <li><a href="{{ path('app_contact') }}">Contact</a></li>
+                                    </ul>
+                                </nav>
+                            </div>
+                        </div>
+                        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-6 text-end">
+                            <a href="{{ path('app_dashboard') }}" class="boxed-btn">Mon Tableau</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- header-end -->
+
+    <!-- Main Content -->
+    {% block content %}{% endblock %}
+
+    <!-- footer-start -->
+    <footer>
+        <div class="footer-area footer-bg" data-background="{{ asset('front_assets/img/banner/footer-bg.png') }}">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-4 col-md-6 col-lg-4">
+                        <div class="single-footer-widget">
+                            <h4>À propos de nous</h4>
+                            <p>MoodTracker est votre compagnon pour suivre et améliorer votre bien-être émotionnel.</p>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6 col-lg-4">
+                        <div class="single-footer-widget">
+                            <h4>Liens rapides</h4>
+                            <ul>
+                                <li><a href="{{ path('app_home') }}">Accueil</a></li>
+                                <li><a href="{{ path('app_about') }}">À propos</a></li>
+                                <li><a href="{{ path('app_contact') }}">Contact</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-xl-4 col-md-6 col-lg-4">
+                        <div class="single-footer-widget">
+                            <h4>Contact</h4>
+                            <p>Tel: +33 (0)1 23 45 67 89<br>Email: info@moodtracker.fr</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xl-12">
+                        <div class="footer-copy-right text-center">
+                            <p>&copy; 2026 MoodTracker. Tous droits réservés.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+    <!-- footer-end -->
+
+    {% block javascripts %}
+        <!-- JS here -->
+        <script src="{{ asset('front_assets/js/vendor/jquery-1.12.4.min.js') }}"></script>
+        <script src="{{ asset('front_assets/js/bootstrap.min.js') }}"></script>
+        <script src="{{ asset('front_assets/js/jquery.slicknav.min.js') }}"></script>
+        <script src="{{ asset('front_assets/js/owl.carousel.min.js') }}"></script>
+        <script src="{{ asset('front_assets/js/slick.min.js') }}"></script>
+        <script src="{{ asset('front_assets/js/wow.min.js') }}"></script>
+        <script src="{{ asset('front_assets/js/animated-counter.js') }}"></script>
+        <script src="{{ asset('front_assets/js/jquery.magnific-popup.min.js') }}"></script>
+        <script src="{{ asset('front_assets/js/jquery.ajaxchimp.min.js') }}"></script>
+        <script src="{{ asset('front_assets/js/jquery.form.js') }}"></script>
+        <script src="{{ asset('front_assets/js/jquery.validate.min.js') }}"></script>
+        <script src="{{ asset('front_assets/js/mail-script.js') }}"></script>
+        <script src="{{ asset('front_assets/js/main.js') }}"></script>
+    {% endblock %}
+</body>
+
+</html>

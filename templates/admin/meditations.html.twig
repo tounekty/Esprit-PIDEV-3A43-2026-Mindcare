@@ -1,0 +1,231 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Gestion Méditations - Admin{% endblock %}
+{% block page_title %}🧘 Gestion des Méditations & Bien-être{% endblock %}
+
+{% block breadcrumb %}
+    <ul class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_admin') }}">Dashboard</a></li>
+        <li class="breadcrumb-item">Méditations</li>
+    </ul>
+{% endblock %}
+
+{% block body %}
+<style>
+    .mood-meditation-badge {
+        display: inline-block;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .meditation-card {
+        border-left: 4px solid #7FBFFF;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .meditation-card:hover {
+        box-shadow: 0 4px 12px rgba(127, 191, 255, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .benefit-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        margin: 2px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+    }
+
+    .affirmation-box {
+        background: linear-gradient(135deg, #f0f7ff 0%, #e6f3ff 100%);
+        border-left: 4px solid #7FBFFF;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+    }
+
+    .breathing-exercise {
+        background: #f8f9fa;
+        padding: 12px;
+        border-radius: 6px;
+        border-left: 4px solid #A8D8FF;
+        margin-bottom: 12px;
+    }
+</style>
+
+    <!-- Onglets par humeur -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="heureux-tab" data-bs-toggle="tab" data-bs-target="#heureux" type="button" role="tab">
+                😊 Heureux
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="triste-tab" data-bs-toggle="tab" data-bs-target="#triste" type="button" role="tab">
+                😢 Triste
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="colere-tab" data-bs-toggle="tab" data-bs-target="#colere" type="button" role="tab">
+                😠 Colère
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="stresse-tab" data-bs-toggle="tab" data-bs-target="#stresse" type="button" role="tab">
+                😰 Stressé
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="neutre-tab" data-bs-toggle="tab" data-bs-target="#neutre" type="button" role="tab">
+                😐 Neutre
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tools-tab" data-bs-toggle="tab" data-bs-target="#tools" type="button" role="tab">
+                🛠️ Outils
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenu des onglets -->
+    <div class="tab-content">
+        {% set moods = ['heureux', 'triste', 'colere', 'stresse', 'neutre'] %}
+        {% for mood in moods %}
+            <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="{{ mood }}" role="tabpanel">
+                <div class="row">
+                    {% for meditation in meditations_by_mood[mood] %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card meditation-card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-2">
+                                        <i class="fas fa-play-circle text-primary me-2"></i>{{ meditation.title }}
+                                    </h5>
+                                    <p class="text-muted small mb-2">
+                                        {{ meditation.description }}
+                                    </p>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge bg-info">
+                                            <i class="far fa-clock me-1"></i>{{ meditation.duration }}
+                                        </span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <small class="d-block mb-1 fw-semibold">Bénéfices:</small>
+                                        {% for benefit in meditation.benefits %}
+                                            <span class="benefit-badge bg-light text-dark">
+                                                {{ benefit }}
+                                            </span>
+                                        {% endfor %}
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <a href="https://youtube.com/watch?v={{ meditation.youtubeId }}" target="_blank" class="btn btn-sm btn-primary">
+                                            <i class="fab fa-youtube me-1"></i> Voir sur YouTube
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
+        <!-- Onglet Outils (Affirmations & Exercices) -->
+        <div class="tab-pane fade" id="tools" role="tabpanel">
+            <div class="row">
+                <!-- Affirmations -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-lightbulb me-2"></i>Affirmations Positives
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small mb-3">Total: {{ affirmations|length }} affirmations disponibles</p>
+                            {% for affirmation in affirmations %}
+                                <div class="affirmation-box">
+                                    <i class="fas fa-quote-left text-primary me-2"></i>
+                                    {{ affirmation }}
+                                    <i class="fas fa-quote-right text-primary ms-2"></i>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercices de Respiration -->
+                <div class="col-lg-6">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-header" style="background-color: #A8D8FF;">
+                            <h5 class="mb-0">
+                                <i class="fas fa-wind me-2"></i>Exercices de Respiration
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted small mb-3">Total: {{ breathing_exercises|length }} exercices</p>
+                            {% for exercise in breathing_exercises %}
+                                <div class="breathing-exercise">
+                                    <h6 class="mb-1 fw-bold">
+                                        <i class="fas fa-wind me-2"></i>{{ exercise.name }}
+                                    </h6>
+                                    <p class="text-muted small mb-2">{{ exercise.description }}</p>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="badge bg-info bg-opacity-50">
+                                            {{ exercise.duration }}
+                                        </small>
+                                        <small>
+                                            {% for benefit in exercise.benefits %}
+                                                <span class="badge bg-light text-dark text-uppercase small">
+                                                    {{ benefit }}
+                                                </span>
+                                            {% endfor %}
+                                        </small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-primary">{{ meditations_by_mood|length * 3 }}</h3>
+                    <p class="text-muted small">Méditations Total</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-success">{{ affirmations|length }}</h3>
+                    <p class="text-muted small">Affirmations</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-info">{{ breathing_exercises|length }}</h3>
+                    <p class="text-muted small">Exercices de Respiration</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h3 class="text-warning">5</h3>
+                    <p class="text-muted small">Catégories d'Humeur</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

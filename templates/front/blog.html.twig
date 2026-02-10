@@ -1,0 +1,84 @@
+{% extends "base_front.html.twig" %}
+
+{% block title %}Blog - MoodTracker{% endblock %}
+{% block meta_description %}Articles et conseils sur la santé mentale{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="breadcrumb-area" style="background-image: url({{ asset('front_assets/img/banner/breadcrumb.jpg') }})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb_content">
+                    <h1 class="breadcrumb_title">Blog</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Blog Section -->
+<section class="blog-area pt-120 pb-120">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <article class="blog-item mb-5">
+                    <div class="blog-img">
+                        <img src="{{ asset('front_assets/img/blog/blog-1.jpg') }}" alt="">
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-meta">
+                            <span class="date">10 Mars 2026</span>
+                            <span class="author">Par Dr. Jean Dupont</span>
+                        </div>
+                        <h3><a href="#">L'importance du sommeil pour la santé mentale</a></h3>
+                        <p>Le sommeil joue un rôle crucial dans votre bien-être émotionnel. Découvrez comment améliorer votre qualité de sommeil...</p>
+                        <a href="#" class="btn btn-primary btn-sm">Lire plus</a>
+                    </div>
+                </article>
+
+                <article class="blog-item mb-5">
+                    <div class="blog-img">
+                        <img src="{{ asset('front_assets/img/blog/blog-2.jpg') }}" alt="">
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-meta">
+                            <span class="date">08 Mars 2026</span>
+                            <span class="author">Par Sophie Martin</span>
+                        </div>
+                        <h3><a href="#">5 techniques pour gérer l'anxiété</a></h3>
+                        <p>L'anxiété est un problème courant dans notre société moderne. Voici 5 techniques pratiques pour la combattre...</p>
+                        <a href="#" class="btn btn-primary btn-sm">Lire plus</a>
+                    </div>
+                </article>
+
+                <article class="blog-item mb-5">
+                    <div class="blog-img">
+                        <img src="{{ asset('front_assets/img/blog/blog-3.jpg') }}" alt="">
+                    </div>
+                    <div class="blog-content">
+                        <div class="blog-meta">
+                            <span class="date">05 Mars 2026</span>
+                            <span class="author">Par Marc Bernard</span>
+                        </div>
+                        <h3><a href="#">Comprendre la dépression saisonnière</a></h3>
+                        <p>La dépression saisonnière affecte des millions de personnes. Apprenez à la reconnaître et à la traiter...</p>
+                        <a href="#" class="btn btn-primary btn-sm">Lire plus</a>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="sidebar">
+                    <h4>Articles Populaires</h4>
+                    <ul class="blog-list">
+                        <li><a href="#">L'importance du sommeil</a></li>
+                        <li><a href="#">Gérer l'anxiété</a></li>
+                        <li><a href="#">Dépression saisonnière</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

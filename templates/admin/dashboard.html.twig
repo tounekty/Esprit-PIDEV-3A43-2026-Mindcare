@@ -1,0 +1,159 @@
+{% extends "admin/base_admin.html.twig" %}
+
+{% block title %}Tableau de Bord - MoodTracker{% endblock %}
+
+{% block content %}
+<div class="nxl-content-body">
+    <div class="nxl-content-top">
+        <div class="nxl-content-header">
+            <h3 class="nxl-content-title">Tableau de Bord</h3>
+            <div class="nxl-content-search">
+                <input type="search" class="form-control" placeholder="Rechercher...">
+            </div>
+        </div>
+        <ul class="nxl-breadcrumb">
+            <li class="nxl-item"><a href="{{ path('app_home') }}">Accueil</a></li>
+            <li class="nxl-item"><span>Tableau de Bord</span></li>
+        </ul>
+    </div>
+
+    <div class="row">
+        <!-- Stats Cards -->
+        <div class="col-xxl-3 col-lg-6">
+            <div class="card border-0 mb-3">
+                <div class="card-body">
+                    <div class="nxl-card--header d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="nxl-card--title">Utilisateurs Totaux</h5>
+                        <div class="nxl-card-icon bg-success-light">
+                            <i class="feather-users"></i>
+                        </div>
+                    </div>
+                    <h1 class="nxl-stat--count">1,234</h1>
+                    <p class="nxl-stat--description">
+                        <span class="badge badge-success">+5.2%</span> ce mois
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xxl-3 col-lg-6">
+            <div class="card border-0 mb-3">
+                <div class="card-body">
+                    <div class="nxl-card--header d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="nxl-card--title">Entrées Aujourd'hui</h5>
+                        <div class="nxl-card-icon bg-info-light">
+                            <i class="feather-activity"></i>
+                        </div>
+                    </div>
+                    <h1 class="nxl-stat--count">456</h1>
+                    <p class="nxl-stat--description">
+                        <span class="badge badge-info">+2.1%</span> par rapport à hier
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xxl-3 col-lg-6">
+            <div class="card border-0 mb-3">
+                <div class="card-body">
+                    <div class="nxl-card--header d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="nxl-card--title">Psychologues Actifs</h5>
+                        <div class="nxl-card-icon bg-warning-light">
+                            <i class="feather-user-check"></i>
+                        </div>
+                    </div>
+                    <h1 class="nxl-stat--count">45</h1>
+                    <p class="nxl-stat--description">
+                        <span class="badge badge-warning">3 en attente</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xxl-3 col-lg-6">
+            <div class="card border-0 mb-3">
+                <div class="card-body">
+                    <div class="nxl-card--header d-flex align-items-center justify-content-between mb-3">
+                        <h5 class="nxl-card--title">Séances ce Mois</h5>
+                        <div class="nxl-card-icon bg-danger-light">
+                            <i class="feather-calendar"></i>
+                        </div>
+                    </div>
+                    <h1 class="nxl-stat--count">789</h1>
+                    <p class="nxl-stat--description">
+                        <span class="badge badge-danger">-1.5%</span> par rapport au mois dernier
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-lg-6">
+            <div class="card border-0">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Entrées Récentes</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <tbody>
+                                <tr>
+                                    <td>Jean Dupont</td>
+                                    <td><span class="badge badge-success">Heureux</span></td>
+                                    <td>Il y a 2 min</td>
+                                </tr>
+                                <tr>
+                                    <td>Marie Martin</td>
+                                    <td><span class="badge badge-warning">Neutre</span></td>
+                                    <td>Il y a 15 min</td>
+                                </tr>
+                                <tr>
+                                    <td>Pierre Bernard</td>
+                                    <td><span class="badge badge-danger">Triste</span></td>
+                                    <td>Il y a 1h</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-0">
+                <div class="card-body">
+                    <h5 class="card-title mb-4">Activités Récentes</h5>
+                    <ul class="nxl-timeline">
+                        <li class="nxl-timeline-item">
+                            <div class="nxl-timeline-item-icon">
+                                <i class="feather-user-plus"></i>
+                            </div>
+                            <div class="nxl-timeline-item-content">
+                                <h6>Nouvel utilisateur inscrit</h6>
+                                <small class="text-muted">Il y a 2 heures</small>
+                            </div>
+                        </li>
+                        <li class="nxl-timeline-item">
+                            <div class="nxl-timeline-item-icon">
+                                <i class="feather-message-square"></i>
+                            </div>
+                            <div class="nxl-timeline-item-content">
+                                <h6>Nouveau message reçu</h6>
+                                <small class="text-muted">Il y a 4 heures</small>
+                            </div>
+                        </li>
+                        <li class="nxl-timeline-item">
+                            <div class="nxl-timeline-item-icon">
+                                <i class="feather-check-circle"></i>
+                            </div>
+                            <div class="nxl-timeline-item-content">
+                                <h6>Rapport généré avec succès</h6>
+                                <small class="text-muted">Il y a 1 jour</small>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends "base_front.html.twig" %}
+
+{% block title %}À propos - MoodTracker{% endblock %}
+{% block meta_description %}En savoir plus sur MoodTracker et notre mission{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<section style="background: linear-gradient(135deg, #009DFF 0%, #0181f5 100%); color: white; padding: 60px 0;">
+    <div class="container">
+        <h1 style="font-size: 2.5rem; font-weight: 700; margin: 0;">À Propos de MoodTracker</h1>
+        <p style="font-size: 1.1rem; opacity: 0.9; margin: 10px 0 0 0;">Notre mission et nos valeurs</p>
+    </div>
+</section>
+
+<!-- Mission Section -->
+<section style="padding: 100px 0; background: white;">
+    <div class="container">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; align-items: center;">
+            <div>
+                <span style="display: inline-block; background: #e8f4ff; color: #0181f5; padding: 10px 20px; border-radius: 50px; font-weight: 600; font-size: 14px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">📝 Notre Mission</span>
+                <h2 style="font-size: 2.2rem; font-weight: 800; color: #131313; margin-bottom: 20px;">Votre bien-être émotionnel est notre priorité</h2>
+                <p style="color: #666; line-height: 1.8; margin-bottom: 20px;">
+                    MoodTracker est née de la conviction que la santé mentale est aussi importante que la santé physique. Notre plateforme rend le suivi émotionnel accessible à tous, quel que soit le contexte socio-économique.
+                </p>
+                <p style="color: #666; line-height: 1.8;">
+                    Nous croyons que comprendre et accepter nos émotions est la première étape vers un bien-être personnel durable et une meilleure qualité de vie.
+                </p>
+            </div>
+            <div style="text-align: center;">
+                <div style="font-size: 200px; opacity: 0.1;">💖</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Values Section -->
+<section style="padding: 100px 0; background: #f8f9fb;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 70px;">
+            <span style="display: inline-block; background: #e8f4ff; color: #0181f5; padding: 10px 20px; border-radius: 50px; font-weight: 600; font-size: 14px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">⭐ Nos Valeurs</span>
+            <h2 style="font-size: 2.2rem; font-weight: 800; color: #131313; margin-bottom: 20px; margin-top: 20px;">Ce en quoi nous croyons</h2>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px;">
+            <!-- Value 1 -->
+            <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #0181f5;">
+                <div style="font-size: 3rem; margin-bottom: 20px;">🔐</div>
+                <h4 style="color: #131313; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">Confidentialité & Sécurité</h4>
+                <p style="color: #666; line-height: 1.7; margin: 0;">
+                    Vos données sont sacrées. Nous utilisons les meilleures pratiques de sécurité pour protéger votre vie privée.
+                </p>
+            </div>
+
+            <!-- Value 2 -->
+            <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #5db2ff;">
+                <div style="font-size: 3rem; margin-bottom: 20px;">🌍</div>
+                <h4 style="color: #131313; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">Accessibilité Pour Tous</h4>
+                <p style="color: #666; line-height: 1.7; margin: 0;">
+                    MoodTracker est conçu pour être accessible à tous, peu importe l'âge ou la compétence technologique.
+                </p>
+            </div>
+
+            <!-- Value 3 -->
+            <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #009DFF;">
+                <div style="font-size: 3rem; margin-bottom: 20px;">💡</div>
+                <h4 style="color: #131313; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">Innovation Technologique</h4>
+                <p style="color: #666; line-height: 1.7; margin: 0;">
+                    Nous utilisons les dernières technologies pour vous offrir une expérience moderne et intuitive.
+                </p>
+            </div>
+
+            <!-- Value 4 -->
+            <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #0181f5;">
+                <div style="font-size: 3rem; margin-bottom: 20px;">👨‍⚕️</div>
+                <h4 style="color: #131313; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">Support Professionnel</h4>
+                <p style="color: #666; line-height: 1.7; margin: 0;">
+                    Notre équipe de professionnels qualifiés est toujours prête à vous aider et vous conseiller.
+                </p>
+            </div>
+
+            <!-- Value 5 -->
+            <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #5db2ff;">
+                <div style="font-size: 3rem; margin-bottom: 20px;">🎯</div>
+                <h4 style="color: #131313; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">Efficacité Prouvée</h4>
+                <p style="color: #666; line-height: 1.7; margin: 0;">
+                    Nos méthodes sont basées sur la recherche scientifique pour garantir des résultats réels.
+                </p>
+            </div>
+
+            <!-- Value 6 -->
+            <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border-left: 4px solid #009DFF;">
+                <div style="font-size: 3rem; margin-bottom: 20px;">🤝</div>
+                <h4 style="color: #131313; font-weight: 700; margin-bottom: 15px; font-size: 1.2rem;">Communauté Bienveillante</h4>
+                <p style="color: #666; line-height: 1.7; margin: 0;">
+                    Vous êtes jamais seul. Rejoignez une communauté d'utilisateurs soutenant votre parcours.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Team Section -->
+<section style="padding: 100px 0; background: white;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 70px;">
+            <span style="display: inline-block; background: #e8f4ff; color: #0181f5; padding: 10px 20px; border-radius: 50px; font-weight: 600; font-size: 14px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">👥 L'Équipe</span>
+            <h2 style="font-size: 2.2rem; font-weight: 800; color: #131313; margin-bottom: 20px; margin-top: 20px;">Des Experts Bienveillants</h2>
+            <p style="font-size: 1.1rem; color: #666; max-width: 600px; margin: 0 auto; line-height: 1.8;">
+                Nos professionnels qualifiés sont dédiés à votre bien-être émotionnel et psychologique
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 35px;">
+            <!-- Team Member 1 -->
+            <div style="background: white; padding: 35px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #0181f5;">
+                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #0181f5 0%, #5db2ff 100%); border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2.5rem;">
+                    👨‍⚕️
+                </div>
+                <h4 style="color: #131313; font-weight: 700; margin-bottom: 5px; font-size: 1.2rem;">Dr. Jean Dupont</h4>
+                <p style="color: #0181f5; font-weight: 600; margin-bottom: 15px;">Fondateur & Psychologue</p>
+                <p style="color: #666; line-height: 1.7; font-size: 14px; margin: 0;">
+                    Docteur en psychologie clinique avec 15 ans d'expérience.
+                </p>
+            </div>
+
+            <!-- Team Member 2 -->
+            <div style="background: white; padding: 35px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #5db2ff;">
+                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #5db2ff 0%, #009DFF 100%); border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2.5rem;">
+                    👩‍💻
+                </div>
+                <h4 style="color: #131313; font-weight: 700; margin-bottom: 5px; font-size: 1.2rem;">Sophie Martin</h4>
+                <p style="color: #5db2ff; font-weight: 600; margin-bottom: 15px;">Directrice Technique</p>
+                <p style="color: #666; line-height: 1.7; font-size: 14px; margin: 0;">
+                    Ingénieure logiciel avec expertise en santé numérique.
+                </p>
+            </div>
+
+            <!-- Team Member 3 -->
+            <div style="background: white; padding: 35px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; border-top: 4px solid #009DFF;">
+                <div style="width: 100px; height: 100px; background: linear-gradient(135deg, #009DFF 0%, #0181f5 100%); border-radius: 50%; margin: 0 auto 25px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2.5rem;">
+                    👨‍🏫
+                </div>
+                <h4 style="color: #131313; font-weight: 700; margin-bottom: 5px; font-size: 1.2rem;">Marc Bernard</h4>
+                <p style="color: #009DFF; font-weight: 600; margin-bottom: 15px;">Psychologue Clinicien</p>
+                <p style="color: #666; line-height: 1.7; font-size: 14px; margin: 0;">
+                    Spécialiste en thérapie comportementale et cognition.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section style="padding: 80px 0; background: linear-gradient(135deg, #009DFF 0%, #0181f5 50%, #5db2ff 100%); color: white;">
+    <div class="container" style="text-align: center;">
+        <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 20px;">
+            Rejoignez MoodTracker Aujourd'hui
+        </h2>
+        <p style="font-size: 1.1rem; opacity: 0.95; margin-bottom: 35px; line-height: 1.8;">
+            Commencez à suiv votre bien-être émotionnel et transformez votre qualité de vie
+        </p>
+        <a href="{{ path('app_mood_new') }}" style="display: inline-block; background: white; color: #0181f5; padding: 14px 40px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: all .3s ease;">
+            <i class="fa fa-plus-circle" style="margin-right: 10px;"></i>Commencer Maintenant
+        </a>
+    </div>
+</section>
+{% endblock %}

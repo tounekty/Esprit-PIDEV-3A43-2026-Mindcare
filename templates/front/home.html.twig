@@ -1,0 +1,244 @@
+{% extends "base_front.html.twig" %}
+
+{% block title %}Accueil - MoodTracker{% endblock %}
+{% block meta_description %}Bienvenue sur MoodTracker, votre plateforme de suivi émotionnel{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section style="background: linear-gradient(135deg, #A8D8FF 0%, #7FBFFF 50%, #E5F2FF 100%); color: #2C5282; min-height: 550px; display: flex; align-items: center; position: relative; overflow: hidden; padding: 60px 0;">
+    <div style="position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: rgba(255,255,255,0.3); border-radius: 50%; filter: blur(60px);"></div>
+    <div style="position: absolute; bottom: -50px; left: -50px; width: 300px; height: 300px; background: rgba(255,255,255,0.3); border-radius: 50%; filter: blur(60px);"></div>
+    
+    <div class="container" style="position: relative; z-index: 1;">
+        <div class="row align-items-center gy-4">
+            <div class="col-lg-6">
+                <h1 style="font-size: 2.8rem; font-weight: 800; margin-bottom: 20px; line-height: 1.2; color: #1a365d;">
+                    💙 Suivez votre bien-être émotionnel
+                </h1>
+                <p style="font-size: 1.05rem; margin-bottom: 30px; opacity: 0.9; line-height: 1.8; color: #2D3748;">
+                    MoodTracker est votre plateforme complète pour comprendre, suivre et améliorer votre santé mentale au quotidien avec des analyses détaillées.
+                </p>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-top: 25px;">
+                    {% if app.user %}
+                        <a href="{{ path('app_mood_new') }}" style="display: inline-flex; align-items: center; background: white; color: #7FBFFF; padding: 12px 28px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: all .3s ease; border: none; box-shadow: 0 4px 15px rgba(127, 191, 255, 0.3);">
+                            <i class="fa fa-plus-circle" style="margin-right: 8px;"></i>Ajouter une humeur
+                        </a>
+                        <a href="{{ path('app_dashboard') }}" style="display: inline-flex; align-items: center; background: rgba(255,255,255,0.25); color: #1a365d; padding: 12px 28px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: all .3s ease; border: 2px solid white;">
+                            <i class="fa fa-chart-line" style="margin-right: 8px;"></i>Tableau de bord
+                        </a>
+                    {% else %}
+                        <a href="#features" style="display: inline-flex; align-items: center; background: white; color: #7FBFFF; padding: 12px 28px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: all .3s ease; border: none; box-shadow: 0 4px 15px rgba(127, 191, 255, 0.3);">
+                            <i class="fa fa-play-circle" style="margin-right: 8px;"></i>Commencer Maintenant
+                        </a>
+                        <a href="#features" style="display: inline-flex; align-items: center; background: rgba(255,255,255,0.25); color: #1a365d; padding: 12px 28px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: all .3s ease; border: 2px solid white;">
+                            <i class="fa fa-arrow-down" style="margin-right: 8px;"></i>En savoir plus
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <div style="font-size: 200px; opacity: 0.15; line-height: 1;">
+                    💭
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" style="padding: 100px 0; background: #f8f9fb;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 70px;">
+            <span style="display: inline-block; background: #D4E6FF; color: #2C5282; padding: 10px 20px; border-radius: 50px; font-weight: 600; font-size: 14px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">✨ Nos Fonctionnalités</span>
+            <h2 style="font-size: 2.8rem; font-weight: 800; color: #131313; margin-bottom: 20px; margin-top: 20px;">
+                Tout ce dont vous avez besoin
+            </h2>
+            <p style="font-size: 1.1rem; color: #666; max-width: 600px; margin: 0 auto; line-height: 1.8;">
+                Une suite complète d'outils pour suivre, analyser et améliorer votre bien-être émotionnel
+            </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+            <!-- Card 1 -->
+            <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: all .3s ease; border: 1px solid #f0f0f0;">
+                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #A8D8FF 0%, #7FBFFF 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin-bottom: 25px;">
+                    📔
+                </div>
+                <h4 style="font-size: 1.3rem; font-weight: 700; color: #131313; margin-bottom: 15px;">Journal Émotionnel</h4>
+                <p style="color: #666; line-height: 1.7; margin: 0;">
+                    Enregistrez vos émotions quotidiennes avec intensité et contexte. Gardez une trace complète de votre état émotionnel au fil du temps.
+                </p>
+            </div>
+
+            <!-- Card 2 -->
+            <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: all .3s ease; border: 1px solid #f0f0f0;">
+                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #7FBFFF 0%, #D4E6FF 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin-bottom: 25px;">
+                    📊
+                </div>
+                <h4 style="font-size: 1.3rem; font-weight: 700; color: #131313; margin-bottom: 15px;">Analyses Détaillées</h4>
+                <p style="color: #666; line-height: 1.7; margin: 0;">
+                    Découvrez des insights précieux sur vos patterns émotionnels et explorez les corrélations avec vos activités et événements.
+                </p>
+            </div>
+
+            <!-- Card 3 -->
+            <div style="background: white; padding: 40px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: all .3s ease; border: 1px solid #f0f0f0;">
+                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #A8D8FF 0%, #D4E6FF 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; margin-bottom: 25px;">
+                    👨‍⚕️
+                </div>
+                <h4 style="font-size: 1.3rem; font-weight: 700; color: #131313; margin-bottom: 15px;">Ressources Pro</h4>
+                <p style="color: #666; line-height: 1.7; margin: 0;">
+                    Accédez à des conseils et recommandations de professionnels de la santé mentale qualifiés et expérimentés.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- How It Works Section -->
+<section style="padding: 100px 0; background: white;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 70px;">
+            <span style="display: inline-block; background: #D4E6FF; color: #2C5282; padding: 10px 20px; border-radius: 50px; font-weight: 600; font-size: 14px; margin-bottom: 20px; text-transform: uppercase; letter-spacing: 1px;">🚀 Démarrage Simple</span>
+            <h2 style="font-size: 2.8rem; font-weight: 800; color: #131313; margin-bottom: 20px; margin-top: 20px;">
+                3 étapes pour commencer
+            </h2>
+            <p style="font-size: 1.1rem; color: #666; max-width: 600px; margin: 0 auto; line-height: 1.8;">
+                Aucune complication, juste un processus simple et intuitif
+            </p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 50px;">
+            <!-- Step 1 -->
+            <div style="position: relative;">
+                <div style="position: relative; z-index: 2;">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #A8D8FF 0%, #7FBFFF 100%); border-radius: 50%; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; color: #1a365d; font-size: 2rem; font-weight: 700;">
+                        01
+                    </div>
+                    <h4 style="font-size: 1.3rem; font-weight: 700; color: #131313; margin-bottom: 15px;">Créez votre compte</h4>
+                    <p style="color: #666; line-height: 1.8; margin: 0;">
+                        Inscrivez-vous en quelques secondes et accédez immédiatement à votre tableau de bord personnalisé.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Arrow -->
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div style="font-size: 2rem; color: #ddd;">→</div>
+            </div>
+
+            <!-- Step 2 -->
+            <div style="position: relative;">
+                <div style="position: relative; z-index: 2;">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #7FBFFF 0%, #D4E6FF 100%); border-radius: 50%; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; color: #1a365d; font-size: 2rem; font-weight: 700;">
+                        02
+                    </div>
+                    <h4 style="font-size: 1.3rem; font-weight: 700; color: #131313; margin-bottom: 15px;">Enregistrez vos humeurs</h4>
+                    <p style="color: #666; line-height: 1.8; margin: 0;">
+                        Notez votre état émotionnel quotidien avec intensité et contexte en moins d'une minute.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Arrow -->
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div style="font-size: 2rem; color: #ddd;">→</div>
+            </div>
+
+            <!-- Step 3 -->
+            <div style="position: relative;">
+                <div style="position: relative; z-index: 2;">
+                    <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #A8D8FF 0%, #D4E6FF 100%); border-radius: 50%; margin-bottom: 30px; display: flex; align-items: center; justify-content: center; color: #1a365d; font-size: 2rem; font-weight: 700;">
+                        03
+                    </div>
+                    <h4 style="font-size: 1.3rem; font-weight: 700; color: #131313; margin-bottom: 15px;">Explorez vos données</h4>
+                    <p style="color: #666; line-height: 1.8; margin: 0;">
+                        Découvrez vos patterns émotionnels et obtenez des insights pour progresser continuellement.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- CTA Section -->
+<section style="padding: 80px 0; background: linear-gradient(135deg, #A8D8FF 0%, #7FBFFF 50%, #E5F2FF 100%); color: #2C5282; position: relative; overflow: hidden;">
+    <div style="position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: rgba(255,255,255,0.3); border-radius: 50%; filter: blur(60px);"></div>
+    <div style="position: absolute; bottom: -50px; left: -50px; width: 300px; height: 300px; background: rgba(255,255,255,0.3); border-radius: 50%; filter: blur(60px);"></div>
+    
+    <div class="container" style="position: relative; z-index: 1;">
+        <div style="text-align: center; max-width: 700px; margin: 0 auto;">
+            <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 25px; color: #1a365d;">
+                ❤️ Prêt à suivre votre bien-être ?
+            </h2>
+            <p style="font-size: 1.1rem; margin-bottom: 35px; opacity: 0.9; line-height: 1.8; color: #2D3748;">
+                Enregistrez votre première humeur maintenant et découvrez les insights personnalisés qui vous aideront à comprendre votre bien-être émotionnel.
+            </p>
+            <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                <a href="{{ path('app_mood_new') }}" style="display: inline-flex; align-items: center; background: white; color: #7FBFFF; padding: 15px 40px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: all .3s ease; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(127, 191, 255, 0.3);">
+                    <i class="fa fa-plus-circle" style="margin-right: 10px;"></i>Ajouter une humeur
+                </a>
+                <a href="{{ path('app_mood_index') }}" style="display: inline-flex; align-items: center; background: rgba(255,255,255,0.25); color: #1a365d; padding: 15px 40px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: all .3s ease; border: 2px solid white;">
+                    <i class="fa fa-list" style="margin-right: 10px;"></i>Voir mes humeurs
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Stats Section -->
+<section style="padding: 80px 0; background: #f8f9fb;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 50px;">
+            <h3 style="font-size: 1.8rem; font-weight: 700; color: #131313;">Statistiques MoodTracker</h3>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: center;">
+            <!-- Stat 1 -->
+            <div>
+                <h3 style="font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #A8D8FF 0%, #7FBFFF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px;">
+                    10K+
+                </h3>
+                <p style="color: #666; font-size: 1.1rem; margin: 0;">Utilisateurs actifs</p>
+            </div>
+
+            <!-- Stat 2 -->
+            <div>
+                <h3 style="font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #7FBFFF 0%, #D4E6FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px;">
+                    50K+
+                </h3>
+                <p style="color: #666; font-size: 1.1rem; margin: 0;">Humeurs enregistrées</p>
+            </div>
+
+            <!-- Stat 3 -->
+            <div>
+                <h3 style="font-size: 2.8rem; font-weight: 800; background: linear-gradient(135deg, #A8D8FF 0%, #D4E6FF 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px;">
+                    4.8/5
+                </h3>
+                <p style="color: #666; font-size: 1.1rem; margin: 0;">⭐ Note moyenne</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Footer CTA -->
+<section style="padding: 80px 0;">
+    <div class="container">
+        <div style="background: linear-gradient(135deg, #E5F2FF 0%, #D4E6FF 100%); padding: 50px; border-radius: 15px; border: 2px solid #A8D8FF; text-align: center; max-width: 800px; margin: 0 auto;">
+            <h3 style="font-size: 1.8rem; font-weight: 700; color: #1a365d; margin-bottom: 20px;">
+                ❓ Vous avez des questions ?
+            </h3>
+            <p style="color: #2D3748; font-size: 1.05rem; margin-bottom: 30px; line-height: 1.7;">
+                Notre équipe de support est disponible pour vous aider. N'hésitez pas à nous contacter si vous avez des questions sur MoodTracker ou besoin d'assistance.
+            </p>
+            <a href="{{ path('app_contact') }}" style="display: inline-flex; align-items: center; background: linear-gradient(135deg, #7FBFFF 0%, #D4E6FF 100%); color: #1a365d; padding: 12px 30px; border-radius: 8px; font-weight: 700; text-decoration: none; transition: all .3s ease; border: none; cursor: pointer; box-shadow: 0 4px 15px rgba(127, 191, 255, 0.3);">
+                <i class="fa fa-envelope" style="margin-right: 10px;"></i>Contacter le support
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

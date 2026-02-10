@@ -1,11 +1,9 @@
-# yaml-language-server: $schema=../vendor/symfony/routing/Loader/schema/routing.schema.json
+# Ce fichier contrôle la configuration des routes
+# Importez les routes des contrôleurs automatiquement
 
-# This file is the entry point to configure the routes of your app.
-# Methods with the #[Route] attribute are automatically imported.
-# See also https://symfony.com/doc/current/routing.html
-
-# To list all registered routes, run the following command:
-#   bin/console debug:router
-
+# Import des contrôleurs (déjà présent)
 controllers:
-    resource: routing.controllers
+    resource: ../src/Controller/
+    type: attribute
+
+## Les routes front/admin sont définies dans les contrôleurs (attributs).

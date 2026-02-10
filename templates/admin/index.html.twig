@@ -1,0 +1,166 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Dashboard Admin - MoodTracker{% endblock %}
+
+{% block page_title %}📊 Dashboard Admin{% endblock %}
+
+{% block body %}
+<style>
+    .stat-card {
+        background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(127, 191, 255, 0.2);
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(127, 191, 255, 0.3);
+    }
+
+    .stat-card h6 {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .stat-card .fs-4 {
+        font-size: 2rem;
+        font-weight: 700;
+    }
+
+    .stat-card-icon {
+        font-size: 2.5rem;
+        opacity: 0.8;
+    }
+</style>
+
+    <!-- Statistiques principales -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6>Total des Humeurs</h6>
+                            <div class="fs-4">{{ moods|length }}</div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-smile"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6>Total des Journaux</h6>
+                            <div class="fs-4">{{ journals|length }}</div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-book"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6>Moyenne d'Intensité</h6>
+                            <div class="fs-4">
+                                {% set total = 0 %}
+                                {% for mood in moods %}
+                                    {% set total = total + mood.intensite %}
+                                {% endfor %}
+                                {% set avg = moods|length > 0 ? (total / moods|length)|number_format(1) : 0 %}
+                                {{ avg }}/5
+                            </div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stat-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h6>Humeur Dominante</h6>
+                            <div class="fs-4">
+                                {% set counts = {} %}
+                                {% for mood in moods %}
+                                    {% set counts = counts|merge({(mood.humeur): counts[mood.humeur]|default(0) + 1}) %}
+                                {% endfor %}
+                                {{ counts|keys|first|default('N/A')|capitalize }}
+                            </div>
+                        </div>
+                        <div class="stat-card-icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Accès rapide -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Gestion des Humeurs
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Gérez et consultez toutes les entrées d'humeur des utilisateurs.</p>
+                    <a href="{{ path('admin_moods') }}" class="btn btn-primary w-100">
+                        <i class="fas fa-arrow-right me-2"></i> Accéder à la gestion Mood
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-journal-whills me-2"></i>Gestion des Journaux
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Consultez et modérez les entrées du journal émotionnel.</p>
+                    <a href="{{ path('admin_journals') }}" class="btn btn-primary w-100">
+                        <i class="fas fa-arrow-right me-2"></i> Accéder à la gestion Journal
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-spa me-2"></i>Ressources Méditations
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-3">Consultez les méditations, affirmations et exercices de respiration.</p>
+                    <a href="{{ path('admin_meditations') }}" class="btn btn-primary w-100">
+                        <i class="fas fa-arrow-right me-2"></i> Voir les Méditations
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
