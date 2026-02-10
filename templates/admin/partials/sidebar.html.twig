@@ -12,95 +12,105 @@
                     <label>Navigation</label>
                 </li>
 
+                <!-- Gestion Users -->
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_users_' %}active{% endif %}">
                     <a href="{{ path('admin_users_index') }}" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-users"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-users"></i></span>
                         <span class="nxl-mtext">Gestion User</span>
                     </a>
                 </li>
 
-                <li class="nxl-item {% if app.request.get('_route') starts with 'admin_ressources_' %}active{% endif %}">
-                    <a href="#" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-book-open"></i></span>
-                        <span class="nxl-mtext">Gestion Ressources &amp; Commentaires</span>
+                <!-- Gestion Ressources -->
+                <li class="nxl-item {% if app.request.get('_route') starts with 'admin_resources_' %}active{% endif %}">
+                    <a href="{{ path('admin_resources_index') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather icon-book"></i></span>
+                        <span class="nxl-mtext">Gestion Ressources</span>
                     </a>
                 </li>
 
+                <!-- Gestion Commentaires -->
+                <li class="nxl-item {% if app.request.get('_route') starts with 'admin_comments_' %}active{% endif %}">
+                    <a href="{{ path('admin_comments_index') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather icon-message-square"></i></span>
+                        <span class="nxl-mtext">Gestion Commentaires</span>
+                    </a>
+                </li>
+
+                <!-- Gestion Events -->
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_events_' %}active{% endif %}">
                     <a href="#" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-calendar"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-calendar"></i></span>
                         <span class="nxl-mtext">Gestion Events</span>
                     </a>
                 </li>
 
+                <!-- Gestion Réservations -->
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_reservations_' %}active{% endif %}">
                     <a href="#" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-check-circle"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-check-circle"></i></span>
                         <span class="nxl-mtext">Gestion Réservations</span>
                     </a>
                 </li>
 
+                <!-- Forum Sujets -->
                 <li class="nxl-item">
                     <a href="{{ path('sujet_forum_index') }}" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-message-circle"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-message-circle"></i></span>
                         <span class="nxl-mtext">Gestion Forum - Sujets</span>
                     </a>
                 </li>
 
+                <!-- Forum Messages -->
                 <li class="nxl-item">
                     <a href="{{ path('message_forum_index') }}" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-message-square"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-message-square"></i></span>
                         <span class="nxl-mtext">Gestion Forum - Messages</span>
                     </a>
                 </li>
 
+                <!-- Gestion Rendez-vous -->
                 <li class="nxl-item">
                     <a href="#" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-heart"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-heart"></i></span>
                         <span class="nxl-mtext">Gestion Rendez-vous</span>
                     </a>
                 </li>
 
+                <!-- Gestion Rappels -->
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_rappels_' %}active{% endif %}">
                     <a href="#" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-bell"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-bell"></i></span>
                         <span class="nxl-mtext">Gestion Rappels</span>
                     </a>
                 </li>
 
+                <!-- Gestion Mood -->
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_mood_' %}active{% endif %}">
                     <a href="#" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-activity"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-activity"></i></span>
                         <span class="nxl-mtext">Gestion Mood</span>
                     </a>
                 </li>
 
+                <!-- Gestion Journal -->
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_journal_' %}active{% endif %}">
                     <a href="#" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-edit"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-edit"></i></span>
                         <span class="nxl-mtext">Gestion Journal Émotionnel</span>
                     </a>
                 </li>
 
+                <!-- Front links -->
                 <li class="nxl-item">
                     <a href="{{ path('front_forum_index') }}" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-globe"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-globe"></i></span>
                         <span class="nxl-mtext">Forum (Front)</span>
                     </a>
                 </li>
 
                 <li class="nxl-item">
                     <a href="{{ path('app_home') }}" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-user-check"></i></span>
-                        <span class="nxl-mtext">Front Office</span>
-                    </a>
-                </li>
-                    </a>
-                </li>
-
-                <li class="nxl-item">
-                    <a href="{{ path('app_home') }}" class="nxl-link">
-                        <span class="nxl-micon"><i class="feather-user-check"></i></span>
+                        <span class="nxl-micon"><i class="feather icon-user-check"></i></span>
                         <span class="nxl-mtext">Front Office</span>
                     </a>
                 </li>
