@@ -13,6 +13,7 @@
 
     {% block stylesheets %}
         <link rel="stylesheet" href="{{ asset('front/css/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ asset('front/css/login.css') }}">
         <link rel="stylesheet" href="{{ asset('front/css/owl.carousel.min.css') }}">
         <link rel="stylesheet" href="{{ asset('front/css/magnific-popup.css') }}">
         <link rel="stylesheet" href="{{ asset('front/css/font-awesome.min.css') }}">
@@ -23,7 +24,9 @@
         <link rel="stylesheet" href="{{ asset('front/css/animate.css') }}">
         <link rel="stylesheet" href="{{ asset('front/css/slicknav.css') }}">
         <link rel="stylesheet" href="{{ asset('front/css/style.css') }}">
-            <style>
+
+        {# Banned Popup Styles #}
+        <style>
             .banned-popup {
                 position: fixed;
                 top: 20px;
@@ -76,13 +79,11 @@
 </head>
 
 <body>
-    {% include 'front/partials/header.html.twig' %}
 
+    {# Main page content #}
     {% block body %}{% endblock %}
 
-    {% include 'front/partials/footer.html.twig' %}
-
-        {# Banned Popup Flash #}
+    {# Banned Popup Flash #}
     {% for message in app.flashes('banned') %}
         <div id="banned-popup" class="banned-popup">
             <h3>⚠️ Compte banni !</h3>
@@ -95,6 +96,7 @@
         <script src="{{ asset('front/js/vendor/modernizr-3.5.0.min.js') }}"></script>
         <script src="{{ asset('front/js/vendor/jquery-1.12.4.min.js') }}"></script>
         <script src="{{ asset('front/js/popper.min.js') }}"></script>
+        <script src="{{ asset('front/js/login.js') }}"></script>
         <script src="{{ asset('front/js/bootstrap.min.js') }}"></script>
         <script src="{{ asset('front/js/owl.carousel.min.js') }}"></script>
         <script src="{{ asset('front/js/isotope.pkgd.min.js') }}"></script>
@@ -117,7 +119,8 @@
         <script src="{{ asset('front/js/mail-script.js') }}"></script>
         <script src="{{ asset('front/js/main.js') }}"></script>
 
-         <script>
+        {# Banned Popup Script #}
+        <script>
             document.addEventListener('DOMContentLoaded', () => {
                 const popup = document.getElementById('banned-popup');
                 const closeBtn = document.getElementById('close-banned-popup');
@@ -139,6 +142,5 @@
         </script>
     {% endblock %}
 </body>
-
 
 </html>
