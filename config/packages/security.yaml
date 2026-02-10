@@ -40,6 +40,8 @@ security:
         - { path: ^/logout, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/profile, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/home, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/forum, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+
 
         # 🔒 ROLE-SPECIFIC
         - { path: ^/admin, roles: ROLE_ADMIN }
