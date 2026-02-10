@@ -1,0 +1,193 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ resource.title }} | MindCare{% endblock %}
+
+{% block body %}
+<div class="container py-5">
+    <div class="row mb-5">
+        <div class="col-12">
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{{ path('resource_index') }}">Ressources</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ resource.title }}</li>
+                </ol>
+            </nav>
+            <h1 class="display-5 fw-bold">{{ resource.title }}</h1>
+            <p class="text-muted">Publié le {{ resource.createdAt|date('d/m/Y') }} | {{ resource.commentaires|length }} commentaire(s)</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Resource Content -->
+            <div class="card border-0 shadow-sm mb-5">
+                <div class="card-body">
+                    <p>{{ resource.description }}</p>
+                    {% if resource.filePath %}
+                        <a href="{{ asset('uploads/resources/' ~ resource.filePath) }}" target="_blank" class="btn btn-primary mt-3">
+                            <i class="fas fa-download me-1"></i>Télécharger le PDF
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="comments-section mb-5">
+                <h3>Commentaires ({{ resource.commentaires|length }})</h3>
+                
+                {% if resource.commentaires|length > 0 %}
+                    {% for commentaire in resource.commentaires|sort((a, b) => b.createdAt <=> a.createdAt) %}
+                        <div class="card border-0 shadow-sm mb-3">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <strong>{{ commentaire.authorName }}</strong>
+                                        <small class="text-muted">- {{ commentaire.createdAt|date('d/m/Y H:i') }}</small>
+                                    </div>
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <form action="{{ path('commentaire_delete', {'id': commentaire.id}) }}" method="post" class="d-inline ms-2" onsubmit="return confirm('Supprimer ce commentaire ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ commentaire.id) }}">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-trash me-1"></i>Supprimer
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                                
+                                {% if commentaire.rating %}
+                                    <div class="stars mb-2">
+                                        {% for i in 1..5 %}
+                                            {% if i <= commentaire.rating %}
+                                                <i class="fas fa-star text-warning"></i>
+                                            {% else %}
+                                                <i class="far fa-star text-warning"></i>
+                                            {% endif %}
+                                        {% endfor %}
+                                        <small class="ms-2">{{ commentaire.rating }}/5</small>
+                                    </div>
+                                {% endif %}
+                                
+                                <p class="mb-0">{{ commentaire.content }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Aucun commentaire pour cette ressource. Soyez le premier à commenter !
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Add Comment Form -->
+            {% if app.user %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <h4>Ajouter un commentaire</h4>
+                        <p class="text-muted mb-4">Vous commentez en tant que <strong>{{ app.user.firstName }} {{ app.user.lastName }}</strong></p>
+                        
+                        {{ form_start(commentForm, {'attr': {'id': 'commentForm'}}) }}
+                            {{ form_errors(commentForm) }}
+                            
+                            <div class="mb-3">
+                                {{ form_label(commentForm.content) }}
+                                {{ form_widget(commentForm.content, {'attr': {'class':'form-control','rows':5}}) }}
+                                {{ form_errors(commentForm.content) }}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form_label(commentForm.rating) }}
+                                {{ form_widget(commentForm.rating, {'attr': {'class':'form-control'}}) }}
+                                <small class="text-muted">Note optionnelle (1-5)</small>
+                                {{ form_errors(commentForm.rating) }}
+                            </div>
+                            
+                            <!-- Hidden fields -->
+                            {{ form_widget(commentForm.authorName) }}
+                            {{ form_widget(commentForm.authorEmail) }}
+                            
+                            <div class="d-flex justify-content-end align-items-center">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane me-2"></i>Publier le commentaire
+                                </button>
+                            </div>
+                        {{ form_end(commentForm) }}
+                    </div>
+                </div>
+            {% else %}
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <h5>Connectez-vous pour commenter</h5>
+                        <p class="text-muted mb-4">Vous devez être connecté pour ajouter un commentaire à cette ressource.</p>
+                        <a href="{{ path('app_login') }}" class="btn btn-primary me-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                        </a>
+                        <a href="{{ path('app_register') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>S'inscrire
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-book me-2"></i>Autres ressources
+                </div>
+                <div class="card-body">
+                    {% for other in all_resources %}
+                        {% if other.id != resource.id %}
+                            <div class="mb-3 pb-2 {% if not loop.last %}border-bottom{% endif %}">
+                                <a href="{{ path('resource_show', {'id': other.id}) }}" class="text-decoration-none">
+                                    <h6 class="mb-1">{{ other.title }}</h6>
+                                </a>
+                                <small class="text-muted">
+                                    <i class="far fa-calendar-alt me-1"></i>
+                                    {{ other.createdAt|date('d/m/Y') }}
+                                </small>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted mb-0">Aucune autre ressource disponible.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stars {
+    font-size: 0.9rem;
+}
+.stars i {
+    margin-right: 2px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingInput = document.getElementById('commentaire_rating');
+    if (ratingInput) {
+        ratingInput.addEventListener('change', function() {
+            const value = parseInt(this.value);
+            if (value < 1 || value > 5) {
+                this.value = '';
+            }
+        });
+    }
+
+    const commentForm = document.getElementById('commentForm');
+    if (commentForm) {
+        commentForm.addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Publication...';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

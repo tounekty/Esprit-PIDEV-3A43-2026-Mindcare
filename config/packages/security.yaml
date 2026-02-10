@@ -41,6 +41,8 @@ security:
         - { path: ^/profile, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/home, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/forum, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/resources, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+
 
 
         # 🔒 ROLE-SPECIFIC

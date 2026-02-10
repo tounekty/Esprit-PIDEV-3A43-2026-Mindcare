@@ -1,7 +1,7 @@
 # config/services.yaml
 
 parameters:
-    uploads_dir: '%kernel.project_dir%/public/uploads'
+    uploads_dir: '%kernel.project_dir%/public/uploads/resources'
 
 services:
     # Default configuration for services in *this* file
