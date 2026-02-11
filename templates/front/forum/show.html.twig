@@ -181,12 +181,7 @@
             <div class="col-xl-12">
                 <div class="topic-content-card">
                     {% if sujet.imageUrl %}
-<<<<<<< HEAD
                         <img src="{{ sujet.imageUrl }}" alt="{{ sujet.titre }}" class="topic-image">
-=======
-                        {% set image_path = sujet.imageUrl starts with 'http' ? sujet.imageUrl : (sujet.imageUrl starts with '/uploads/resources/' ? sujet.imageUrl : sujet.imageUrl|replace({'/uploads/':'/uploads/resources/'}) ) %}
-                        <img src="{{ image_path starts with 'http' ? image_path : asset(image_path) }}" alt="{{ sujet.titre }}" class="topic-image">
->>>>>>> master
                     {% endif %}
                     
                     <div class="message-content" style="font-size: 16px; margin-bottom: 25px;">
@@ -194,12 +189,7 @@
                     </div>
                     
                     {% if sujet.attachmentPath %}
-<<<<<<< HEAD
                         <a href="{{ sujet.attachmentPath }}" download class="attachment-badge">
-=======
-                        {% set attachment_path = sujet.attachmentPath starts with 'http' ? sujet.attachmentPath : (sujet.attachmentPath starts with '/uploads/resources/' ? sujet.attachmentPath : sujet.attachmentPath|replace({'/uploads/':'/uploads/resources/'}) ) %}
-                        <a href="{{ attachment_path starts with 'http' ? attachment_path : asset(attachment_path) }}" download class="attachment-badge">
->>>>>>> master
                             <i class="ti-clip"></i>
                             Télécharger la pièce jointe ({{ (sujet.attachmentSize / 1024)|round(2) }} KB)
                         </a>
