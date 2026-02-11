@@ -104,16 +104,16 @@
                 </li>
 
                 <!-- Gestion Mood -->
-                <li class="nxl-item {% if app.request.get('_route') starts with 'admin_mood_' %}active{% endif %}">
-                    <a href="#" class="nxl-link">
+                <li class="nxl-item {% if app.request.get('_route') starts with 'app_mood_' %}active{% endif %}">
+                    <a href="{{ path('app_mood_index') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather icon-activity"></i></span>
                         <span class="nxl-mtext">Gestion Mood</span>
                     </a>
                 </li>
 
                 <!-- Gestion Journal -->
-                <li class="nxl-item {% if app.request.get('_route') starts with 'admin_journal_' %}active{% endif %}">
-                    <a href="#" class="nxl-link">
+                <li class="nxl-item {% if app.request.get('_route') starts with 'app_journal_emotionnel_' %}active{% endif %}">
+                    <a href="{{ path('app_journal_emotionnel_index') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather icon-edit"></i></span>
                         <span class="nxl-mtext">Gestion Journal Émotionnel</span>
                     </a>
