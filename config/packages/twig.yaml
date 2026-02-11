@@ -1,6 +1,14 @@
 twig:
     file_name_pattern: '*.twig'
+<<<<<<< HEAD
+=======
+    form_themes: ['bootstrap_5_layout.html.twig']
+>>>>>>> b2f43ba2c3b18bebe120cab4f5fa1f2e65b267bc
 
 when@test:
     twig:
         strict_variables: true
+<<<<<<< HEAD
+=======
+        form_themes: ['bootstrap_5_layout.html.twig']
+>>>>>>> b2f43ba2c3b18bebe120cab4f5fa1f2e65b267bc

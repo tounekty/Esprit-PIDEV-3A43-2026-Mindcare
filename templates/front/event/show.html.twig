@@ -1,0 +1,169 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ event.titre }}{% endblock %}
+
+{% block body %}
+    <style>
+        .event-detail-hero {
+            background: linear-gradient(135deg, #0f766e 0%, #0ea5a0 100%);
+            padding: 60px 0;
+            color: white;
+        }
+        .event-detail-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            padding: 35px;
+            margin-top: -45px;
+        }
+        .event-detail-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .event-detail-meta span {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .event-action-card {
+            background: #f0fdfa;
+            border: 1px solid #ccfbf1;
+            border-radius: 16px;
+            padding: 25px;
+        }
+        .event-cta {
+            background: linear-gradient(135deg, #0f766e 0%, #0ea5a0 100%);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 24px;
+            border: none;
+            font-weight: 600;
+        }
+        .event-cta:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .event-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .badge-open {
+            background: rgba(14, 165, 160, 0.15);
+            color: #0f766e;
+        }
+        .badge-full {
+            background: rgba(239, 68, 68, 0.15);
+            color: #b91c1c;
+        }
+        .badge-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #b45309;
+        }
+        .badge-accepted {
+            background: rgba(34, 197, 94, 0.15);
+            color: #15803d;
+        }
+        .badge-refused {
+            background: rgba(239, 68, 68, 0.15);
+            color: #b91c1c;
+        }
+        .badge-cancelled {
+            background: rgba(100, 116, 139, 0.2);
+            color: #334155;
+        }
+    </style>
+
+    <div class="event-detail-hero">
+        <div class="container">
+            <h1 style="font-size: 40px; font-weight: bold; margin-bottom: 10px;">{{ event.titre }}</h1>
+            <div class="event-detail-meta">
+                <span><i class="ti-calendar"></i> {{ event.dateEvent|date('d M Y, H:i') }}</span>
+                <span><i class="ti-location-pin"></i> {{ event.lieu }}</span>
+                <span><i class="ti-user"></i> Capacite: {{ event.capacite }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="padding: 70px 0;">
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <div class="event-detail-card">
+                    <h3 style="font-weight: 700; margin-bottom: 16px;">Description</h3>
+                    <p style="color: #475569; line-height: 1.7; font-size: 15px;">{{ event.description }}</p>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="event-action-card">
+                    <h5 style="font-weight: 700; margin-bottom: 12px;">Reservation</h5>
+                    <p style="color: #475569; margin-bottom: 15px;">Places restantes: <strong>{{ remaining }}</strong></p>
+
+                    {% if remaining > 0 %}
+                        <span class="event-badge badge-open"><i class="ti-check"></i> Disponible</span>
+                    {% else %}
+                        <span class="event-badge badge-full"><i class="ti-close"></i> Complet</span>
+                    {% endif %}
+
+                    {% if userReservation %}
+                        <div style="margin-top: 15px;">
+                            {% if userReservation.statut == 'pending' %}
+                                <span class="event-badge badge-pending">En attente</span>
+                            {% elseif userReservation.statut == 'accepted' %}
+                                <span class="event-badge badge-accepted">Acceptee</span>
+                            {% elseif userReservation.statut == 'refused' %}
+                                <span class="event-badge badge-refused">Refusee</span>
+                            {% elseif userReservation.statut == 'cancelled' %}
+                                <span class="event-badge badge-cancelled">Annulee</span>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+
+                    {% if form is not null %}
+                        {{ form_start(form, {'attr': {'style': 'margin-top: 20px;'}}) }}
+                            <div class="mb-3">
+                                {{ form_label(form.nom) }}
+                                {{ form_widget(form.nom) }}
+                                {{ form_errors(form.nom) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.prenom) }}
+                                {{ form_widget(form.prenom) }}
+                                {{ form_errors(form.prenom) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.telephone) }}
+                                {{ form_widget(form.telephone) }}
+                                {{ form_errors(form.telephone) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.commentaire) }}
+                                {{ form_widget(form.commentaire) }}
+                                {{ form_errors(form.commentaire) }}
+                            </div>
+                            <button type="submit" class="event-cta" {% if not canReserve %}disabled{% endif %}>
+                                Reserver ma place
+                            </button>
+                        {{ form_end(form) }}
+                    {% endif %}
+
+                    {% if not app.user %}
+                        <p style="margin-top: 12px; font-size: 13px; color: #64748b;">Connectez-vous pour reserver.</p>
+                    {% endif %}
+                    {% if app.user and app.user.role != 'etudiant' %}
+                        <p style="margin-top: 12px; font-size: 13px; color: #64748b;">Seuls les etudiants peuvent reserver.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

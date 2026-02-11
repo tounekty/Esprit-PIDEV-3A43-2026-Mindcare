@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Enable stateless CSRF protection for forms and logins/logouts
 framework:
     form:
@@ -9,3 +10,6 @@ framework:
             - submit
             - authenticate
             - logout
+=======
+
+>>>>>>> b2f43ba2c3b18bebe120cab4f5fa1f2e65b267bc
