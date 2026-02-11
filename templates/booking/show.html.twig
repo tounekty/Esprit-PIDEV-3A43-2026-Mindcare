@@ -1,0 +1,50 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la réservation{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-info text-white py-3">
+                    <h3 class="mb-0">Détails de la Réservation #{{ booking.id }}</h3>
+                </div>
+                <div class="card-body p-4">
+                    <table class="table table-bordered">
+                        <tr>
+                            <th class="bg-light w-25">Étudiant</th>
+                            <td>{{ booking.nomEtudiant }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Email</th>
+                            <td>{{ booking.emailEtudiant }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Atelier</th>
+                            <td>{{ booking.event.titre }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Lieu</th>
+                            <td><span class="badge bg-primary">{{ booking.event.lieu }}</span></td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Date de l'atelier</th>
+                            <td>{{ booking.event.dateHeure ? booking.event.dateHeure|date('d/m/Y H:i') : 'Non définie' }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Inscrit le</th>
+                            <td>{{ booking.dateReservation|date('d/m/Y à H:i') }}</td>
+                        </tr>
+                    </table>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <a href="{{ path('app_booking_index') }}" class="btn btn-secondary">Retour à la liste</a>
+                        <a href="{{ path('app_booking_edit', {'id': booking.id}) }}" class="btn btn-warning">Modifier</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

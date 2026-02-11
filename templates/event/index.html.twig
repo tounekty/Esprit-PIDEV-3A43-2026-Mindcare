@@ -1,0 +1,67 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Ateliers{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>Ateliers de Santé Mentale</h1>
+
+    {# Formulaire de recherche et tri #}
+    <form method="get" class="row g-3 mb-4 mt-2 p-3 bg-light border rounded">
+        <div class="col-md-4">
+            <input type="text" name="nom" class="form-control" placeholder="Nom de l'atelier..." value="{{ app.request.query.get('nom') }}">
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="lieu" class="form-control" placeholder="Lieu..." value="{{ app.request.query.get('lieu') }}">
+        </div>
+        <div class="col-md-3">
+            <select name="tri" class="form-select">
+                <option value="titre" {% if app.request.query.get('tri') == 'titre' %}selected{% endif %}>Trier par Titre</option>
+                <option value="dateHeure" {% if app.request.query.get('tri') == 'dateHeure' %}selected{% endif %}>Trier par Date</option>
+                <option value="lieu" {% if app.request.query.get('tri') == 'lieu' %}selected{% endif %}>Trier par Lieu</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Rechercher</button>
+        </div>
+    </form>
+
+    <table class="table table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Titre</th>
+                <th>Date</th>
+                <th>Lieu</th>
+                <th>Capacité</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for event in events %}
+            <tr>
+                <td>{{ event.titre }}</td>
+                <td>{{ event.dateHeure ? event.dateHeure|date('d/m/Y H:i') : '' }}</td>
+                <td>{{ event.lieu }}</td>
+                <td>
+                    <span class="badge {% if event.bookings|length >= event.capaciteMax %}bg-danger{% else %}bg-success{% endif %}">
+                        {{ event.bookings|length }} / {{ event.capaciteMax }}
+                    </span>
+                </td>
+                <td>
+                    <a href="{{ path('app_event_show', {'id': event.id}) }}" class="btn btn-sm btn-info">Voir</a>
+                    <a href="{{ path('app_event_edit', {'id': event.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5" class="text-center">Aucun atelier trouvé.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="mt-3">
+        <a href="{{ path('app_event_new') }}" class="btn btn-success">Créer un nouvel atelier</a>
+    </div>
+</div>
+{% endblock %}

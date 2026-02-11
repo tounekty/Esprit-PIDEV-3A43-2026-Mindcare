@@ -1,0 +1,35 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Accueil - Projet Santé Mentale{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="mb-4">Bienvenue</h1>
+            <p class="lead">Plateforme de gestion des événements et réservations de santé mentale</p>
+            
+            <div class="row mt-5">
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Événements</h5>
+                            <p class="card-text">Découvrez les ateliers et événements disponibles</p>
+                            <a href="{{ path('app_event_index') }}" class="btn btn-primary">Voir les événements</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Réservations</h5>
+                            <p class="card-text">Gérez vos réservations d'événements</p>
+                            <a href="{{ path('app_booking_index') }}" class="btn btn-primary">Voir les réservations</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,187 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Liste des Réservations{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Réservations</h1>
+        <a href="{{ path('app_booking_new') }}" class="btn btn-primary">Nouvelle réservation</a>
+    </div>
+
+    {# Formulaire de recherche #}
+    <form method="get" class="row g-3 mb-4 p-3 bg-light border rounded shadow-sm">
+        <div class="col-md-4">
+            <input type="text" name="nom" class="form-control" placeholder="Nom étudiant..." value="{{ app.request.query.get('nom') }}">
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="lieu" class="form-control" placeholder="Lieu atelier..." value="{{ app.request.query.get('lieu') }}">
+        </div>
+        <div class="col-md-3">
+            <select name="tri" class="form-select">
+                <option value="nomEtudiant" {% if app.request.query.get('tri') == 'nomEtudiant' %}selected{% endif %}>Trier par Nom</option>
+                <option value="dateReservation" {% if app.request.query.get('tri') == 'dateReservation' %}selected{% endif %}>Trier par Date</option>
+                <option value="lieu" {% if app.request.query.get('tri') == 'lieu' %}selected{% endif %}>Trier par Lieu</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-dark w-100">Filtrer</button>
+        </div>
+    </form>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Étudiant</th>
+                    <th>Email</th>
+                    <th>Atelier</th>
+                    <th>Lieu</th>
+                    <th>Date d'inscription</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for booking in bookings %}
+                <tr>
+                    {# Le nom de l'étudiant devient un lien vers la page de détails #}
+                    <td>
+                        <a href="{{ path('app_booking_show', {'id': booking.id}) }}" class="text-decoration-none fw-bold text-primary">
+                            {{ booking.nomEtudiant }}
+                        </a>
+                    </td>
+                    <td>{{ booking.emailEtudiant }}</td>
+                    <td>{{ booking.event.titre }}</td>
+                    <td><span class="badge bg-info text-dark">{{ booking.event.lieu }}</span></td>
+                    <td>{{ booking.dateReservation|date('d/m/Y H:i') }}</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            {# BOUTON MODIFIER #}
+                            <a href="{{ path('app_booking_edit', {'id': booking.id}) }}" class="btn btn-warning btn-sm">
+                                Modifier
+                            </a>
+
+                            {# FORMULAIRE ANNULER / SUPPRIMER #}
+                            <form method="post" action="{{ path('app_booking_delete', {'id': booking.id}) }}" onsubmit="return confirm('Voulez-vous vraiment annuler cette réservation ?');" style="margin:0;">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ booking.id) }}">
+                                <button class="btn btn-outline-danger btn-sm">Annuler</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-4 text-muted">Aucune réservation trouvée.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {# Section Carte des Événements #}
+    <div class="card mt-5 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">📍 Carte des Ateliers</h5>
+        </div>
+        <div class="card-body">
+            <div id="map" style="height: 400px; border-radius: 8px; border: 2px solid #e0e0e0;"></div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #map {
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .leaflet-popup-content {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-size: 14px;
+        padding: 8px;
+    }
+    
+    .leaflet-popup-content h6 {
+        margin: 0 0 8px 0;
+        font-weight: bold;
+        color: #333;
+    }
+    
+    .leaflet-popup-content p {
+        margin: 0;
+        color: #666;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialiser la carte centrée sur la France
+    const map = L.map('map').setView([46.2276, 2.2137], 6);
+    
+    // Ajouter le fond OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19,
+        minZoom: 2
+    }).addTo(map);
+    
+    // Ajouter le contrôle fullscreen
+    L.Control.fullscreen().addTo(map);
+    
+    // Les événements depuis le template Twig
+    const events = {{ events|json_encode|raw }};
+    console.log('Événements reçus:', events);
+    
+    // Tableau pour stocker les marqueurs
+    const markers = [];
+    
+    // Créer les marqueurs pour chaque événement
+    events.forEach(function(event) {
+        console.log('Événement:', event.titre, 'Lat:', event.latitude, 'Lng:', event.longitude);
+        
+        // Vérifier si l'événement a des coordonnées
+        if (event.latitude !== null && event.longitude !== null && event.latitude !== undefined && event.longitude !== undefined) {
+            const marker = L.marker([parseFloat(event.latitude), parseFloat(event.longitude)], {
+                icon: L.icon({
+                    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                })
+            }).addTo(map);
+            
+            // Créer le contenu du popup
+            const dateStr = event.dateHeure ? new Date(event.dateHeure).toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : 'Date non définie';
+            
+            const popupContent = `
+                <div>
+                    <h6 style="margin: 0 0 8px 0; font-weight: bold; color: #333;">` + event.titre + `</h6>
+                    <p style="margin: 0; color: #666;">
+                        <strong>Adresse:</strong> ` + event.lieu + `
+                    </p>
+                    <p style="margin: 8px 0 0 0; color: #666; font-size: 12px;">
+                        <strong>Date:</strong> ` + dateStr + `
+                    </p>
+                </div>
+            `;
+            
+            marker.bindPopup(popupContent);
+            markers.push(marker);
+            console.log('Marqueur ajouté pour:', event.titre);
+        }
+    });
+    
+    console.log('Total marqueurs créés:', markers.length);
+    
+    // Ajuster la vue pour afficher tous les marqueurs
+    if (markers.length > 0) {
+        const group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+    } else {
+        console.log('Aucun événement avec coordonnées trouvé. Assurez-vous que les événements ont des valeurs latitude et longitude.');
+    }
+});
+</script>
+{% endblock %}
