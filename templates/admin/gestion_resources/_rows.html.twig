@@ -1,0 +1,49 @@
+{% for row in rows %}
+    {% set resource = row.resource %}
+    <tr>
+        <td>{{ resource.id }}</td>
+        <td>{{ resource.title }}</td>
+        <td>
+            {% if resource.type == 'video' %}
+                <span class="badge bg-danger">Video</span>
+            {% else %}
+                <span class="badge bg-info">Article</span>
+            {% endif %}
+        </td>
+        <td>
+            <span class="badge bg-light text-dark">{{ row.commentsCount }}</span>
+        </td>
+        <td>
+            {% if resource.type == 'video' and resource.videoUrl %}
+                <a href="{{ resource.videoUrl }}" target="_blank" rel="noopener noreferrer">Voir video</a>
+            {% elseif resource.type == 'article' and resource.imageUrl %}
+                <a href="{{ resource.imageUrl }}" target="_blank" rel="noopener noreferrer">Voir image</a>
+            {% elseif resource.filePath %}
+                <a href="{{ asset('uploads/resources/' ~ resource.filePath) }}" target="_blank">Voir fichier</a>
+            {% else %}
+                N/A
+            {% endif %}
+        </td>
+        <td>{{ resource.description|length > 100 ? resource.description|slice(0, 100) ~ '...' : resource.description }}</td>
+        <td>{{ resource.createdAt ? resource.createdAt|date('Y-m-d H:i') : '-' }}</td>
+        <td>
+            <div class="table-actions">
+                <a href="{{ path('admin_resources_edit', {id: resource.id}) }}" class="btn btn-sm table-action-btn table-action-edit">
+                    <i class="feather icon-edit-3"></i>
+                    <span>Editer</span>
+                </a>
+                <form method="post" action="{{ path('admin_resources_delete', {id: resource.id}) }}" class="m-0 d-inline-block" onsubmit="return confirm('Voulez-vous vraiment supprimer cette ressource ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ resource.id) }}">
+                    <button class="btn btn-sm table-action-btn table-action-delete" type="submit">
+                        <i class="feather icon-trash-2"></i>
+                        <span>Supprimer</span>
+                    </button>
+                </form>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="8" class="text-center py-4">Aucune ressource trouvee.</td>
+    </tr>
+{% endfor %}
