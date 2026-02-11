@@ -1,0 +1,54 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block page_title %}Gestion Commentaires{% endblock %}
+
+{% block body %}
+<div class="card">
+    <div class="card-header">
+        <h5>Commentaires</h5>
+    </div>
+    <div class="card-body table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Ressource</th>
+                    <th>Auteur</th>
+                    <th>Email</th>
+                    <th>Contenu</th>
+                    <th>Note</th>
+                    <th>Approuvé</th>
+                    <th>Créé le</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for comment in commentaires %}
+                    <tr>
+                        <td>{{ comment.id }}</td>
+                        <td>{{ comment.resource.title }}</td>
+                        <td>{{ comment.authorName }}</td>
+                        <td>{{ comment.authorEmail }}</td>
+{{ comment.content|slice(0, 50) ~ (comment.content|length > 50 ? '...' : '') }}
+                        <td>{{ comment.rating ?? '-' }}</td>
+                        <td>{{ comment.approved ? 'Oui' : 'Non' }}</td>
+                        <td>{{ comment.createdAt|date('d/m/Y H:i') }}</td>
+                        <td>
+                            <form method="POST" action="{{ path('admin_comments_delete', {id: comment.id}) }}" onsubmit="return confirm('Voulez-vous vraiment supprimer ce commentaire ?');">
+                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                                <button class="btn btn-danger btn-sm">
+                                    <i class="feather icon-trash"></i> Supprimer
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center">Aucun commentaire trouvé.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

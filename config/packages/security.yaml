@@ -1,0 +1,58 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    providers:
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            lazy: true
+            provider: app_user_provider
+            user_checker: App\Security\UserChecker # <-- Added this line
+
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                username_parameter: email
+                password_parameter: password
+                enable_csrf: false
+                default_target_path: app_redirect
+
+            logout:
+                path: app_logout
+                target: app_login
+
+    access_control:
+        # 🔓 PUBLIC (MUST BE FIRST)
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+
+        # 🔐 LOGGED USERS
+        - { path: ^/redirect, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/logout, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/profile, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/home, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/forum, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/resources, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/mood, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/journal, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/dashboard, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+
+
+
+        # 🔒 ROLE-SPECIFIC
+        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/forum, roles: ROLE_ADMIN }
+
+        - { path: ^/psychologue, roles: ROLE_PSYCHOLOGUE }
+
+        # 🚨 CATCH-ALL (MUST BE LAST)
+        - { path: ^/, roles: ROLE_USER }

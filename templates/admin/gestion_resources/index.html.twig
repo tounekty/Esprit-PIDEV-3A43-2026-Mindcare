@@ -1,0 +1,55 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block page_title %}Gestion Ressources{% endblock %}
+
+{% block body %}
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Liste des Ressources</h5>
+        <a href="{{ path('admin_resources_new') }}" class="btn btn-primary btn-sm">Ajouter Ressource</a>
+    </div>
+    <div class="card-body">
+        {% if resources is empty %}
+            <p>Aucune ressource trouvée.</p>
+        {% else %}
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titre</th>
+                        <th>Description</th>
+                        <th>Fichier</th>
+                        <th>Créé le</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for resource in resources %}
+                        <tr>
+                            <td>{{ resource.id }}</td>
+                            <td>{{ resource.title }}</td>
+                            <td>{{ resource.description }}</td>
+                            <td>
+                                {% if resource.filePath %}
+                                    <a href="{{ asset('uploads/' ~ resource.filePath) }}" target="_blank">Voir Fichier</a>
+                                {% else %}
+                                    N/A
+                                {% endif %}
+                            </td>
+                            <td>{{ resource.createdAt ? resource.createdAt|date('Y-m-d H:i') : '' }}</td>
+<td>
+    <a href="{{ path('admin_resources_edit', {id: resource.id}) }}" class="btn btn-sm btn-warning">Éditer</a>
+
+    <form method="post" action="{{ path('admin_resources_delete', {id: resource.id}) }}" style="display:inline-block;" onsubmit="return confirm('Voulez-vous vraiment supprimer cette ressource ?');">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ resource.id) }}">
+        <button class="btn btn-sm btn-danger">Supprimer</button>
+    </form>
+</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
