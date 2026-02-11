@@ -26,12 +26,10 @@ class FrontController extends AbstractController
         ]);
     }
 
-    #[Route('events', name: 'events')]
-    public function events(): Response
+    #[Route('events-legacy', name: 'events_legacy')]
+    public function eventsLegacy(): Response
     {
-        return $this->render('front/events.html.twig', [
-            'title' => 'Événements',
-        ]);
+        return $this->redirectToRoute('front_events_index');
     }
 
     #[Route('blog', name: 'blog')]

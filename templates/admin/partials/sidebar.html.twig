@@ -38,15 +38,15 @@
 
                 <!-- Gestion Events -->
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_events_' %}active{% endif %}">
-                    <a href="#" class="nxl-link">
+                    <a href="{{ path('admin_events_index') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather icon-calendar"></i></span>
                         <span class="nxl-mtext">Gestion Events</span>
                     </a>
                 </li>
 
                 <!-- Gestion Réservations -->
-                <li class="nxl-item {% if app.request.get('_route') starts with 'admin_reservations_' %}active{% endif %}">
-                    <a href="#" class="nxl-link">
+                <li class="nxl-item {% if app.request.get('_route') starts with 'admin_event_reservations_' %}active{% endif %}">
+                    <a href="{{ path('admin_event_reservations_index') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather icon-check-circle"></i></span>
                         <span class="nxl-mtext">Gestion Réservations</span>
                     </a>
