@@ -1,0 +1,289 @@
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Humeur | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(127, 191, 255, 0.2);
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-item strong {
+            display: block;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .stat-item .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 0.25rem;
+        }
+        
+        /* Cards */
+        .card-modern {
+            background: white;
+            border: 1px solid #D4E8FF;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(127, 191, 255, 0.1);
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+        
+        .card-modern:hover {
+            box-shadow: 0 10px 30px rgba(127, 191, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .card-modern-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .card-modern-body {
+            padding: 2rem;
+        }
+        
+        /* Form Controls */
+        .form-control, .form-select, .form-range {
+            border: 1px solid #D4E8FF !important;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #7FBFFF !important;
+            box-shadow: 0 0 0 0.2rem rgba(127, 191, 255, 0.25) !important;
+        }
+        
+        /* Intensity Visual */
+        .intensity-visual {
+            height: 8px;
+            background: #e0e7ff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+        
+        .intensity-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #7FBFFF, #A8D8FF);
+            transition: width 0.3s;
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%) !important;
+            border: none !important;
+            color: #1a365d !important;
+            font-weight: 600 !important;
+            transition: all 0.3s !important;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3) !important;
+        }
+        
+        .btn-outline-secondary {
+            color: #7FBFFF !important;
+            border-color: #D4E8FF !important;
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: #E8F0FF !important;
+            border-color: #A8D8FF !important;
+            color: #1a365d !important;
+        }
+        
+        /* Layout */
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        
+        /* Alert */
+        .alert-current {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.08) 0%, rgba(168, 216, 255, 0.08) 100%);
+            border: 1px solid #D4E8FF;
+            border-left: 4px solid #7FBFFF;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_mood_index') }}" class="text-decoration-none">Mes Humeurs</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_mood_show', {'id': mood.id}) }}" class="text-decoration-none">Humeur #{{ mood.id }}</a></li>
+            <li class="breadcrumb-item active">Modifier</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div style="font-size: 48px;">
+                    {% if mood.humeur == 'heureux' %} 😊
+                    {% elseif mood.humeur == 'triste' %} 😢
+                    {% elseif mood.humeur == 'colere' %} 😠
+                    {% elseif mood.humeur == 'stresse' %} 😰
+                    {% elseif mood.humeur == 'neutre' %} 😐
+                    {% elseif mood.humeur == 'calme' %} 😌
+                    {% elseif mood.humeur == 'fatigue' %} 😴
+                    {% elseif mood.humeur == 'excite' %} 😃
+                    {% else %} 😊
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col">
+                <h1 class="h3 mb-1" style="color: white;">
+                    <i class="fas fa-edit me-2"></i>Modifier Humeur #{{ mood.id }}
+                </h1>
+                <p class="mb-0 opacity-75">Mettre à jour votre entrée d'humeur</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ path('app_mood_show', {'id': mood.id}) }}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-1"></i> Retour
+                </a>
+            </div>
+        </div>
+        
+        <div class="stat-grid">
+            <div class="stat-item">
+                <strong>État actuel</strong>
+                <div class="value">
+                    {% if mood.humeur == 'heureux' %} Heureux
+                    {% elseif mood.humeur == 'triste' %} Triste
+                    {% elseif mood.humeur == 'colere' %} Colère
+                    {% elseif mood.humeur == 'stresse' %} Stressé
+                    {% elseif mood.humeur == 'neutre' %} Neutre
+                    {% elseif mood.humeur == 'calme' %} Calme
+                    {% elseif mood.humeur == 'fatigue' %} Fatigué
+                    {% elseif mood.humeur == 'excite' %} Excité
+                    {% else %} {{ mood.humeur|capitalize }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="stat-item">
+                <strong>Intensité</strong>
+                <div class="value">{{ mood.intensite }}/5</div>
+            </div>
+            <div class="stat-item">
+                <strong>Date</strong>
+                <div class="value">{{ mood.datemood|date('d/m/Y') }}</div>
+            </div>
+            <div class="stat-item">
+                <strong>Journaux</strong>
+                <div class="value">{{ mood.journals|length }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card-modern">
+        <div class="card-modern-header">
+            <div>
+                <i class="fas fa-pencil-alt me-2"></i>Modifier les paramètres
+            </div>
+        </div>
+        <div class="card-modern-body">
+            {{ form_start(form) }}
+            
+            <!-- Humeur -->
+            <div class="form-section">
+                <label class="form-label fw-bold mb-3">
+                    <i class="fas fa-smile me-2" style="color: #7FBFFF;"></i>Humeur
+                </label>
+                {{ form_widget(form.humeur, {'attr': {'class': 'form-select form-select-lg'}}) }}
+                <small class="text-muted d-block mt-2">Sélectionnez le type d'humeur</small>
+            </div>
+
+            <!-- Intensité -->
+            <div class="form-section">
+                <label class="form-label fw-bold mb-3">
+                    <i class="fas fa-sliders-h me-2" style="color: #7FBFFF;"></i>Intensité
+                </label>
+                <div class="d-flex justify-content-between mb-1">
+                    <span>Faible</span>
+                    <span id="intensityDisplay" class="fw-bold">{{ mood.intensite }}/5</span>
+                    <span>Forte</span>
+                </div>
+                {{ form_widget(form.intensite, {'attr': {'class': 'form-range', 'oninput': 'document.getElementById("intensityDisplay").textContent = this.value + "/5"; document.querySelector(".intensity-bar").style.width = (this.value * 20) + "%"'}}) }}
+                <div class="intensity-visual mt-2">
+                    <div class="intensity-bar" style="width: {{ mood.intensite * 20 }}%;"></div>
+                </div>
+            </div>
+
+            <!-- Date -->
+            <div class="form-section">
+                <label class="form-label fw-bold mb-3">
+                    <i class="far fa-calendar-alt me-2" style="color: #7FBFFF;"></i>Date et Heure
+                </label>
+                {{ form_widget(form.datemood, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                <small class="text-muted d-block mt-2">Date de cette humeur</small>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-2 mt-4 pt-3 border-top">
+                <a href="{{ path('app_mood_show', {'id': mood.id}) }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-times me-1"></i> Annuler
+                </a>
+                <button type="submit" class="btn btn-primary btn-lg ms-auto">
+                    <i class="fas fa-save me-1"></i> Enregistrer les modifications
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="alert-current mt-4">
+        <div class="d-flex align-items-start">
+            <i class="fas fa-info-circle me-2" style="color: #7FBFFF; margin-top: 0.25rem;"></i>
+            <div>
+                <strong class="d-block mb-2">À propos de cette humeur</strong>
+                <small class="text-muted">
+                    Créée le {{ mood.datemood|date('d/m/Y à H:i') }} 
+                    {% if mood.journals|length > 0 %}
+                        • {{ mood.journals|length }} entrée{{ mood.journals|length > 1 ? 's' : '' }} de journal associée{{ mood.journals|length > 1 ? 's' : '' }}
+                    {% else %}
+                        • Aucune entrée de journal
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

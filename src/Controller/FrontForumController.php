@@ -142,7 +142,7 @@ class FrontForumController extends AbstractController
             $filename = uniqid('sujet_img_', true) . '.' . $imageFile->guessExtension();
             try {
                 $imageFile->move($imageDir, $filename);
-                $sujet->setImageUrl('/uploads/sujet-images/' . $filename);
+                $sujet->setImageUrl('/uploads/resources/sujet-images/' . $filename);
             } catch (\Exception $e) {
                 // Skip upload on error - file will not be saved
             }
@@ -159,7 +159,7 @@ class FrontForumController extends AbstractController
             $filename = uniqid('sujet_att_', true) . '.' . $attachmentFile->guessExtension();
             try {
                 $attachmentFile->move($attachDir, $filename);
-                $sujet->setAttachmentPath('/uploads/sujet-attachments/' . $filename);
+                $sujet->setAttachmentPath('/uploads/resources/sujet-attachments/' . $filename);
                 $sujet->setAttachmentMimeType($attachmentFile->getMimeType());
                 $sujet->setAttachmentSize($attachmentFile->getSize());
             } catch (\Exception $e) {
@@ -183,7 +183,7 @@ class FrontForumController extends AbstractController
             $filename = uniqid('message_att_', true) . '.' . $attachmentFile->guessExtension();
             try {
                 $attachmentFile->move($attachDir, $filename);
-                $message->setAttachmentPath('/uploads/message-attachments/' . $filename);
+                $message->setAttachmentPath('/uploads/resources/message-attachments/' . $filename);
                 $message->setAttachmentMimeType($attachmentFile->getMimeType());
                 $message->setAttachmentSize($attachmentFile->getSize());
             } catch (\Exception $e) {

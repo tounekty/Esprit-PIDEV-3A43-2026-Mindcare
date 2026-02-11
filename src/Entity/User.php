@@ -145,16 +145,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setPatientFile(?PatientFile $patientFile): self
     {
-        // unset the owning side of the relation if necessary
-        if ($patientFile === null && $this->patientFile !== null) {
-            $this->patientFile->setStudent(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($patientFile !== null && $patientFile->getStudent() !== $this) {
-            $patientFile->setStudent($this);
-        }
-
         $this->patientFile = $patientFile;
 
         return $this;
@@ -164,4 +154,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         // Clear temporary sensitive data if any
     }
+
+
 }

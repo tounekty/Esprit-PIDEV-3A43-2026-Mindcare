@@ -224,7 +224,8 @@
                         <div class="forum-topic-card">
                             <div class="topic-image-wrapper">
                                 {% if sujet.imageUrl %}
-                                    <img src="{{ sujet.imageUrl }}" alt="{{ sujet.titre }}" class="topic-image">
+                                    {% set image_path = sujet.imageUrl starts with 'http' ? sujet.imageUrl : (sujet.imageUrl starts with '/uploads/resources/' ? sujet.imageUrl : sujet.imageUrl|replace({'/uploads/':'/uploads/resources/'}) ) %}
+                                    <img src="{{ image_path starts with 'http' ? image_path : asset(image_path) }}" alt="{{ sujet.titre }}" class="topic-image">
                                 {% else %}
                                     <i class="flaticon-first-aid-kit topic-icon"></i>
                                 {% endif %}
