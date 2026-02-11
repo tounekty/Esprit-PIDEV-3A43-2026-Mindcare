@@ -266,6 +266,7 @@ class AppointmentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            $appointment->setStatus('pending');
             $em->flush();
             
             // Notify the student about the update via email
