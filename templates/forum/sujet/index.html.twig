@@ -4,94 +4,192 @@
 {% block page_title %}Sujets Forum{% endblock %}
 
 {% block body %}
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card stretch stretch-full">
-                <div class="card-header">
-                    <h5 class="card-title">Liste des sujets</h5>
-                    <div class="card-header-action">
-                        <a href="{{ path('sujet_forum_new') }}" class="btn btn-primary">Nouveau sujet</a>
-                        <a href="{{ path('message_forum_index') }}" class="btn btn-secondary ms-2">Voir messages</a>
-                    </div>
-                </div>
-                <div class="card-body custom-card-action">
-                    <form method="get" action="{{ path('sujet_forum_index') }}" class="row g-2 align-items-end mb-3">
-                        <div class="col-md-5">
-                            <label for="sujet-search" class="form-label">Recherche</label>
-                            <input id="sujet-search" type="text" name="q" value="{{ q }}" class="form-control" placeholder="Titre ou description">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="sujet-status" class="form-label">Statut</label>
-                            <select id="sujet-status" name="status" class="form-select">
-                                <option value="">Tous les statuts</option>
-                                {% for label, value in statusChoices %}
-                                    <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-3">
-                            <button type="submit" class="btn btn-primary w-100">Filtrer</button>
-                        </div>
-                    </form>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Titre</th>
-                                    <th>Description</th>
-                                    <th>Date</th>
-                                    <th>User</th>
-                                    <th>Image</th>
-                                    <th>Statut</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {% for sujet in sujets %}
-                                <tr>
-                                    <td>
-                                        {{ sujet.titre }}
-                                        {% if sujet.isPinned %}<span class="badge bg-warning ms-1">📌</span>{% endif %}
-                                    </td>
-                                    <td>{{ sujet.description|slice(0, 50) }}...</td>
-                                    <td>{{ sujet.dateCreation|date('Y-m-d H:i') }}</td>
-                                    <td>{{ sujet.idUser }}</td>
-                                    <td>
-                                        {% if sujet.imageUrl %}
-                                            <img src="{{ sujet.imageUrl }}" alt="img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        {% if sujet.status %}
-                                            <span class="badge bg-info">{{ sujet.status }}</span>
-                                        {% else %}
-                                            <span class="text-muted">-</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <div class="dropdown">
-                                            <a href="#" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-                                                <i class="feather-more-vertical"></i>
-                                            </a>
-                                            <ul class="dropdown-menu">
-                                                <li><a class="dropdown-item" href="{{ path('sujet_forum_show', {id: sujet.id}) }}"><i class="feather-eye me-2"></i> Voir</a></li>
-                                                <li><a class="dropdown-item" href="{{ path('sujet_forum_edit', {id: sujet.id}) }}"><i class="feather-edit me-2"></i> Modifier</a></li>
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                            {% else %}
-                                <tr>
-                                    <td colspan="7" class="text-center">Aucun sujet.</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+<div class="row g-3 mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Total</small>
+                <h4 id="statTotal" class="mb-0">{{ stats.total }}</h4>
             </div>
         </div>
     </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Epingles</small>
+                <h4 id="statPinned" class="mb-0">{{ stats.pinned }}</h4>
+            </div>
+        </div>
+    </div>
+    {% for label, value in statusChoices %}
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted d-block mb-1">{{ label|split(' -> ')|first }}</small>
+                    <h4 class="mb-0" id="statStatus{{ value }}">{{ stats.byStatus[value] ?? 0 }}</h4>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Resultats affiches</small>
+                <h4 id="statVisible" class="mb-0">{{ visible_count }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0">Liste des sujets</h5>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ path('sujet_forum_new') }}" class="btn btn-primary btn-sm text-uppercase fw-semibold px-3 toolbar-btn">Nouveau sujet</a>
+            <a href="{{ path('message_forum_index') }}" class="btn btn-outline-secondary btn-sm text-uppercase fw-semibold px-3 toolbar-btn">Voir messages</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-2 mb-3">
+            <div class="col-lg-5">
+                <input
+                    id="sujetSearch"
+                    type="text"
+                    class="form-control"
+                    placeholder="Rechercher par titre ou description..."
+                    value="{{ filters.query }}"
+                >
+            </div>
+            <div class="col-lg-3">
+                <select id="sujetStatusFilter" class="form-select">
+                    <option value="all" {{ filters.status == 'all' ? 'selected' : '' }}>Tous les statuts</option>
+                    {% for label, value in statusChoices %}
+                        <option value="{{ value }}" {{ filters.status == value ? 'selected' : '' }}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-3">
+                {% set currentSort = filters.sort ~ '_' ~ filters.direction|lower %}
+                <select id="sujetSort" class="form-select">
+                    <option value="date_desc" {{ currentSort == 'date_desc' ? 'selected' : '' }}>Plus recents</option>
+                    <option value="date_asc" {{ currentSort == 'date_asc' ? 'selected' : '' }}>Plus anciens</option>
+                    <option value="title_asc" {{ currentSort == 'title_asc' ? 'selected' : '' }}>Titre A-Z</option>
+                    <option value="title_desc" {{ currentSort == 'title_desc' ? 'selected' : '' }}>Titre Z-A</option>
+                    <option value="status_asc" {{ currentSort == 'status_asc' ? 'selected' : '' }}>Statut A-Z</option>
+                    <option value="status_desc" {{ currentSort == 'status_desc' ? 'selected' : '' }}>Statut Z-A</option>
+                </select>
+            </div>
+            <div class="col-lg-1 d-grid">
+                <button id="sujetReset" type="button" class="btn btn-light toolbar-btn">Reset</button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Image</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="sujetsTableBody">
+                    {% include 'forum/sujet/_rows.html.twig' with {rows: rows} %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.toolbar-btn {
+    min-width: 110px;
+    border-radius: 6px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('sujetSearch');
+    const statusFilter = document.getElementById('sujetStatusFilter');
+    const sortSelect = document.getElementById('sujetSort');
+    const resetBtn = document.getElementById('sujetReset');
+    const tableBody = document.getElementById('sujetsTableBody');
+    const ajaxUrl = '{{ path('sujet_forum_ajax') }}';
+
+    let debounceTimer;
+
+    const updateStats = (stats, visibleCount) => {
+        const set = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+            }
+        };
+
+        set('statTotal', stats.total ?? 0);
+        set('statPinned', stats.pinned ?? 0);
+        if (stats.byStatus) {
+            Object.keys(stats.byStatus).forEach((key) => {
+                set(`statStatus${key}`, stats.byStatus[key]);
+            });
+        }
+        set('statVisible', visibleCount ?? 0);
+    };
+
+    const loadSujets = async () => {
+        if (!tableBody) {
+            return;
+        }
+
+        const [sort, direction] = (sortSelect.value || 'date_desc').split('_');
+
+        const params = new URLSearchParams({
+            q: searchInput.value.trim(),
+            status: statusFilter.value,
+            sort: sort,
+            direction: (direction || 'desc').toUpperCase(),
+        });
+
+        tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4">Chargement...</td></tr>';
+
+        try {
+            const response = await fetch(`${ajaxUrl}?${params.toString()}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur de chargement');
+            }
+
+            const data = await response.json();
+            tableBody.innerHTML = data.rowsHtml;
+            updateStats(data.stats || {}, data.visibleCount || 0);
+        } catch (error) {
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center text-danger py-4">Impossible de charger les donnees.</td></tr>';
+        }
+    };
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(loadSujets, 300);
+    });
+
+    statusFilter.addEventListener('change', loadSujets);
+    sortSelect.addEventListener('change', loadSujets);
+
+    resetBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        statusFilter.value = 'all';
+        sortSelect.value = 'date_desc';
+        loadSujets();
+    });
+});
+</script>
 {% endblock %}
