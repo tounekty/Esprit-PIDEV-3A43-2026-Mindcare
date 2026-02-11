@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 document.addEventListener("DOMContentLoaded", () => {
     const loginText = document.querySelector(".title-text .login");
     const loginForm = document.querySelector("form.login");
@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
         return false;
     };
 });
-=======
  const loginText = document.querySelector(".title-text .login");
       const loginForm = document.querySelector("form.login");
       const loginBtn = document.querySelector("label.login");
@@ -39,4 +38,3 @@ document.addEventListener("DOMContentLoaded", () => {
         signupBtn.click();
         return false;
       });
->>>>>>> origin/gestion_forum

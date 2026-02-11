@@ -45,6 +45,9 @@
                                     <li><a class="active" href="{{ path('app_home') }}">Accueil</a></li>
                                     <li><a href="{{ path('front_forum_index') }}">Forum</a></li>
                                     <li><a href="{{ path('resource_index') }}">Ressources</a></li>
+                                    <li><a href="{{ path('student_mes_rendezvous') }}">Mes RDV</a></li>
+                                    <li><a href="{{ path('student_patient_file') }}">Mon dossier médical</a></li>
+                                    <li><a href="{{ path('app_reservation') }}">Prendre RDV</a></li>
                                 </ul>
                                 
                             </nav>
@@ -54,11 +57,7 @@
                     <!-- Right Side: Appointment + User -->
                     <div class="col-xl-3 col-lg-3 d-none d-lg-flex justify-content-end align-items-center gap-3">
                         <!-- Appointment Button -->
-                        <div class="Appointment">
-                            <div class="book_btn d-none d-lg-block">
-                                <a class="popup-with-form" href="#test-form">Make an Appointment</a>
-                            </div>
-                        </div>
+
 
                         <!-- User Dropdown -->
                         {% if app.user %}
