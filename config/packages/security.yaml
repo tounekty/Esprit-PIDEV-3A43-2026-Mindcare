@@ -8,6 +8,10 @@ security:
                 class: App\Entity\User
                 property: email
 
+    role_hierarchy:
+        ROLE_PSYCHOLOGUE: ROLE_ETUDIANT
+        ROLE_ADMIN:       [ROLE_PSYCHOLOGUE, ROLE_ETUDIANT]
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -35,6 +39,12 @@ security:
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
 
+        # 🔐 API ENDPOINTS
+        # Public access for availability (students need this for booking, only shows busy slots)
+        - { path: ^/api/psychologue/\d+/availability$, roles: PUBLIC_ACCESS }
+        # Other psychologue API endpoints require psychologue role
+        - { path: ^/api/psychologue, roles: ROLE_PSYCHOLOGUE }
+
         # 🔐 LOGGED USERS
         - { path: ^/redirect, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/logout, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
@@ -46,9 +56,18 @@ security:
 
 
         # 🔒 ROLE-SPECIFIC
-        - { path: ^/admin, roles: ROLE_ADMIN }
+        - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_PSYCHOLOGUE] }
         - { path: ^/forum, roles: ROLE_ADMIN }
 
+        - { path: ^/reservation, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+
+        # Student personal medical dossier
+        - { path: ^/mon-dossier-medical, roles: ROLE_ETUDIANT }
+        - { path: ^/mes-rendezvous, roles: ROLE_ETUDIANT }
+
+
+        # 🔒 ROLE-SPECIFIC
+        - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_PSYCHOLOGUE] }
         - { path: ^/psychologue, roles: ROLE_PSYCHOLOGUE }
 
         # 🚨 CATCH-ALL (MUST BE LAST)

@@ -1,0 +1,118 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Dossiers Étudiants{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Dossiers Étudiants</h1>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <!-- Search and Controls -->
+                <div class="row mb-4 h-100">
+                    <div class="col-md-6">
+                        <form method="get" action="{{ path('admin_patient_file_index') }}" class="d-flex gap-2">
+                            <input type="hidden" name="sort" value="{{ currentSort }}">
+                            <input type="hidden" name="order" value="{{ currentOrder }}">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0">
+                                    <i class="fa fa-search text-muted"></i>
+                                </span>
+                                <input type="text" name="search" class="form-control border-start-0 ps-0" 
+                                       placeholder="Rechercher un étudiant par son nom..." 
+                                       value="{{ currentSearch }}">
+                                <button class="btn btn-outline-primary" type="submit">Rechercher</button>
+                                {% if currentSearch %}
+                                    <a href="{{ path('admin_patient_file_index', {sort: currentSort, order: currentOrder}) }}" 
+                                       class="btn btn-outline-danger">
+                                        <i class="fa fa-times"></i>
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="border-0">Étudiant</th>
+                                <th class="border-0">Email</th>
+                                <th class="border-0">
+                                    <a href="{{ path('admin_patient_file_index', {
+                                        search: currentSearch, 
+                                        sort: 'date', 
+                                        order: (currentSort == 'date' and currentOrder == 'ASC') ? 'DESC' : 'ASC'
+                                    }) }}" class="text-decoration-none text-dark">
+                                        Date de création {% if currentSort == 'date' %}<i class="fa fa-sort-{{ currentOrder == 'ASC' ? 'up' : 'down' }}"></i>{% else %}<i class="fa fa-sort text-muted opacity-50"></i>{% endif %}
+                                    </a>
+                                </th>
+                                <th class="border-0">Statut Dossier</th>
+                                <th class="border-0 text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-light rounded-circle p-2 me-3">
+                                                <i class="fa fa-user text-primary"></i>
+                                            </div>
+                                            <span class="fw-bold">{{ student.firstName }} {{ student.lastName }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted">{{ student.email }}</td>
+                                    <td>
+                                        {% if student.patientFile %}
+                                            {{ student.patientFile.createdAt|date('d/m/Y') }}
+                                        {% else %}
+                                            <span class="text-muted italic">Jamais créé</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if student.patientFile %}
+                                            <span class="badge bg-success-soft text-success border border-success">
+                                                <i class="fa fa-check-circle me-1"></i>Actif
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-light text-muted border border-secondary">
+                                                <i class="fa fa-minus-circle me-1"></i>Inexistant
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group">
+                                            <a href="{{ path('admin_patient_file_show', {id: student.id}) }}" 
+                                               class="btn btn-sm {{ student.patientFile ? 'btn-outline-primary' : 'btn-primary' }}">
+                                                <i class="fa {{ student.patientFile ? 'fa-eye' : 'fa-plus' }} me-1"></i>
+                                                {{ student.patientFile ? 'Consulter' : 'Créer Dossier' }}
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="py-5 text-center">
+                                        <div class="text-muted">
+                                            <i class="fa fa-folder-open fa-3x mb-3 opacity-20"></i>
+                                            <p class="mb-0">Aucun étudiant trouvé.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .badge.bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+        .avatar-sm { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+    </style>
+{% endblock %}

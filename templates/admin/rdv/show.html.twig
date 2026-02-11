@@ -1,0 +1,63 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Détails Rendez-vous{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <h1 class="mb-4">Rendez-vous #{{ appointment.getId() }}</h1>
+
+        <div class="card">
+            <div class="card-body">
+                <p><strong>Étudiant:</strong> {{ appointment.getEtudiant() ? appointment.getEtudiant().getFirstName() ~ ' ' ~ appointment.getEtudiant().getLastName() : '-' }}</p>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <p><strong>Psychologue:</strong> {{ appointment.getPsychologue() ? appointment.getPsychologue().getFirstName() ~ ' ' ~ appointment.getPsychologue().getLastName() : '-' }}</p>
+                {% endif %}
+                <p><strong>Date:</strong> {{ appointment.getDate() ? appointment.getDate().format('d/m/Y H:i') : '' }}</p>
+                <p><strong>Mode:</strong> 
+                    {% if appointment.getLocation() == 'in_office' %}
+                        <span class="badge bg-primary">En cabinet</span>
+                    {% else %}
+                        <span class="badge bg-info">En ligne</span>
+                    {% endif %}
+                </p>
+                <p><strong>Status:</strong> 
+                    {% if appointment.getStatus() == 'pending' %}
+                        <span class="badge bg-warning">En attente</span>
+                    {% elseif appointment.getStatus() == 'accepted' %}
+                        <span class="badge bg-success">Accepté</span>
+                    {% elseif appointment.getStatus() == 'refused' %}
+                        <span class="badge bg-danger">Refusé</span>
+                    {% endif %}
+                </p>
+                <p><strong>Description:</strong><br/>{{ appointment.getDescription() ?: '-' }}</p>
+
+                <div class="mt-4">
+                    {% if appointment.getEtudiant() %}
+                        <a href="{{ path('admin_patient_file_show', {'id': appointment.getEtudiant().getId()}) }}" class="btn btn-sm btn-info">
+                            <i class="fa fa-file-medical me-1"></i>Dossier Médical
+                        </a>
+                    {% endif %}
+                    
+                    {% if is_granted('ROLE_PSYCHOLOGUE') and not is_granted('ROLE_ADMIN') %}
+                        {% if appointment.getStatus() == 'pending' %}
+                            <form method="POST" action="{{ path('admin_rdv_accept', {'id': appointment.getId()}) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Accepter ce rendez-vous?')">Accepter</button>
+                            </form>
+                            <form method="POST" action="{{ path('admin_rdv_decline', {'id': appointment.getId()}) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Refuser ce rendez-vous?')">Refuser</button>
+                            </form>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ path('admin_rdv_edit', {'id': appointment.getId()}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                        <form method="post" action="{{ path('admin_rdv_delete', {'id': appointment.getId()}) }}" style="display:inline-block;" onsubmit="return confirm('Supprimer ce rendez-vous ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ appointment.getId()) }}">
+                            <button class="btn btn-sm btn-danger">Supprimer</button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <a href="{% if is_granted('ROLE_PSYCHOLOGUE') and not is_granted('ROLE_ADMIN') %}{{ path('admin_rdv_pending') }}{% else %}{{ path('admin_rdv_index') }}{% endif %}" class="btn btn-link mt-3">Retour</a>
+    </div>
+{% endblock %}
