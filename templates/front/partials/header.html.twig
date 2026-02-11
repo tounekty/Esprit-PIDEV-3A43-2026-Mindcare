@@ -1,0 +1,74 @@
+    <!-- header-start -->
+    <header>
+        <div class="header-area ">
+            <div class="header-top_area">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-xl-6 col-md-6 ">
+                            <div class="social_media_links">
+                                <a href="#">
+                                    <i class="fa fa-linkedin"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-facebook"></i>
+                                </a>
+                                <a href="#">
+                                    <i class="fa fa-google-plus"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-xl-6 col-md-6">
+                            <div class="short_contact_list">
+                                <ul>
+                                    <li><a href="#"> <i class="fa fa-envelope"></i> MindcareStudents@gmail.com</a></li>
+                                    <li><a href="#"> <i class="fa fa-phone"></i> +21693213496</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="sticky-header" class="main-header-area">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-xl-3 col-lg-2">
+                            <div class="logo">
+                                <a href="{{ path('app_home') }}">
+                                    <img src="img/logo.png" alt="">
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-xl-7 col-lg-8">
+                            <div class="main-menu d-none d-lg-block">
+                                <div class="d-flex align-items-center justify-content-center gap-3">
+                                    {% if app.user %}
+                                        {% if 'ROLE_PSYCHOLOGUE' in app.user.roles %}
+                                            <a href="{{ path('admin_rdv_index') }}" class="boxed-btn3">Tableau de bord</a>
+                                            <a href="{{ path('admin_rdv_pending') }}" class="btn btn-sm btn-outline-warning">En attente</a>
+                                        {% elseif 'ROLE_ETUDIANT' in app.user.roles %}
+                                            <a href="{{ path('student_mes_rendezvous') }}" class="boxed-btn3">Mes RDV</a>
+                                            <a href="{{ path('student_patient_file') }}" class="boxed-btn3">Mon dossier médical</a>
+                                            <a href="{{ path('app_reservation') }}" class="boxed-btn3">Prendre RDV</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-2 col-lg-2 d-none d-lg-block">
+                            <div class="Appointment text-end">
+                                <div class="book_btn d-none d-lg-block">
+                                    {% if not app.user %}
+                                        <a href="{{ path('app_reservation') }}" class="boxed-btn3">Faire un RDV</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mobile_menu d-block d-lg-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    <!-- header-end -->

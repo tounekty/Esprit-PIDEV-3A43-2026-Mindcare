@@ -30,6 +30,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string')]
     private ?string $password = null;
 
+    #[ORM\OneToOne(mappedBy: 'student', targetEntity: PatientFile::class)]
+    private ?PatientFile $patientFile = null;
+
     // -------------------- Ban logic --------------------
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $bannedUntil = null;
@@ -132,6 +135,28 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): self
     {
         $this->password = $password;
+        return $this;
+    }
+
+    public function getPatientFile(): ?PatientFile
+    {
+        return $this->patientFile;
+    }
+
+    public function setPatientFile(?PatientFile $patientFile): self
+    {
+        // unset the owning side of the relation if necessary
+        if ($patientFile === null && $this->patientFile !== null) {
+            $this->patientFile->setStudent(null);
+        }
+
+        // set the owning side of the relation if necessary
+        if ($patientFile !== null && $patientFile->getStudent() !== $this) {
+            $patientFile->setStudent($this);
+        }
+
+        $this->patientFile = $patientFile;
+
         return $this;
     }
 
