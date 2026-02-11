@@ -1,0 +1,290 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ sujet.titre }}{% endblock %}
+
+{% block body %}
+    <style>
+        .forum-topic-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 60px 0;
+            color: white;
+        }
+        .topic-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .topic-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .topic-content-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 40px;
+            margin-top: -50px;
+            position: relative;
+        }
+        .topic-image {
+            width: 100%;
+            max-height: 450px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        .message-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .message-card:hover {
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            transform: translateX(5px);
+        }
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .message-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .message-avatar {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .message-content {
+            line-height: 1.8;
+            color: #333;
+            font-size: 15px;
+        }
+        .message-date {
+            color: #888;
+            font-size: 13px;
+        }
+        .reply-form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 35px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-top: 40px;
+        }
+        .section-title {
+            font-size: 26px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 3px solid #667eea;
+            display: inline-block;
+        }
+        .attachment-badge {
+            background: #e8f0fe;
+            color: #1967d2;
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        .attachment-badge:hover {
+            background: #1967d2;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .no-messages {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 16px;
+        }
+        .badge-custom {
+            padding: 6px 14px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .form-control, .form-select {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 15px;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.15);
+        }
+    </style>
+
+    <div class="forum-topic-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <h1 style="font-size: 42px; font-weight: bold; margin-bottom: 10px;">{{ sujet.titre }}</h1>
+                    <div class="topic-meta">
+                        <div class="topic-meta-item">
+                            <i class="ti-calendar"></i>
+                            {{ sujet.dateCreation|date('d M Y, H:i') }}
+                        </div>
+                        {% if sujet.category %}
+                        <div class="topic-meta-item">
+                            <i class="ti-tag"></i>
+                            {{ sujet.category }}
+                        </div>
+                        {% endif %}
+                        {% if sujet.isPinned %}
+                        <div class="topic-meta-item" style="background: rgba(255,193,7,0.3);">
+                            <i class="ti-pin"></i>
+                            Épinglé
+                        </div>
+                        {% endif %}
+                        {% if sujet.status %}
+                        <div class="topic-meta-item">
+                            <i class="ti-info"></i>
+                            {{ sujet.status }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" style="padding: 80px 0;">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="topic-content-card">
+                    {% if sujet.imageUrl %}
+                        {% set image_path = sujet.imageUrl starts with 'http' ? sujet.imageUrl : (sujet.imageUrl starts with '/uploads/resources/' ? sujet.imageUrl : sujet.imageUrl|replace({'/uploads/':'/uploads/resources/'}) ) %}
+                        <img src="{{ image_path starts with 'http' ? image_path : asset(image_path) }}" alt="{{ sujet.titre }}" class="topic-image">
+                    {% endif %}
+                    
+                    <div class="message-content" style="font-size: 16px; margin-bottom: 25px;">
+                        {{ sujet.description }}
+                    </div>
+                    
+                    {% if sujet.attachmentPath %}
+                        {% set attachment_path = sujet.attachmentPath starts with 'http' ? sujet.attachmentPath : (sujet.attachmentPath starts with '/uploads/resources/' ? sujet.attachmentPath : sujet.attachmentPath|replace({'/uploads/':'/uploads/resources/'}) ) %}
+                        <a href="{{ attachment_path starts with 'http' ? attachment_path : asset(attachment_path) }}" download class="attachment-badge">
+                            <i class="ti-clip"></i>
+                            Télécharger la pièce jointe ({{ (sujet.attachmentSize / 1024)|round(2) }} KB)
+                        </a>
+                    {% endif %}
+                </div>
+
+                <!-- Messages Section -->
+                <div style="margin-top: 60px;">
+                    <h3 class="section-title">
+                        <i class="ti-comments" style="margin-right: 10px;"></i>
+                        Réponses ({{ messages|length }})
+                    </h3>
+
+                    <form method="get" action="{{ path('front_forum_show', {id: sujet.id}) }}" style="margin: 15px 0 25px; display: flex; gap: 10px;">
+                        <input type="text" name="q" value="{{ q }}" placeholder="Rechercher un message" class="form-control" style="max-width: 420px;">
+                        <button type="submit" class="boxed-btn3" style="padding: 10px 18px;">Rechercher</button>
+                    </form>
+                    
+                    {% if messages|length > 0 %}
+                        <div style="margin-top: 30px;">
+                            {% for message in messages %}
+                                <div class="message-card">
+                                    <div class="message-header">
+                                        <div class="message-author">
+                                            <div class="message-avatar">
+                                                U{{ message.idUser }}
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 600; color: #333;">Utilisateur #{{ message.idUser }}</div>
+                                                <div class="message-date">
+                                                    <i class="ti-time"></i>
+                                                    {{ message.dateMessage|date('d M Y à H:i') }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="message-content">
+                                        {{ message.contenu }}
+                                    </div>
+                                    {% if message.attachmentPath %}
+                                        <div style="margin-top: 15px;">
+                                            <a href="{{ message.attachmentPath }}" download class="attachment-badge" style="font-size: 13px;">
+                                                <i class="ti-clip"></i>
+                                                Pièce jointe ({{ (message.attachmentSize / 1024)|round(2) }} KB)
+                                            </a>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="no-messages">
+                            <i class="ti-comment" style="font-size: 48px; opacity: 0.3; margin-bottom: 15px;"></i>
+                            <p>Aucune réponse pour le moment. Soyez le premier à répondre !</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Reply Form -->
+                <div class="reply-form-card">
+                    <h3 class="section-title">
+                        <i class="ti-pencil-alt" style="margin-right: 10px;"></i>
+                        Ajouter une réponse
+                    </h3>
+                    {{ form_start(form, {'attr': {'style': 'margin-top: 30px;', 'novalidate': 'novalidate'}}) }}
+                        <div class="mb-4">
+                            {{ form_label(form.contenu) }}
+                            {{ form_widget(form.contenu, {'attr': {'rows': 6, 'placeholder': 'Ecrivez votre reponse ici...'}}) }}
+                            {{ form_errors(form.contenu) }}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.idUser) }}
+                                {{ form_widget(form.idUser, {'attr': {'placeholder': 'Votre ID'}}) }}
+                                {{ form_errors(form.idUser) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.attachmentFile) }}
+                                {{ form_widget(form.attachmentFile) }}
+                                {{ form_errors(form.attachmentFile) }}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 15px; margin-top: 20px;">
+                            <button type="submit" class="boxed-btn3">
+                                <i class="ti-check"></i> Publier la réponse
+                            </button>
+                            <a href="{{ path('front_forum_index') }}" class="boxed-btn3-white">
+                                <i class="ti-back-left"></i> Retour au forum
+                            </a>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
