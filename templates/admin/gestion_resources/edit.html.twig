@@ -5,7 +5,7 @@
 {% block body %}
 <div class="card">
     <div class="card-body">
-        {{ form_start(form) }}
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
         <div class="mb-3">
             {{ form_label(form.title) }}
@@ -20,19 +20,49 @@
         </div>
 
         <div class="mb-3">
+            {{ form_label(form.type) }}
+            {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.type) }}
+        </div>
+
+        <div class="mb-3" id="video-url-group">
+            {{ form_label(form.videoUrl) }}
+            {{ form_widget(form.videoUrl, {'attr': {'class': 'form-control'}}) }}
+            <small class="text-muted">Obligatoire si type = Video YouTube</small>
+            <small class="text-muted d-block">Note: certaines videos YouTube (souvent clips musicaux) ne sont pas autorisees en integration.</small>
+            {{ form_errors(form.videoUrl) }}
+        </div>
+
+        <div class="mb-3" id="image-url-group">
+            {{ form_label(form.imageUrl) }}
+            {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control'}}) }}
+            <small class="text-muted">Obligatoire si type = Article</small>
+            {{ form_errors(form.imageUrl) }}
+        </div>
+
+        <div class="mb-3">
             {{ form_label(form.filePath) }}
             {{ form_widget(form.filePath, {'attr': {'class': 'form-control'}}) }}
             {% if resource.filePath %}
-                <small class="text-muted">Fichier actuel : {{ resource.filePath }}</small>
+                <small class="text-muted d-block mt-1">Fichier actuel : {{ resource.filePath }}</small>
             {% endif %}
             {{ form_errors(form.filePath) }}
         </div>
 
-        <button type="submit" class="btn btn-warning">
-            <i class="feather icon-edit me-2"></i>Mettre à jour
-        </button>
+        <div class="form-actions d-flex justify-content-end gap-2 mt-4">
+            <a href="{{ path('admin_resources_index') }}" class="btn btn-light">Annuler</a>
+            <button type="submit" class="btn btn-warning text-uppercase fw-semibold">
+                <i class="feather icon-edit me-2"></i>Mettre a jour
+            </button>
+        </div>
 
         {{ form_end(form) }}
     </div>
 </div>
+
+<style>
+.form-actions .btn {
+    min-width: 150px;
+}
+</style>
 {% endblock %}

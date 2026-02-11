@@ -1,0 +1,35 @@
+{% for comment in commentaires %}
+    <tr>
+        <td>{{ comment.id }}</td>
+        <td>{{ comment.resource.title }}</td>
+        <td>{{ comment.authorName }}</td>
+        <td>{{ comment.authorEmail }}</td>
+        <td>
+            {% if comment.rating %}
+                <span class="rating-stars">
+                    {% for i in 1..5 %}{% if i <= comment.rating %}&#9733;{% else %}&#9734;{% endif %}{% endfor %}
+                </span>
+                <span class="ms-1">{{ comment.rating }}/5</span>
+            {% else %}
+                -
+            {% endif %}
+        </td>
+        <td>{{ comment.createdAt|date('Y-m-d H:i') }}</td>
+        <td>{{ comment.content|length > 80 ? comment.content|slice(0, 80) ~ '...' : comment.content }}</td>
+        <td>
+            <div class="table-actions">
+                <form method="post" action="{{ path('admin_comments_delete', {id: comment.id}) }}" class="m-0 d-inline-block" onsubmit="return confirm('Voulez-vous vraiment supprimer ce commentaire ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ comment.id) }}">
+                    <button class="btn btn-sm table-action-btn table-action-delete" type="submit">
+                        <i class="feather icon-trash-2"></i>
+                        <span>Supprimer</span>
+                    </button>
+                </form>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="8" class="text-center py-4">Aucun commentaire trouve.</td>
+    </tr>
+{% endfor %}

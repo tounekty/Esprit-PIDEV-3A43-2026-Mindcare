@@ -4,12 +4,11 @@ namespace App\Form;
 
 use App\Entity\Commentaire;
 use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\Range;
 
 class CommentaireType extends AbstractType
 {
@@ -21,26 +20,22 @@ class CommentaireType extends AbstractType
                 'attr' => [
                     'rows' => 5,
                     'class' => 'form-control',
-                    'placeholder' => 'Écrivez votre commentaire ici...'
+                    'placeholder' => 'Ecrivez votre commentaire ici...',
                 ],
-                'required' => true,
-            ])
-            ->add('rating', IntegerType::class, [
-                'label' => 'Note (1-5)',
                 'required' => false,
-                'attr' => [
-                    'min' => 1,
-                    'max' => 5,
-                    'class' => 'form-control',
-                    'placeholder' => 'Optionnel'
+            ])
+            ->add('rating', ChoiceType::class, [
+                'label' => 'Votre note',
+                'required' => false,
+                'expanded' => true,
+                'multiple' => false,
+                'choices' => [
+                    '5' => 5,
+                    '4' => 4,
+                    '3' => 3,
+                    '2' => 2,
+                    '1' => 1,
                 ],
-                'constraints' => [
-                    new Range([
-                        'min' => 1,
-                        'max' => 5,
-                        'notInRangeMessage' => 'La note doit être comprise entre {{ min }} et {{ max }}',
-                    ])
-                ]
             ])
             ->add('authorName', HiddenType::class)
             ->add('authorEmail', HiddenType::class);
