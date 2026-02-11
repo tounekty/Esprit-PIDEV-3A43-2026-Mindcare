@@ -24,7 +24,7 @@ class RedirectController extends AbstractController
         }
 
         if (in_array('ROLE_PSYCHOLOGUE', $roles)) {
-            return $this->redirectToRoute('psychologue_dashboard');
+            return $this->redirectToRoute('app_admin');
         }
 
         if (in_array('ROLE_ADMIN', $roles)) {

@@ -13,10 +13,12 @@
                 </li>
 
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_users_' %}active{% endif %}">
+                    {% if is_granted('ROLE_ADMIN') and not is_granted('ROLE_PSYCHOLOGUE') %}
                     <a href="{{ path('admin_users_index') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-users"></i></span>
                         <span class="nxl-mtext">Gestion User</span>
                     </a>
+                    {% endif %}
                 </li>
 
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_ressources_' %}active{% endif %}">
@@ -34,14 +36,23 @@
                 </li>
 
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_reservations_' %}active{% endif %}">
-                    <a href="#" class="nxl-link">
+                    {% if is_granted('ROLE_PSYCHOLOGUE') %}
+                    <a href="{{ path('admin_rdv_pending') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-check-circle"></i></span>
                         <span class="nxl-mtext">Gestion Réservations</span>
+                    </a>
+                    {% endif %}
+                </li>
+
+                <li class="nxl-item {% if app.request.get('_route') starts with 'admin_patient_file_' %}active{% endif %}">
+                    <a href="{{ path('admin_patient_file_index') }}" class="nxl-link">
+                        <span class="nxl-micon"><i class="feather-file-text"></i></span>
+                        <span class="nxl-mtext">Dossiers Étudiants</span>
                     </a>
                 </li>
 
                 <li class="nxl-item {% if app.request.get('_route') starts with 'admin_rdv_' %}active{% endif %}">
-                    <a href="#" class="nxl-link">
+                    <a href="{{ path('admin_rdv_index') }}" class="nxl-link">
                         <span class="nxl-micon"><i class="feather-heart"></i></span>
                         <span class="nxl-mtext">Gestion Rendez-vous</span>
                     </a>

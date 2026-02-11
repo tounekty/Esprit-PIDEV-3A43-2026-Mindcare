@@ -1,0 +1,232 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Créer Rendez-vous{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+    <style>
+        .fc-event-busy { background-color: #ff4d4d !important; border-color: #ff4d4d !important; cursor: not-allowed; opacity: 0.7; }
+        .selected-time-display { background-color: #e9ecef; border-left: 5px solid #0d6efd; padding: 15px; border-radius: 4px; margin-top: 20px; }
+        #calendar { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 30px; }
+        .availability-legend { display: flex; gap: 20px; margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px; font-size: 0.9rem; }
+        .legend-item { display: flex; align-items: center; gap: 8px; }
+        .legend-color { width: 16px; height: 16px; border-radius: 2px; }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <h1 class="mb-4">Créer un rendez-vous</h1>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'adminAppointmentForm'}}) }}
+                            
+                            <div class="mb-3">
+                                {{ form_label(form.psychologue, 'Psychologue', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.psychologue, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.psychologue) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.etudiant, 'Étudiant', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.etudiant, {'attr': {'class': 'form-select'}}) }}
+                                {{ form_errors(form.etudiant) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.location, 'Type de consultation', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.location, {'attr': {
+                                    'class': 'form-select' ~ (form.location.vars.errors|length > 0 ? ' is-invalid' : '')
+                                }}) }}
+                                {% if form.location.vars.errors|length > 0 %}
+                                    <div class="invalid-feedback d-block mt-1">
+                                        {% for error in form.location.vars.errors %}
+                                            <div><i class="fa fa-exclamation-circle me-1"></i>{{ error.message }}</div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-3" style="display: none;">
+                                {{ form_row(form.date) }}
+                            </div>
+
+                            <div class="mb-3">
+                                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+
+                            {# Render any remaining fields before the submit button #}
+                            {{ form_rest(form) }}
+
+                            <div id="selectedTimeDisplay" class="selected-time-display mb-4" style="display: none;">
+                                <h6 class="mb-1"><i class="fa fa-calendar-check me-2"></i>Date sélectionnée :</h6>
+                                <p class="mb-0 small" id="selectedTimeText"></p>
+                            </div>
+
+                            <div class="mt-3 d-flex justify-content-start gap-2">
+                                <button class="btn btn-primary" id="submitBtn" disabled>Créer</button>
+                                <a href="{{ path('admin_rdv_index') }}" class="btn btn-outline-secondary">Annuler</a>
+                            </div>
+                        {{ form_end(form, {'render_rest': false}) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="availability-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ff4d4d; opacity: 0.7;"></div>
+                        <span>Occupé</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #0d6efd;"></div>
+                        <span>Sélection</span>
+                    </div>
+                </div>
+                <!-- Calendar -->
+                <div id="calendar"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const psychologueSelect = document.querySelector('select[name*="[psychologue]"]');
+            const hiddenDateInput = document.querySelector('input[type="datetime-local"]');
+            const selectedTimeDisplay = document.getElementById('selectedTimeDisplay');
+            const selectedTimeText = document.getElementById('selectedTimeText');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            let calendar;
+            let busySlots = [];
+            let currentSelection = null;
+
+            function initCalendar() {
+                calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'timeGridWeek',
+                    locale: 'fr',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'timeGridWeek,timeGridDay'
+                    },
+                    slotMinTime: '09:00:00',
+                    slotMaxTime: '18:00:00',
+                    allDaySlot: false,
+                    slotDuration: '01:00:00',
+                    height: 'auto',
+                    selectable: true,
+                    events: busySlots.map(slot => ({
+                        start: slot.start,
+                        end: slot.end,
+                        display: 'background',
+                        classNames: ['fc-event-busy']
+                    })),
+                    select: function(info) {
+                        const selectedDate = info.start;
+                        
+                        // Check if slot is busy
+                        const isBusy = busySlots.some(slot => {
+                            const bStart = new Date(slot.start);
+                            const bEnd = new Date(slot.end);
+                            return selectedDate >= bStart && selectedDate < bEnd;
+                        });
+
+                        if (isBusy) {
+                            alert("Ce créneau est déjà réservé.");
+                            calendar.unselect();
+                            return;
+                        }
+
+                        // Update selection
+                        if (currentSelection) {
+                            currentSelection.remove();
+                        }
+                        const endTime = new Date(selectedDate.getTime() + 60 * 60 * 1000);
+                        currentSelection = calendar.addEvent({
+                            start: selectedDate,
+                            end: endTime,
+                            backgroundColor: '#0d6efd',
+                            borderColor: '#0d6efd'
+                        });
+
+                        // Update form
+                        const offset = selectedDate.getTimezoneOffset() * 60000;
+                        const localISODate = new Date(selectedDate.getTime() - offset).toISOString().slice(0, 16);
+                        hiddenDateInput.value = localISODate;
+
+                        selectedTimeText.innerText = selectedDate.toLocaleString('fr-FR', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        });
+                        selectedTimeDisplay.style.display = 'block';
+                        submitBtn.disabled = false;
+                    }
+                });
+                calendar.render();
+            }
+
+            function loadAvailability(psyId) {
+                if (!psyId) {
+                    busySlots = [];
+                    if (calendar) calendar.removeAllEvents();
+                    return;
+                }
+
+                fetch(`/api/psychologue/${psyId}/availability`)
+                    .then(response => response.json())
+                    .then(data => {
+                        busySlots = data;
+                        if (calendar) {
+                            calendar.removeAllEvents();
+                            busySlots.forEach(slot => {
+                                calendar.addEvent({
+                                    start: slot.start,
+                                    end: slot.end,
+                                    display: 'background',
+                                    classNames: ['fc-event-busy']
+                                });
+                            });
+                        } else {
+                            initCalendar();
+                        }
+                    });
+            }
+
+            // Initial load
+            if (psychologueSelect.value) {
+                loadAvailability(psychologueSelect.value);
+            } else {
+                initCalendar();
+            }
+
+            // Watch for psychologue changes
+            psychologueSelect.addEventListener('change', function() {
+                loadAvailability(this.value);
+                // Reset selection
+                hiddenDateInput.value = '';
+                selectedTimeDisplay.style.display = 'none';
+                submitBtn.disabled = true;
+                if (currentSelection) {
+                    currentSelection.remove();
+                    currentSelection = null;
+                }
+            });
+        });
+    </script>
+{% endblock %}
