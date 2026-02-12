@@ -97,30 +97,4 @@
 </div>
 
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const formInner = document.getElementById('formInner');
-        
-        document.querySelector('label[for="login"]').addEventListener('click', function() {
-            formInner.style.transform = 'translateX(0%)';
-        });
-        
-        document.querySelector('label[for="signup"]').addEventListener('click', function() {
-            formInner.style.transform = 'translateX(-50%)';
-        });
-        
-        const forms = document.querySelectorAll('form');
-        forms.forEach(form => {
-            form.addEventListener('submit', function() {
-                const btn = this.querySelector('.btn');
-                if (btn) {
-                    btn.style.opacity = '0.8';
-                    setTimeout(() => {
-                        btn.style.opacity = '1';
-                    }, 1000);
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}

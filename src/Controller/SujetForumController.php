@@ -62,6 +62,11 @@ class SujetForumController extends AbstractController
             ->add('description', TextareaType::class)
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
+            ->add('status', ChoiceType::class, [
+                'choices' => SujetForum::getStatusChoices(),
+                'placeholder' => 'Aucun statut',
+                'required' => false,
+            ])
             ->add('category', TextType::class, ['required' => false])
             ->add('attachmentFile', FileType::class, ['mapped' => false, 'required' => false])
             ->getForm();
