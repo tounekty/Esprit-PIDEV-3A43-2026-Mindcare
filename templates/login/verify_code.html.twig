@@ -1,0 +1,68 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="wrapper" style="padding: 30px;">
+    <div class="title-text" style="width: 100%; margin-bottom: 20px;">
+        <div class="title" style="width: 100%; font-size: 28px;">Verify Code</div>
+    </div>
+    
+    <div class="form-container">
+        <div style="margin-bottom: 15px; text-align: center; color: #666; font-size: 14px;">
+            Enter the 6-digit code sent to:
+        </div>
+        
+        <div style="background: #f8f9fa; padding: 12px; border-radius: 10px; text-align: center; margin-bottom: 25px; font-weight: 500; color: #1a75ff; word-break: break-all;">
+            {{ email }}
+        </div>
+        
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+        
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% endfor %}
+        
+        <form method="post" action="{{ path('app_verify_code') }}">
+            <div class="field">
+                <input type="text" name="code" placeholder="6-digit code" maxlength="6" style="text-align: center; font-size: 24px; letter-spacing: 8px; font-weight: 600;" required autofocus>
+            </div>
+            
+            <div class="field btn">
+                <div class="btn-layer"></div>
+                <input type="submit" value="Verify Code">
+            </div>
+            
+            <div class="resend-link" style="text-align: center; margin-top: 20px; font-size: 13px;">
+                <a href="#" onclick="resendCode(); return false;">Didn't receive code? Resend</a>
+            </div>
+            
+            <div class="back-link" style="margin-top: 15px;">
+                <a href="{{ path('app_forgot_password') }}">← Use different email</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function resendCode() {
+    fetch('{{ path('app_resend_code') }}', {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('✅ New code sent! Check your email.');
+        } else {
+            alert('❌ ' + (data.error || 'Failed to send code. Please try again.'));
+        }
+    })
+    .catch(error => {
+        alert('❌ Error sending code. Please try again.');
+    });
+}
+</script>
+{% endblock %}
