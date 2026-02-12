@@ -50,6 +50,11 @@
                 <td>
                     <a href="{{ path('app_event_show', {'id': event.id}) }}" class="btn btn-sm btn-info">Voir</a>
                     <a href="{{ path('app_event_edit', {'id': event.id}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                    {% if event.bookings|length < event.capaciteMax %}
+                        <a href="{{ path('app_booking_new', {'event': event.id}) }}" class="btn btn-sm btn-success">Réserver</a>
+                    {% else %}
+                        <button class="btn btn-sm btn-outline-secondary" disabled>Complet</button>
+                    {% endif %}
                 </td>
             </tr>
         {% else %}

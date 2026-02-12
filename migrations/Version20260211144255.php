@@ -29,7 +29,6 @@ final class Version20260211144255 extends AbstractMigration
         $this->addSql('CREATE TABLE resource (id INT AUTO_INCREMENT NOT NULL, title VARCHAR(255) NOT NULL, description LONGTEXT NOT NULL, file_path VARCHAR(255) DEFAULT NULL, created_at DATETIME NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE sujet_forum (id INT AUTO_INCREMENT NOT NULL, titre VARCHAR(255) NOT NULL, description LONGTEXT NOT NULL, date_creation DATETIME NOT NULL, id_user INT NOT NULL, image_url VARCHAR(255) DEFAULT NULL, is_pinned TINYINT(1) NOT NULL, status VARCHAR(50) DEFAULT NULL, category VARCHAR(100) DEFAULT NULL, attachment_path VARCHAR(255) DEFAULT NULL, attachment_mime_type VARCHAR(100) DEFAULT NULL, attachment_size INT DEFAULT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('CREATE TABLE user (id INT AUTO_INCREMENT NOT NULL, first_name VARCHAR(255) NOT NULL, last_name VARCHAR(255) NOT NULL, email VARCHAR(180) NOT NULL, role VARCHAR(50) NOT NULL, password VARCHAR(255) NOT NULL, banned_until DATETIME DEFAULT NULL, UNIQUE INDEX UNIQ_8D93D649E7927C74 (email), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
-        $this->addSql('CREATE TABLE messenger_messages (id BIGINT AUTO_INCREMENT NOT NULL, body LONGTEXT NOT NULL, headers LONGTEXT NOT NULL, queue_name VARCHAR(190) NOT NULL, created_at DATETIME NOT NULL, available_at DATETIME NOT NULL, delivered_at DATETIME DEFAULT NULL, INDEX IDX_75EA56E0FB7336F0E3BD61CE16BA31DBBF396750 (queue_name, available_at, delivered_at, id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4');
         $this->addSql('ALTER TABLE appointment ADD CONSTRAINT FK_FE38F844DBAB6AEE FOREIGN KEY (idetudiant) REFERENCES user (id)');
         $this->addSql('ALTER TABLE appointment ADD CONSTRAINT FK_FE38F8449F7E0988 FOREIGN KEY (idpsy) REFERENCES user (id)');
         $this->addSql('ALTER TABLE appointment ADD CONSTRAINT FK_FE38F844CEA82C87 FOREIGN KEY (patient_file_id) REFERENCES patient_file (id) ON DELETE SET NULL');
@@ -58,6 +57,5 @@ final class Version20260211144255 extends AbstractMigration
         $this->addSql('DROP TABLE resource');
         $this->addSql('DROP TABLE sujet_forum');
         $this->addSql('DROP TABLE user');
-        $this->addSql('DROP TABLE messenger_messages');
     }
 }

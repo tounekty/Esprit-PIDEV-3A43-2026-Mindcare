@@ -1,7 +1,4 @@
 framework:
     property_info:
-<<<<<<< HEAD
-        with_constructor_extractor: true
-=======
         enabled: true
->>>>>>> b2f43ba2c3b18bebe120cab4f5fa1f2e65b267bc
+        with_constructor_extractor: true

@@ -4,52 +4,6 @@ namespace App\Form;
 
 use App\Entity\Event;
 use Symfony\Component\Form\AbstractType;
-<<<<<<< HEAD
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
-use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\OptionsResolver\OptionsResolver;
-
-class EventType extends AbstractType
-{
-    public function buildForm(FormBuilderInterface $builder, array $options): void
-    {
-        $builder
-            ->add('titre')
-            ->add('description')
-            ->add('dateHeure', null, [
-                'widget' => 'single_text',
-            ])
-            ->add('lieu')
-            ->add('capaciteMax')
-            ->add('latitude', NumberType::class, [
-                'label' => 'Latitude',
-                'required' => false,
-                'scale' => 8,
-                'html5' => true,
-                'attr' => [
-                    'placeholder' => 'Ex: 33.7931611111',
-                    'step' => 'any',
-                    'min' => '-90',
-                    'max' => '90',
-                ]
-            ])
-            ->add('longitude', NumberType::class, [
-                'label' => 'Longitude',
-                'required' => false,
-                'scale' => 8,
-                'html5' => true,
-                'attr' => [
-                    'placeholder' => 'Ex: 10.1619222222',
-                    'step' => 'any',
-                    'min' => '-180',
-                    'max' => '180',
-                ]
-            ])
-        ;
-    }
-
-    public function configureOptions(OptionsResolver $resolver): void
-=======
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -60,7 +14,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 
 class EventType extends AbstractType
 {
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
             ->add('titre', TextType::class, [
@@ -71,13 +25,13 @@ class EventType extends AbstractType
                 'label' => 'Description',
                 'attr' => ['class' => 'form-control', 'rows' => 4],
             ])
-            ->add('dateEvent', DateTimeType::class, [
-                'label' => 'Date de l\'evenement',
+            ->add('dateHeure', DateTimeType::class, [
+                'label' => "Date et heure de l'événement",
                 'widget' => 'single_text',
                 'attr' => ['class' => 'form-control'],
                 'constraints' => [
                     new Assert\NotNull(['message' => 'La date est obligatoire.']),
-                    new Assert\GreaterThan('now', message: 'La date doit etre dans le futur.'),
+                    new Assert\GreaterThan(['value' => 'now', 'message' => 'La date doit etre dans le futur.']),
                 ],
             ])
             ->add('lieu', TextType::class, [
@@ -94,8 +48,7 @@ class EventType extends AbstractType
             ]);
     }
 
-    public function configureOptions(OptionsResolver $resolver)
->>>>>>> b2f43ba2c3b18bebe120cab4f5fa1f2e65b267bc
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => Event::class,

@@ -88,7 +88,7 @@
         <div class="container">
             <h1 style="font-size: 40px; font-weight: bold; margin-bottom: 10px;">{{ event.titre }}</h1>
             <div class="event-detail-meta">
-                <span><i class="ti-calendar"></i> {{ event.dateEvent|date('d M Y, H:i') }}</span>
+                <span><i class="ti-calendar"></i> {{ event.dateHeure|date('d M Y, H:i') }}</span>
                 <span><i class="ti-location-pin"></i> {{ event.lieu }}</span>
                 <span><i class="ti-user"></i> Capacite: {{ event.capacite }}</span>
             </div>

@@ -127,10 +127,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->email;
     }
 
-    public function getPassword(): string
-    {
-        return (string) $this->password;
-    }
+    
 
     public function setPassword(string $password): self
     {
@@ -150,7 +147,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function eraseCredentials()
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function eraseCredentials(): void
     {
         // Clear temporary sensitive data if any
     }

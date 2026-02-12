@@ -29,12 +29,19 @@ class BookingController extends AbstractController
     }
 
     #[Route('/new', name: 'app_booking_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, EventRepository $eventRepository): Response
     {
         $booking = new Booking();
         // Initialisation de la date (obligatoire selon ton entité)
         $booking->setDateReservation(new \DateTimeImmutable());
-        
+        // Pré-sélectionner un événement si fourni en query string (?event=ID)
+        $eventId = $request->query->get('event');
+        if ($eventId) {
+            $event = $eventRepository->find($eventId);
+            if ($event) {
+                $booking->setEvent($event);
+            }
+        }
         $form = $this->createForm(BookingType::class, $booking);
         $form->handleRequest($request);
 

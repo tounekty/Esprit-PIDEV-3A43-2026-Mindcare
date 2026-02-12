@@ -159,7 +159,7 @@
                             <div class="event-card-header">
                                 <h3 class="event-title">{{ event.titre }}</h3>
                                 <div class="event-meta">
-                                    <span><i class="ti-calendar"></i> {{ event.dateEvent|date('d M Y, H:i') }}</span>
+                                    <span><i class="ti-calendar"></i> {{ event.dateHeure|date('d M Y, H:i') }}</span>
                                     <span><i class="ti-location-pin"></i> {{ event.lieu }}</span>
                                 </div>
                             </div>
@@ -173,7 +173,12 @@
                                     {% else %}
                                         <span class="event-badge badge-full"><i class="ti-close"></i> Complet</span>
                                     {% endif %}
-                                    <a href="{{ path('front_events_show', {id: event.id}) }}" class="event-cta">Voir details</a>
+                                    <div style="display:flex;gap:10px;align-items:center">
+                                        <a href="{{ path('front_events_show', {id: event.id}) }}" class="event-cta">Voir details</a>
+                                        {% if remaining > 0 %}
+                                            <a href="{{ path('app_booking_new', {'event': event.id}) }}" class="event-cta" style="background:#06b6d4">Réserver</a>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
                         </div>

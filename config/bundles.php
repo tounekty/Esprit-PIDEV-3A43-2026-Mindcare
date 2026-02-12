@@ -13,9 +13,5 @@ return [
     Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true],
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
     Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],
-<<<<<<< HEAD
-=======
     Karser\Recaptcha3Bundle\KarserRecaptcha3Bundle::class => ['all' => true],
-
->>>>>>> b2f43ba2c3b18bebe120cab4f5fa1f2e65b267bc
 ];

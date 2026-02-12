@@ -1,0 +1,11 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ title|default('Dashboard') }} - MindCare{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <h1>{{ title|default('Mon Tableau de Bord') }}</h1>
+    <p>Bienvenue sur votre espace personnel. Ici vous trouverez vos réservations et activités récentes.</p>
+    <!-- TODO: add dashboard widgets -->
+</div>
+{% endblock %}
