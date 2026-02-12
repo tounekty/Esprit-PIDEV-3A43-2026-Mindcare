@@ -33,87 +33,58 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'student', targetEntity: PatientFile::class)]
     private ?PatientFile $patientFile = null;
 
-    // -------------------- Ban logic --------------------
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $bannedUntil = null;
 
-    public function getBannedUntil(): ?\DateTimeInterface
-    {
-        return $this->bannedUntil;
-    }
+    // ------------------- FORGOT PASSWORD -------------------
+    #[ORM\Column(type: 'string', length: 6, nullable: true)]
+    private ?string $resetCode = null;
 
-    public function setBannedUntil(?\DateTimeInterface $bannedUntil): self
-    {
-        $this->bannedUntil = $bannedUntil;
-        return $this;
-    }
+ #[ORM\Column(type: 'datetime', nullable: true)]
+private ?\DateTimeInterface $resetCodeExpiresAt = null;
 
-    public function isBanned(): bool
-    {
-        return $this->bannedUntil !== null && $this->bannedUntil > new \DateTime();
-    }
+    // ------------------- Getters & Setters -------------------
 
-    // -------------------- Getters & Setters --------------------
+    public function getId(): ?int { return $this->id; }
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+    public function getFirstName(): ?string { return $this->firstName; }
+    public function setFirstName(string $firstName): self { $this->firstName = $firstName; return $this; }
 
-    public function getFirstName(): ?string
-    {
-        return $this->firstName;
-    }
+    public function getLastName(): ?string { return $this->lastName; }
+    public function setLastName(string $lastName): self { $this->lastName = $lastName; return $this; }
 
-    public function setFirstName(string $firstName): self
-    {
-        $this->firstName = $firstName;
-        return $this;
-    }
+    public function getEmail(): ?string { return $this->email; }
+    public function setEmail(string $email): self { $this->email = $email; return $this; }
 
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
-
-    public function setLastName(string $lastName): self
-    {
-        $this->lastName = $lastName;
-        return $this;
-    }
-
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
-
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-        return $this;
-    }
-
-    public function getRole(): string
-    {
-        return $this->role;
-    }
-
-    public function setRole(string $role): self
-    {
+    public function getRole(): string { return $this->role; }
+    public function setRole(string $role): self {
         $allowedRoles = ['etudiant', 'psychologue', 'admin'];
-
         if (!in_array($role, $allowedRoles, true)) {
             throw new \InvalidArgumentException("Invalid role: $role");
         }
-
         $this->role = $role;
         return $this;
     }
 
-    // -------------------- Symfony Security --------------------
+    public function getPassword(): string { return (string) $this->password; }
+    public function setPassword(string $password): self { $this->password = $password; return $this; }
 
-    public function getRoles(): array
-    {
+    public function getPatientFile(): ?PatientFile { return $this->patientFile; }
+    public function setPatientFile(?PatientFile $patientFile): self { $this->patientFile = $patientFile; return $this; }
+
+    public function getBannedUntil(): ?\DateTimeInterface { return $this->bannedUntil; }
+    public function setBannedUntil(?\DateTimeInterface $bannedUntil): self { $this->bannedUntil = $bannedUntil; return $this; }
+    public function isBanned(): bool { return $this->bannedUntil !== null && $this->bannedUntil > new \DateTime(); }
+
+    // ------------------- Forgot Password -------------------
+    public function getResetCode(): ?string { return $this->resetCode; }
+    public function setResetCode(?string $resetCode): self { $this->resetCode = $resetCode; return $this; }
+
+    public function getResetCodeExpiresAt(): ?\DateTimeInterface { return $this->resetCodeExpiresAt; }
+    public function setResetCodeExpiresAt(?\DateTimeInterface $expiresAt): self { $this->resetCodeExpiresAt = $expiresAt; return $this; }
+
+    // ------------------- Symfony Security -------------------
+    public function getRoles(): array {
         return match ($this->role) {
             'admin' => ['ROLE_ADMIN'],
             'psychologue' => ['ROLE_PSYCHOLOGUE'],
@@ -122,38 +93,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         };
     }
 
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
+    public function getUserIdentifier(): string { return (string) $this->email; }
 
-    public function getPassword(): string
-    {
-        return (string) $this->password;
-    }
-
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
-        return $this;
-    }
-
-    public function getPatientFile(): ?PatientFile
-    {
-        return $this->patientFile;
-    }
-
-    public function setPatientFile(?PatientFile $patientFile): self
-    {
-        $this->patientFile = $patientFile;
-
-        return $this;
-    }
-
-    public function eraseCredentials()
-    {
-        // Clear temporary sensitive data if any
-    }
-
-
+    public function eraseCredentials() { /* Clear sensitive data */ }
 }

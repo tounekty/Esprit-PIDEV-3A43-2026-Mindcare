@@ -11,7 +11,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('front/img/favicon.png') }}">
 
     {% block stylesheets %}
-        {% if app.request.attributes.get('_route') in ['app_login', 'app_register'] %}
+        {% if app.request.attributes.get('_route') in ['app_login', 'app_register', 'app_forgot_password', 'app_verify_code', 'app_reset_password'] %}
             {# Login/signup specific CSS #}
             <link rel="stylesheet" href="{{ asset('front/css/bootstrap.min.css') }}">
             <link rel="stylesheet" href="{{ asset('front/css/login.css') }}">
@@ -69,10 +69,10 @@
     {% endblock %}
 </head>
 
-<body class="{% if app.request.attributes.get('_route') in ['app_login', 'app_register'] %}auth-page{% endif %}">
+<body class="{% if app.request.attributes.get('_route') in ['app_login', 'app_register', 'app_forgot_password', 'app_verify_code', 'app_reset_password'] %}auth-page{% endif %}">
 
     {# HEADER - show only for home / non-auth pages #}
-    {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
+    {% if app.request.attributes.get('_route') not in ['app_login', 'app_register', 'app_forgot_password', 'app_verify_code', 'app_reset_password'] %}
         {% include 'front/partials/header.html.twig' %}
     {% endif %}
 
@@ -80,7 +80,7 @@
     {% block body %}{% endblock %}
 
     {# FOOTER - show only for home / non-auth pages #}
-    {% if app.request.attributes.get('_route') not in ['app_login', 'app_register'] %}
+    {% if app.request.attributes.get('_route') not in ['app_login', 'app_register', 'app_forgot_password', 'app_verify_code', 'app_reset_password'] %}
         {% include 'front/partials/footer.html.twig' %}
     {% endif %}
 
@@ -94,7 +94,7 @@
     {% endfor %}
 
     {% block javascripts %}
-        {% if app.request.attributes.get('_route') in ['app_login', 'app_register'] %}
+        {% if app.request.attributes.get('_route') in ['app_login', 'app_register', 'app_forgot_password', 'app_verify_code', 'app_reset_password'] %}
             {# Login/signup JS #}
             <script src="{{ asset('front/js/vendor/modernizr-3.5.0.min.js') }}"></script>
             <script src="{{ asset('front/js/vendor/jquery-1.12.4.min.js') }}"></script>

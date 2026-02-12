@@ -1,0 +1,125 @@
+{% extends "admin/base_admin.html.twig" %}
+
+{% block title %}Paramètres - Admin{% endblock %}
+
+{% block content %}
+<div class="nxl-content-body">
+    <div class="nxl-content-top">
+        <div class="nxl-content-header">
+            <h3 class="nxl-content-title">Paramètres</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Paramètres Généraux</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Nom de l'application</label>
+                            <input type="text" class="form-control" value="MoodTracker">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email de contact</label>
+                            <input type="email" class="form-control" value="info@moodtracker.fr">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Langue par défaut</label>
+                            <select class="form-control">
+                                <option selected>Français</option>
+                                <option>English</option>
+                                <option>Español</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Paramètres de Sécurité</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" checked>
+                                <label class="form-check-label">Authentification à deux facteurs</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" checked>
+                                <label class="form-check-label">Chiffrement des données</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Délai de session (minutes)</label>
+                            <input type="number" class="form-control" value="30">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0">Paramètres d'Email</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label class="form-label">Serveur SMTP</label>
+                            <input type="text" class="form-control" placeholder="smtp.example.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Port</label>
+                            <input type="number" class="form-control" value="587">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Nom d'utilisateur</label>
+                            <input type="text" class="form-control" placeholder="username@example.com">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Mot de passe</label>
+                            <input type="password" class="form-control">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enregistrer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Informations Système</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <strong>Version:</strong> 1.0.0
+                        </li>
+                        <li class="mb-2">
+                            <strong>PHP Version:</strong> 8.1.0
+                        </li>
+                        <li class="mb-2">
+                            <strong>Symfony Version:</strong> 7.0
+                        </li>
+                        <li class="mb-2">
+                            <strong>Base de données:</strong> PostgreSQL
+                        </li>
+                        <li class="mb-2">
+                            <strong>Dernière mise à jour:</strong> 10/03/2026
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
