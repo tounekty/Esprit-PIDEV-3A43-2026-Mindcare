@@ -23,9 +23,27 @@
             <div class="card border-0 shadow-sm mb-5">
                 <div class="card-body">
                     <p>{{ resource.description }}</p>
-                    {% if resource.filePath %}
+                    {% if resource.type == 'video' and resource.youtubeEmbedUrl %}
+                        <div class="ratio ratio-16x9 mb-3">
+                            <iframe
+                                src="{{ resource.youtubeEmbedUrl }}"
+                                title="{{ resource.title }}"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen
+                            ></iframe>
+                        </div>
+                        {% if resource.videoUrl %}
+                            <a href="{{ resource.videoUrl }}" target="_blank" rel="noopener" class="btn btn-outline-primary">
+                                <i class="fas fa-external-link-alt me-1"></i>Voir sur YouTube
+                            </a>
+                        {% endif %}
+                    {% elseif resource.filePath %}
                         <a href="{{ asset('uploads/resources/' ~ resource.filePath) }}" target="_blank" class="btn btn-primary mt-3">
                             <i class="fas fa-download me-1"></i>Télécharger le PDF
+                        </a>
+                    {% elseif resource.type == 'video' and resource.videoUrl %}
+                        <a href="{{ resource.videoUrl }}" target="_blank" rel="noopener" class="btn btn-primary mt-3">
+                            <i class="fas fa-external-link-alt me-1"></i>Voir la vidéo
                         </a>
                     {% endif %}
                 </div>
