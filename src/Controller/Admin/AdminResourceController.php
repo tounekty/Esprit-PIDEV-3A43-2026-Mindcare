@@ -87,6 +87,7 @@ class AdminResourceController extends AbstractController
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $resource = new Resource();
+        $resource->setUser($this->getUser());
         $form = $this->createForm(ResourceType::class, $resource);
         $form->handleRequest($request);
 

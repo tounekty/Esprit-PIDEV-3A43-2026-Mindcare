@@ -13,7 +13,13 @@
         {% endif %}
         <p>{{ sujet.description }}</p>
         <p><strong>Date:</strong> {{ sujet.dateCreation|date('Y-m-d H:i') }}</p>
-        <p><strong>User:</strong> {{ sujet.idUser }}</p>
+        <p><strong>User:</strong>
+            {% if sujet.user %}
+                {{ sujet.user.firstName }} {{ sujet.user.lastName }}
+            {% else %}
+                -
+            {% endif %}
+        </p>
         {% if sujet.category %}
             <p><strong>Catégorie:</strong> <span class="badge bg-info">{{ sujet.category }}</span></p>
         {% endif %}
@@ -41,7 +47,14 @@
             {% for message in sujet.messages %}
                 <li>
                     <div><strong>{{ message.dateMessage|date('Y-m-d H:i') }}</strong> - {{ message.contenu }}</div>
-                    <div>Utilisateur: {{ message.idUser }}</div>
+                    <div>
+                        Utilisateur:
+                        {% if message.user %}
+                            {{ message.user.firstName }} {{ message.user.lastName }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </div>
                     {% if message.attachmentPath %}
                         <div style="margin-top: 8px;">
                             <a href="{{ message.attachmentPath }}" download class="btn btn-sm btn-outline-secondary">

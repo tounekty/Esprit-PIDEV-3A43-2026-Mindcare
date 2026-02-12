@@ -9,8 +9,13 @@
         <p><strong>Sujet:</strong> {{ message.sujet ? message.sujet.titre : '-' }}</p>
         <p>{{ message.contenu }}</p>
         <p><strong>Date:</strong> {{ message.dateMessage|date('Y-m-d H:i') }}</p>
-        <p><strong>User:</strong> {{ message.idUser }}</p>
-
+        <p><strong>User:</strong>
+            {% if message.user %}
+                {{ message.user.firstName }} {{ message.user.lastName }}
+            {% else %}
+                -
+            {% endif %}
+        </p>
         <form method="post" action="{{ path('message_forum_delete', {id: message.id}) }}" onsubmit="return confirm('Supprimer ce message ?');">
             <input type="hidden" name="_token" value="{{ csrf_token('delete_message_' ~ message.id) }}">
             <button type="submit" style="padding: .5rem 1rem; background: #dc3545; color: #fff; border: none; border-radius: 4px;">Supprimer</button>

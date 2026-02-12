@@ -27,7 +27,6 @@ final class ForumController extends AbstractController
         $form = $this->createFormBuilder()
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
-            ->add('idUser', TextType::class)
             ->add('imageFile', FileType::class, ['required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
             ->add('category', ChoiceType::class, [

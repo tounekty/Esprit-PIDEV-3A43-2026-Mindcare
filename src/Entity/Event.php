@@ -39,6 +39,11 @@ class Event
     #[Assert\Positive(message: 'La capacite doit etre positive.')]
     private ?int $capacite = null;
 
+    
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private ?User $user = null;
+
     /**
      * @var Collection<int, EventReservation>
      */
@@ -107,6 +112,18 @@ class Event
     public function setCapacite(int $capacite): self
     {
         $this->capacite = $capacite;
+        return $this;
+    }
+
+    
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
         return $this;
     }
 

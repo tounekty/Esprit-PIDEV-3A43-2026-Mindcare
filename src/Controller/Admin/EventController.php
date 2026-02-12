@@ -30,6 +30,7 @@ class EventController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_PSYCHOLOGUE');
 
         $event = new Event();
+        $event->setUser($this->getUser());
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
 

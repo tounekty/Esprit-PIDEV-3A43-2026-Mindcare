@@ -8,7 +8,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -53,12 +52,14 @@ class SujetForumController extends AbstractController
     #[Route('/forum/sujets/new', name: 'sujet_forum_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+       $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $sujet = new SujetForum();
         $sujet->setStatus(SujetForum::STATUS_VISIBLE);
+        $sujet->setUser($this->getUser());
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
-            ->add('idUser', IntegerType::class)
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
             ->add('category', TextType::class, ['required' => false])
@@ -93,7 +94,6 @@ class SujetForumController extends AbstractController
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
-            ->add('idUser', IntegerType::class)
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
             ->add('status', ChoiceType::class, [

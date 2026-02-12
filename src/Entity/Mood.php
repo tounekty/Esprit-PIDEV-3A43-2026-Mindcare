@@ -46,6 +46,10 @@ private Collection $journals;
     #[Assert\LessThanOrEqual("today", message: "La date ne peut pas être dans le futur.")]
     private ?\DateTime $datemood = null;
 
+        #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private ?User $user = null;
+
 
     public function getId(): ?int
     {
@@ -86,7 +90,17 @@ private Collection $journals;
         $this->datemood = $datemood;
         return $this;
     }
+    
+       public function getUser(): ?User
+    {
+        return $this->user;
+    }
 
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
+        return $this;
+    }
     public function getJournals(): Collection
     {
         return $this->journals;

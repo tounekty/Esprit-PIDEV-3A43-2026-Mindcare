@@ -75,7 +75,10 @@ final class MoodController extends AbstractController
     #[Route('/new', name: 'app_mood_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $mood = new Mood();
+        $mood->setUser($this->getUser());
         $form = $this->createForm(MoodType::class, $mood);
         $form->handleRequest($request);
 

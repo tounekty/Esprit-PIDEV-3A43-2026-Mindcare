@@ -215,10 +215,17 @@
                                     <div class="message-header">
                                         <div class="message-author">
                                             <div class="message-avatar">
-                                                U{{ message.idUser }}
+                                                {% set initials = message.user ? (message.user.firstName|default('')|first ~ message.user.lastName|default('')|first)|upper : 'U' %}
+                                                {{ initials }}
                                             </div>
-                                            <div>
-                                                <div style="font-weight: 600; color: #333;">Utilisateur #{{ message.idUser }}</div>
+                                                <div>
+                                                    <div style="font-weight: 600; color: #333;">
+                                                        {% if message.user %}
+                                                            {{ message.user.firstName }} {{ message.user.lastName }}
+                                                        {% else %}
+                                                            Utilisateur
+                                                        {% endif %}
+                                                    </div>
                                                 <div class="message-date">
                                                     <i class="ti-time"></i>
                                                     {{ message.dateMessage|date('d M Y à H:i') }}
@@ -254,6 +261,7 @@
                         <i class="ti-pencil-alt" style="margin-right: 10px;"></i>
                         Ajouter une réponse
                     </h3>
+                    {% if form %}
                     {{ form_start(form, {'attr': {'style': 'margin-top: 30px;', 'novalidate': 'novalidate'}}) }}
                         <div class="mb-4">
                             {{ form_label(form.contenu) }}
@@ -261,11 +269,6 @@
                             {{ form_errors(form.contenu) }}
                         </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                {{ form_label(form.idUser) }}
-                                {{ form_widget(form.idUser, {'attr': {'placeholder': 'Votre ID'}}) }}
-                                {{ form_errors(form.idUser) }}
-                            </div>
                             <div class="col-md-6 mb-3">
                                 {{ form_label(form.attachmentFile) }}
                                 {{ form_widget(form.attachmentFile) }}
@@ -281,6 +284,9 @@
                             </a>
                         </div>
                     {{ form_end(form) }}
+                    {% else %}
+                        <p style="margin-top: 20px; color: #666;">Connectez-vous pour repondre a ce sujet.</p>
+                    {% endif %}    
                 </div>
             </div>
         </div>
