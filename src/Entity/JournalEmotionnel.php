@@ -34,6 +34,11 @@ class JournalEmotionnel
     #[Assert\NotBlank(message: "L'humeur est obligatoire.")]
     private ?Mood $mood = null;
 
+    
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private ?User $user = null;
+
     public function __construct()
     {
         $this->dateecriture = new \DateTime();
@@ -77,6 +82,18 @@ class JournalEmotionnel
     public function setMood(?mood $mood): static
     {
         $this->mood = $mood;
+
+        return $this;
+    }
+    
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): static
+    {
+        $this->user = $user;
 
         return $this;
     }

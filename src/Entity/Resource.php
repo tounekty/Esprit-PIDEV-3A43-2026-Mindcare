@@ -78,6 +78,10 @@ class Resource
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private ?User $user = null;
+
     #[ORM\OneToMany(
         mappedBy: 'resource',
         targetEntity: Commentaire::class,
@@ -230,6 +234,18 @@ class Resource
         return $this;
     }
 
+    
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+        return $this;
+    }
+    
     #[Assert\Callback]
     public function validateMediaByType(ExecutionContextInterface $context): void
     {

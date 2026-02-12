@@ -10,7 +10,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -40,8 +39,11 @@ class FrontForumController extends AbstractController
     #[Route('/forum/new', name: 'front_forum_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $sujet = new SujetForum();
         $sujet->setStatus(SujetForum::STATUS_VISIBLE);
+        $sujet->setUser($this->getUser());
 
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class, [
@@ -49,9 +51,6 @@ class FrontForumController extends AbstractController
             ])
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
-            ])
-            ->add('idUser', IntegerType::class, [
-                'label' => 'Votre ID utilisateur',
             ])
             ->add('imageFile', FileType::class, [
                 'label' => 'Image du sujet',
@@ -93,15 +92,21 @@ class FrontForumController extends AbstractController
         $message = new MessageForum();
         $message->setSujet($sujet);
 
+         $user = $this->getUser();
+        if ($user) {
+            $message->setUser($user);
+        } elseif ($request->isMethod('POST')) {
+            $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        }
+
         $query = trim((string) $request->query->get('q', ''));
         $messages = $messageRepository->findBySujetAndSearch($sujet, $query !== '' ? $query : null);
 
+    $form = null;
+    if ($user) {
         $form = $this->createFormBuilder($message)
             ->add('contenu', TextareaType::class, [
                 'label' => 'Votre message',
-            ])
-            ->add('idUser', IntegerType::class, [
-                'label' => 'Votre ID utilisateur',
             ])
             ->add('attachmentFile', FileType::class, [
                 'label' => 'Pièce jointe',
@@ -123,8 +128,9 @@ class FrontForumController extends AbstractController
             'sujet' => $sujet,
             'messages' => $messages,
             'q' => $query,
-            'form' => $form->createView(),
+            'form' => $form ? $form->createView() : null,
         ]);
+        }
     }
 
     private function handleSujetUploads($form, SujetForum $sujet): void

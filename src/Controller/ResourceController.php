@@ -35,6 +35,7 @@ class ResourceController extends AbstractController
             $commentaire->setAuthorName($user->getFirstName() . ' ' . $user->getLastName());
             $commentaire->setAuthorEmail($user->getEmail() ?? '');
             $commentaire->setResource($resource);
+            $commentaire->setUser($user);
 
             $form = $this->createForm(CommentaireType::class, $commentaire);
             $form->handleRequest($request);

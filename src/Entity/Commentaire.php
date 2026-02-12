@@ -18,6 +18,11 @@ class Commentaire
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?Resource $resource = null;
 
+    
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private ?User $user = null;
+
     #[ORM\Column(length: 100)]
     #[Assert\NotBlank(message: 'Le nom de l auteur est obligatoire.')]
     #[Assert\Length(
@@ -84,6 +89,13 @@ class Commentaire
         return $this;
     }
 
+    
+    public function getUser(): ?User { return $this->user; }
+    public function setUser(?User $user): self {
+        $this->user = $user;
+        return $this;
+    }
+    
     public function getAuthorName(): ?string { return $this->authorName; }
     public function setAuthorName(string $authorName): self {
         $this->authorName = trim($authorName);

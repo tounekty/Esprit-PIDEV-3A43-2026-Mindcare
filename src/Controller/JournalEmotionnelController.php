@@ -26,8 +26,11 @@ final class JournalEmotionnelController extends AbstractController
     #[Route('/new', name: 'app_journal_emotionnel_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $journalEmotionnel = new JournalEmotionnel();
         $journalEmotionnel->setDateecriture(new \DateTime());
+        $journalEmotionnel->setUser($this->getUser());
         $form = $this->createForm(JournalEmotionnelType::class, $journalEmotionnel);
         $form->handleRequest($request);
 

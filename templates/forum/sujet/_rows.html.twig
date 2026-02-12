@@ -7,7 +7,13 @@
         </td>
         <td>{{ sujet.description|slice(0, 50) }}...</td>
         <td>{{ sujet.dateCreation|date('Y-m-d H:i') }}</td>
-        <td>{{ sujet.idUser }}</td>
+        <td>
+            {% if sujet.user %}
+                {{ sujet.user.firstName }} {{ sujet.user.lastName }}
+            {% else %}
+                -
+            {% endif %}
+        </td>
         <td>
             {% if sujet.imageUrl %}
                 <img src="{{ sujet.imageUrl }}" alt="img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">

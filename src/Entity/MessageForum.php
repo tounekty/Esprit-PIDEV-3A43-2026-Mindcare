@@ -32,11 +32,9 @@ class MessageForum
     #[ORM\JoinColumn(name: 'id_sujet', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?SujetForum $sujet = null;
 
-    #[ORM\Column(name: 'id_user', type: 'integer')]
-    #[Assert\NotBlank(message: "L'identifiant utilisateur est obligatoire.")]
-    #[Assert\Positive(message: "L'identifiant utilisateur doit etre un nombre positif.")]
-    private int $idUser;
-
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    private ?User $user = null;
     #[ORM\Column(name: 'attachment_path', type: 'string', length: 255, nullable: true)]
     private ?string $attachmentPath = null;
 
@@ -92,14 +90,14 @@ class MessageForum
         return $this;
     }
 
-    public function getIdUser(): int
+    public function getUser(): ?User
     {
-        return $this->idUser;
+        return $this->user;
     }
 
-    public function setIdUser(int $idUser): self
+    public function setUser(?User $user): self
     {
-        $this->idUser = $idUser;
+        $this->user = $user;
 
         return $this;
     }
