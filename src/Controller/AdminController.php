@@ -11,7 +11,7 @@ use App\Form\JournalEmotionnelType;
 use App\Repository\JournalEmotionnelRepository;
 use App\Repository\MoodRepository;
 use App\Service\MeditationService;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Service\StatisticsService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,11 +21,12 @@ use Symfony\Component\Routing\Attribute\Route;
 final class AdminController extends AbstractController
 {
     #[Route('', name: 'app_admin', methods: ['GET'])]
-    public function index(MoodRepository $moodRepository, JournalEmotionnelRepository $journalRepository): Response
+    public function index(StatisticsService $statisticsService): Response
     {
+        $statistics = $statisticsService->getUserStatistics();
+        
         return $this->render('admin/index.html.twig', [
-            'moods' => $moodRepository->findBy([], ['datemood' => 'DESC']),
-            'journals' => $journalRepository->findBy([], ['dateecriture' => 'DESC']),
+            'statistics' => $statistics,
         ]);
     }
 

@@ -36,6 +36,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $bannedUntil = null;
 
+    // ------------------- EMAIL VERIFICATION -------------------
+    #[ORM\Column(type: 'boolean')]
+    private bool $isVerified = false;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $verificationToken = null;
+
     // ------------------- FORGOT PASSWORD -------------------
     #[ORM\Column(type: 'string', length: 6, nullable: true)]
     private ?string $resetCode = null;
@@ -94,6 +101,13 @@ private ?\DateTimeInterface $resetCodeExpiresAt = null;
     }
 
     public function getUserIdentifier(): string { return (string) $this->email; }
+
+    // ------------------- Email Verification -------------------
+    public function isVerified(): bool { return $this->isVerified; }
+    public function setIsVerified(bool $verified): self { $this->isVerified = $verified; return $this; }
+
+    public function getVerificationToken(): ?string { return $this->verificationToken; }
+    public function setVerificationToken(?string $token): self { $this->verificationToken = $token; return $this; }
 
     public function eraseCredentials() { /* Clear sensitive data */ }
 }
