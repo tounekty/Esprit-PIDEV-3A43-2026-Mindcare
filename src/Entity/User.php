@@ -43,6 +43,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $verificationToken = null;
 
+    // ------------------- TIMESTAMPS -------------------
+    #[ORM\Column(name: 'created_at', type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $createdAt = null;
+
     // ------------------- FORGOT PASSWORD -------------------
     #[ORM\Column(type: 'string', length: 6, nullable: true)]
     private ?string $resetCode = null;
@@ -108,6 +112,10 @@ private ?\DateTimeInterface $resetCodeExpiresAt = null;
 
     public function getVerificationToken(): ?string { return $this->verificationToken; }
     public function setVerificationToken(?string $token): self { $this->verificationToken = $token; return $this; }
+
+    // ------------------- Timestamps -------------------
+    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
+    public function setCreatedAt(?\DateTimeInterface $createdAt): self { $this->createdAt = $createdAt; return $this; }
 
     public function eraseCredentials() { /* Clear sensitive data */ }
 }
