@@ -79,6 +79,7 @@ class AuthController extends AbstractController
         $user->setVerificationToken($verificationToken);
         
         $user->setRole('etudiant');
+        $user->setCreatedAt(new \DateTime());
 
         $em->persist($user);
         $em->flush();

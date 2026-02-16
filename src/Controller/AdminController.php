@@ -24,9 +24,11 @@ final class AdminController extends AbstractController
     public function index(StatisticsService $statisticsService): Response
     {
         $statistics = $statisticsService->getUserStatistics();
+        $chartData = $statisticsService->getChartData();
         
         return $this->render('admin/index.html.twig', [
             'statistics' => $statistics,
+            'chartData' => json_encode($chartData),
         ]);
     }
 
