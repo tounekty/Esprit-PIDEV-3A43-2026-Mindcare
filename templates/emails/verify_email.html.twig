@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header { text-align: center; color: #333; }
+        .header h1 { margin: 0 0 10px 0; color: #3498db; }
+        .content { padding: 20px 0; line-height: 1.6; color: #555; }
+        .button {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .button:hover {
+            background-color: #2980b9;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 20px;
+        }
+        .warning { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✉️ Email Verification</h1>
+            <p>Welcome to MindCare!</p>
+        </div>
+
+        <div class="content">
+            <p>Hello {{ name }},</p>
+
+            <p>Thank you for registering with <strong>MindCare</strong>. To complete your registration and activate your account, please click the button below:</p>
+
+            <center>
+                <a href="{{ verificationLink }}" class="button">Verify Your Email</a>
+            </center>
+
+            <p>Or copy and paste this link in your browser:</p>
+            <p style="word-break: break-all; background-color: #f0f0f0; padding: 10px; border-radius: 5px;">
+                {{ verificationLink }}
+            </p>
+
+            <p><span class="warning">⚠️ Important:</span> If you did not create this account, please ignore this email.</p>
+        </div>
+
+        <div class="footer">
+            <p>&copy; 2025 MindCare. All rights reserved.</p>
+            <p>If you have any questions, please contact us at support@mindcare.tn</p>
+        </div>
+    </div>
+</body>
+</html>

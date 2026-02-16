@@ -11,7 +11,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
@@ -39,7 +40,7 @@ class AuthController extends AbstractController
 
     // ---------------- REGISTER ----------------
     #[Route('/register', name: 'app_register', methods: ['POST'])]
-    public function register(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher): Response
+    public function register(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $hasher, MailerInterface $mailer): Response
     {
         $firstName = $request->request->get('firstName');
         $lastName = $request->request->get('lastName');
@@ -69,13 +70,42 @@ class AuthController extends AbstractController
         $user->setEmail($email);
         $user->setPassword($hasher->hashPassword($user, $password));
         
-        // FIX: Use setRole() not setRoles() - match your entity
+        // User account not verified by default
+        $user->setIsVerified(false);
+        
+        // Generate unique verification token - simple format for URL compatibility
+        $randomBytes = random_bytes(32);
+        $verificationToken = bin2hex($randomBytes);
+        $user->setVerificationToken($verificationToken);
+        
         $user->setRole('etudiant');
 
         $em->persist($user);
         $em->flush();
 
-        $this->addFlash('success', 'Registration successful! You can now login.');
+        // Send verification email with link
+        try {
+            $verificationLink = $this->generateUrl('app_verify_email_link', [
+                'token' => $verificationToken
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
+            
+            $mailer->send(
+                (new Email())
+                    ->from('no-reply@mindcare.tn')
+                    ->to($user->getEmail())
+                    ->subject('✉️ Verify Your Email - MindCare')
+                    ->html($this->renderView('emails/verify_email.html.twig', [
+                        'name' => $user->getFirstName() ?: 'User',
+                        'verificationLink' => $verificationLink
+                    ]))
+            );
+        } catch (\Exception $e) {
+            error_log('Mailer Error: ' . $e->getMessage());
+            $this->addFlash('error', 'Failed to send verification email. Please try again.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        $this->addFlash('success', 'Registration successful! A verification link has been sent to your email. Please click it to activate your account.');
         return $this->redirectToRoute('app_login');
     }
 
@@ -241,6 +271,33 @@ class AuthController extends AbstractController
         }
 
         return $this->render('login/reset_password.html.twig');
+    }
+
+    // ---------------- VERIFY EMAIL LINK ----------------
+    #[Route('/verify-email/{token}', name: 'app_verify_email_link', methods: ['GET'], requirements: ['token' => '.+'])]
+    public function verifyEmailLink(string $token, EntityManagerInterface $em): Response
+    {
+        // Find user by verification token
+        $user = $em->getRepository(User::class)->findOneBy(['verificationToken' => $token]);
+
+        if (!$user) {
+            $this->addFlash('error', '❌ Invalid verification link.');
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Check if already verified
+        if ($user->isVerified()) {
+            $this->addFlash('success', '✅ Your account is already verified!');
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Mark account as verified
+        $user->setIsVerified(true);
+        $user->setVerificationToken(null);
+        $em->flush();
+
+        $this->addFlash('success', '✅ Email verified successfully! You can now login.');
+        return $this->redirectToRoute('app_login');
     }
 
     // ---------------- RESEND CODE ----------------
