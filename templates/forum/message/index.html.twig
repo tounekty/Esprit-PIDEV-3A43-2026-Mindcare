@@ -32,7 +32,16 @@
                     <td style="padding: .5rem;">{{ message.sujet ? message.sujet.titre : '-' }}</td>
                     <td style="padding: .5rem;">{{ message.contenu }}</td>
                     <td style="padding: .5rem;">{{ message.dateMessage|date('Y-m-d H:i') }}</td>
-                    <td style="padding: .5rem;">{{ message.idUser }}</td>
+                    <td style="padding: .5rem;">
+                        {% if message.user %}
+                            {{ message.user.firstName }} {{ message.user.lastName }}
+                        {% else %}
+                            -
+                        {% endif %}
+                        {% if message.isAnonymous %}
+                            <span class="badge bg-secondary ms-1">Anonyme</span>
+                        {% endif %}
+                    </td>
                     <td style="padding: .5rem;">
                         <a href="{{ path('message_forum_show', {id: message.id}) }}">Voir</a> |
                         <a href="{{ path('message_forum_edit', {id: message.id}) }}">Modifier</a>

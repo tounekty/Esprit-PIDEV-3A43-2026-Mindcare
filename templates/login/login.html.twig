@@ -1,0 +1,100 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="wrapper">
+    <div class="title-text">
+        <div class="title login">Login</div>
+        <div class="title signup">Sign Up</div>
+    </div>
+    
+    <div class="form-container">
+        <div class="slide-controls">
+            <input type="radio" name="slide" id="login" checked>
+            <input type="radio" name="slide" id="signup">
+            
+            <label for="login" class="slide login">Login</label>
+            <label for="signup" class="slide signup">Sign Up</label>
+            
+            <div class="slider-tab"></div>
+        </div>
+
+        <div class="form-inner" id="formInner">
+            {# ================= LOGIN FORM ================= #}
+            <form method="post" action="{{ path('app_login') }}" class="login">
+                {% if error %}
+                    <div class="alert alert-danger">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+                
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+
+                <div class="field">
+                    <input type="email" name="email" placeholder="Email Address" value="{{ last_username }}" required>
+                </div>
+
+                <div class="field">
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+
+                <div class="field">
+                    <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                </div>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                {# LOGIN BUTTON - Full width #}
+                <div class="field btn">
+                    <div class="btn-layer"></div>
+                    <input type="submit" value="Login">
+                </div>
+
+                {# FORGOT PASSWORD - Separated and bottom right #}
+                <div class="forgot-link-container">
+                    <a href="{{ path('app_forgot_password') }}" class="forgot-link">Forgot Password?</a>
+                </div>
+            </form>
+
+            {# ================= SIGNUP FORM ================= #}
+            <form method="post" action="{{ path('app_register') }}" class="signup">
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+
+                <div class="field">
+                    <input type="text" name="firstName" placeholder="First Name" required>
+                </div>
+
+                <div class="field">
+                    <input type="text" name="lastName" placeholder="Last Name" required>
+                </div>
+
+                <div class="field">
+                    <input type="email" name="email" placeholder="Email Address" required>
+                </div>
+
+                <div class="field">
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+
+                <div class="field">
+                    <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
+                </div>
+
+                <div class="field btn">
+                    <div class="btn-layer"></div>
+                    <input type="submit" value="Sign Up">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endblock %}
