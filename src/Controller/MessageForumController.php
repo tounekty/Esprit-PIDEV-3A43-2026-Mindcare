@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\MessageForum;
 use App\Entity\SujetForum;
 use App\Repository\MessageForumRepository;
+use App\Service\ForumReplyNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -36,7 +37,7 @@ class MessageForumController extends AbstractController
     }
 
     #[Route('/forum/messages/new', name: 'message_forum_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ForumReplyNotificationService $notificationService): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -74,6 +75,7 @@ class MessageForumController extends AbstractController
             $this->handleMessageUploads($form, $message);
             $entityManager->persist($message);
             $entityManager->flush();
+            $notificationService->notifyTopicOwnerOnReply($message);
 
             return $this->redirectToRoute('message_forum_index');
         }
