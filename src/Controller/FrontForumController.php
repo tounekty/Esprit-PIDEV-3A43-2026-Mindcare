@@ -6,6 +6,7 @@ use App\Entity\MessageForum;
 use App\Entity\SujetForum;
 use App\Repository\MessageForumRepository;
 use App\Repository\SujetForumRepository;
+use App\Service\ForumReplyNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -104,7 +105,7 @@ class FrontForumController extends AbstractController
     }
 
     #[Route('/forum/sujet/{id}', name: 'front_forum_show', methods: ['GET', 'POST'])]
-    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator): Response
+    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ForumReplyNotificationService $notificationService): Response
     {
         $message = new MessageForum();
         $message->setSujet($sujet);
@@ -150,6 +151,7 @@ class FrontForumController extends AbstractController
                 $this->handleMessageUploads($form, $message);
                 $entityManager->persist($message);
                 $entityManager->flush();
+                $notificationService->notifyTopicOwnerOnReply($message);
 
                 return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
             }
