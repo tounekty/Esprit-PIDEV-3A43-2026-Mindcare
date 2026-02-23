@@ -7,6 +7,7 @@ use App\Entity\SujetForum;
 use App\Repository\MessageForumRepository;
 use App\Repository\SujetForumRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -21,7 +22,7 @@ use Symfony\Component\Routing\Annotation\Route;
 class FrontForumController extends AbstractController
 {
     #[Route('/forum', name: 'front_forum_index', methods: ['GET'])]
-    public function index(Request $request, SujetForumRepository $repository): Response
+    public function index(Request $request, SujetForumRepository $repository, PaginatorInterface $paginator): Response
     {
         $query = trim((string) $request->query->get('q', ''));
         $status = (string) $request->query->get('status', '');
@@ -29,8 +30,14 @@ class FrontForumController extends AbstractController
             $status = '';
         }
 
+        $pagination = $paginator->paginate(
+            $repository->createSearchQueryBuilder($query !== '' ? $query : null, $status !== '' ? $status : null),
+            max(1, (int) $request->query->get('page', 1)),
+            5
+        );
+
         return $this->render('front/forum/index.html.twig', [
-            'sujets' => $repository->findBySearch($query !== '' ? $query : null, $status !== '' ? $status : null),
+            'sujets' => $pagination,
             'q' => $query,
             'status' => $status,
             'statusChoices' => SujetForum::getStatusChoices(),
@@ -97,7 +104,7 @@ class FrontForumController extends AbstractController
     }
 
     #[Route('/forum/sujet/{id}', name: 'front_forum_show', methods: ['GET', 'POST'])]
-    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, EntityManagerInterface $entityManager): Response
+    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator): Response
     {
         $message = new MessageForum();
         $message->setSujet($sujet);
@@ -110,37 +117,42 @@ class FrontForumController extends AbstractController
         }
 
         $query = trim((string) $request->query->get('q', ''));
-        $messages = $messageRepository->findBySujetAndSearch($sujet, $query !== '' ? $query : null);
+        $messages = $paginator->paginate(
+            $messageRepository->createSujetSearchQueryBuilder($sujet, $query !== '' ? $query : null),
+            max(1, (int) $request->query->get('page', 1)),
+            5
+        );
 
-    $form = null;
-    if ($user) {
-        $form = $this->createFormBuilder($message)
-            ->add('contenu', TextareaType::class, [
-                'label' => 'Votre message',
-            ])
-            ->add('isAnonymous', ChoiceType::class, [
-                'label' => 'Publication anonyme',
-                'choices' => [
-                    'Normal' => false,
-                    'Anonyme' => true,
-                ],
-                'expanded' => true,
-                'multiple' => false,
-            ])
-            ->add('attachmentFile', FileType::class, [
-                'label' => 'Pièce jointe',
-                'mapped' => false,
-                'required' => false,
-            ])
-            ->getForm();
+        $form = null;
+        if ($user) {
+            $form = $this->createFormBuilder($message)
+                ->add('contenu', TextareaType::class, [
+                    'label' => 'Votre message',
+                ])
+                ->add('isAnonymous', ChoiceType::class, [
+                    'label' => 'Publication anonyme',
+                    'choices' => [
+                        'Normal' => false,
+                        'Anonyme' => true,
+                    ],
+                    'expanded' => true,
+                    'multiple' => false,
+                ])
+                ->add('attachmentFile', FileType::class, [
+                    'label' => 'Pièce jointe',
+                    'mapped' => false,
+                    'required' => false,
+                ])
+                ->getForm();
 
-        $form->handleRequest($request);
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->handleMessageUploads($form, $message);
-            $entityManager->persist($message);
-            $entityManager->flush();
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid()) {
+                $this->handleMessageUploads($form, $message);
+                $entityManager->persist($message);
+                $entityManager->flush();
 
-            return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
+                return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
+            }
         }
 
         return $this->render('front/forum/show.html.twig', [
@@ -149,7 +161,6 @@ class FrontForumController extends AbstractController
             'q' => $query,
             'form' => $form ? $form->createView() : null,
         ]);
-        }
     }
 
     private function handleSujetUploads($form, SujetForum $sujet): void
