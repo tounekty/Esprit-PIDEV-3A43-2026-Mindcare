@@ -14,16 +14,12 @@ class HomeController extends AbstractController
     #[Route('/home', name: 'app_home')]
     public function index(): Response
     {
+        /** @var User|null $user */
         $user = $this->getUser();
-        $bannedUntil = null;
-
-        if ($user && method_exists($user, 'getBannedUntil')) {
-            $bannedUntil = $user->getBannedUntil();
-        }
 
         return $this->render('home/index.html.twig', [
-            'bannedUntil' => $bannedUntil,
+            'bannedUntil' => $user?->getBannedUntil(),
+            'isBanned'    => $user?->isBanned(),
         ]);
     }
 }
-

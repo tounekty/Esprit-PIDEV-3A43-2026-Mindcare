@@ -13,6 +13,13 @@ class UserChecker implements UserCheckerInterface
      */
     public function checkPreAuth(UserInterface $user): void
     {
+        // Check if user email is verified
+        if (method_exists($user, 'isVerified') && !$user->isVerified()) {
+            throw new CustomUserMessageAccountStatusException(
+                'Votre compte n\'a pas été vérifié. Veuillez vérifier votre email pour activer votre compte.'
+            );
+        }
+
         // If your User class has isBanned() and getBannedUntil(), use them
         if (method_exists($user, 'isBanned') && $user->isBanned()) {
             $bannedUntil = null;

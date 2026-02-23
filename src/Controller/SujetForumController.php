@@ -1,0 +1,264 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\SujetForum;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+class SujetForumController extends AbstractController
+{
+    #[Route('/forum/sujets', name: 'sujet_forum_index', methods: ['GET'])]
+    public function index(Request $request, EntityManagerInterface $em): Response
+    {
+        $filters = $this->extractFilters($request);
+        $rows = $this->loadSujetRows($em, $filters);
+        $stats = $this->buildSujetStats($em);
+
+        return $this->render('forum/sujet/index.html.twig', [
+            'rows' => $rows,
+            'stats' => $stats,
+            'filters' => $filters,
+            'visible_count' => count($rows),
+            'statusChoices' => SujetForum::getStatusChoices(),
+        ]);
+    }
+
+    #[Route('/forum/sujets/ajax', name: 'sujet_forum_ajax', methods: ['GET'])]
+    public function ajax(Request $request, EntityManagerInterface $em): Response
+    {
+        $filters = $this->extractFilters($request);
+        $rows = $this->loadSujetRows($em, $filters);
+        $stats = $this->buildSujetStats($em);
+
+        return $this->json([
+            'rowsHtml' => $this->renderView('forum/sujet/_rows.html.twig', [
+                'rows' => $rows,
+            ]),
+            'stats' => $stats,
+            'visibleCount' => count($rows),
+        ]);
+    }
+
+    #[Route('/forum/sujets/new', name: 'sujet_forum_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    {
+       $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $sujet = new SujetForum();
+        $sujet->setStatus(SujetForum::STATUS_VISIBLE);
+        $sujet->setUser($this->getUser());
+        $form = $this->createFormBuilder($sujet)
+            ->add('titre', TextType::class)
+            ->add('description', TextareaType::class)
+            ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
+            ->add('isPinned', CheckboxType::class, ['required' => false])
+            ->add('status', ChoiceType::class, [
+                'choices' => SujetForum::getStatusChoices(),
+                'placeholder' => 'Aucun statut',
+                'required' => false,
+            ])
+            ->add('category', TextType::class, ['required' => false])
+            ->add('attachmentFile', FileType::class, ['mapped' => false, 'required' => false])
+            ->getForm();
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->handleSujetUploads($form, $sujet);
+            $entityManager->persist($sujet);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('sujet_forum_index');
+        }
+
+        return $this->render('forum/sujet/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/forum/sujets/{id}', name: 'sujet_forum_show', methods: ['GET'])]
+    public function show(SujetForum $sujet): Response
+    {
+        return $this->render('forum/sujet/show.html.twig', [
+            'sujet' => $sujet,
+        ]);
+    }
+
+    #[Route('/forum/sujets/{id}/edit', name: 'sujet_forum_edit', methods: ['GET', 'POST'])]
+    public function edit(Request $request, SujetForum $sujet, EntityManagerInterface $entityManager): Response
+    {
+        $form = $this->createFormBuilder($sujet)
+            ->add('titre', TextType::class)
+            ->add('description', TextareaType::class)
+            ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
+            ->add('isPinned', CheckboxType::class, ['required' => false])
+            ->add('status', ChoiceType::class, [
+                'choices' => SujetForum::getStatusChoices(),
+                'placeholder' => 'Aucun statut',
+                'required' => false,
+            ])
+            ->add('category', TextType::class, ['required' => false])
+            ->add('attachmentFile', FileType::class, ['mapped' => false, 'required' => false])
+            ->getForm();
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->handleSujetUploads($form, $sujet);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('sujet_forum_index');
+        }
+
+        return $this->render('forum/sujet/edit.html.twig', [
+            'form' => $form->createView(),
+            'sujet' => $sujet,
+        ]);
+    }
+
+    #[Route('/forum/sujets/{id}/delete', name: 'sujet_forum_delete', methods: ['POST'])]
+    public function delete(Request $request, SujetForum $sujet, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('delete_sujet_' . $sujet->getId(), (string) $request->request->get('_token'))) {
+            $entityManager->remove($sujet);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('sujet_forum_index');
+    }
+
+    private function handleSujetUploads($form, SujetForum $sujet): void
+    {
+        $uploadRoot = rtrim($this->getParameter('uploads_dir'), DIRECTORY_SEPARATOR);
+
+        /** @var UploadedFile|null $imageFile */
+        $imageFile = $form->get('imageFile')->getData();
+        if ($imageFile instanceof UploadedFile) {
+            $imageDir = $uploadRoot . DIRECTORY_SEPARATOR . 'sujet-images';
+            if (!is_dir($imageDir)) {
+                mkdir($imageDir, 0775, true);
+            }
+
+            $filename = uniqid('sujet_img_', true) . '.' . $imageFile->guessExtension();
+            try {
+                $imageFile->move($imageDir, $filename);
+                $sujet->setImageUrl('/uploads/sujet-images/' . $filename);
+            } catch (\Exception $e) {
+                // Skip upload on error - file will not be saved
+            }
+        }
+
+        /** @var UploadedFile|null $attachmentFile */
+        $attachmentFile = $form->get('attachmentFile')->getData();
+        if ($attachmentFile instanceof UploadedFile) {
+            $attachDir = $uploadRoot . DIRECTORY_SEPARATOR . 'sujet-attachments';
+            if (!is_dir($attachDir)) {
+                mkdir($attachDir, 0775, true);
+            }
+
+            $filename = uniqid('sujet_att_', true) . '.' . $attachmentFile->guessExtension();
+            try {
+                $attachmentFile->move($attachDir, $filename);
+                $sujet->setAttachmentPath('/uploads/sujet-attachments/' . $filename);
+                $sujet->setAttachmentMimeType($attachmentFile->getMimeType());
+                $sujet->setAttachmentSize($attachmentFile->getSize());
+            } catch (\Exception $e) {
+                // Skip upload on error - file will not be saved
+            }
+        }
+    }
+
+    private function extractFilters(Request $request): array
+    {
+        $query = trim((string) $request->query->get('q', ''));
+        $status = (string) $request->query->get('status', 'all');
+        $sort = (string) $request->query->get('sort', 'date');
+        $direction = strtoupper((string) $request->query->get('direction', 'DESC'));
+
+        $validStatuses = array_merge(['all'], SujetForum::getStatusValues());
+        if (!in_array($status, $validStatuses, true)) {
+            $status = 'all';
+        }
+
+        if (!in_array($sort, ['date', 'title', 'status'], true)) {
+            $sort = 'date';
+        }
+
+        if (!in_array($direction, ['ASC', 'DESC'], true)) {
+            $direction = 'DESC';
+        }
+
+        return [
+            'query' => $query,
+            'status' => $status,
+            'sort' => $sort,
+            'direction' => $direction,
+        ];
+    }
+
+    private function loadSujetRows(EntityManagerInterface $em, array $filters): array
+    {
+        $qb = $em->createQueryBuilder()
+            ->select('s')
+            ->from(SujetForum::class, 's');
+
+        if ($filters['query'] !== '') {
+            $qb->andWhere('LOWER(s.titre) LIKE :q OR LOWER(s.description) LIKE :q')
+                ->setParameter('q', '%' . strtolower($filters['query']) . '%');
+        }
+
+        if ($filters['status'] !== 'all') {
+            $qb->andWhere('s.status = :status')
+                ->setParameter('status', $filters['status']);
+        }
+
+        $sortMap = [
+            'date' => 's.dateCreation',
+            'title' => 's.titre',
+            'status' => 's.status',
+        ];
+
+        $qb->orderBy($sortMap[$filters['sort']], $filters['direction'])
+            ->addOrderBy('s.id', 'DESC');
+
+        $sujets = $qb->getQuery()->getResult();
+        $rows = [];
+
+        foreach ($sujets as $sujet) {
+            if (!$sujet instanceof SujetForum) {
+                continue;
+            }
+
+            $rows[] = [
+                'sujet' => $sujet,
+            ];
+        }
+
+        return $rows;
+    }
+
+    private function buildSujetStats(EntityManagerInterface $em): array
+    {
+        $total = (int) $em->getRepository(SujetForum::class)->count([]);
+        $pinned = (int) $em->getRepository(SujetForum::class)->count(['isPinned' => true]);
+
+        $countsByStatus = [];
+        foreach (SujetForum::getStatusValues() as $status) {
+            $countsByStatus[$status] = (int) $em->getRepository(SujetForum::class)->count(['status' => $status]);
+        }
+
+        return [
+            'total' => $total,
+            'pinned' => $pinned,
+            'byStatus' => $countsByStatus,
+        ];
+    }
+}

@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+{% block title %}Guide du Sommeil{% endblock %}
+{% block body %}
+<div class="container mt-4">
+    <div class="sleep-entry-card mx-auto mb-5 p-4 p-md-5">
+        <div class="text-center mb-4">
+            <div class="sleep-illustration mb-3">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="40" cy="40" rx="36" ry="28" fill="#e0e7ff" />
+                    <path d="M40 24c12 0 24 8 24 16s-12 16-24 16-24-8-24-16 12-16 24-16z" fill="#c7d2fe" />
+                    <path d="M40 32c6 0 12 4 12 8s-6 8-12 8-12-4-12-8 6-8 12-8z" fill="#6366f1" />
+                </svg>
+            </div>
+            <h2 class="fw-bold text-primary mb-2">Guide du Sommeil</h2>
+            <p class="lead text-muted">Améliorez votre sommeil avec ces conseils simples et efficaces.</p>
+        </div>
+        <ul class="sleep-entry-list mx-auto mb-4" style="max-width: 400px;">
+            <li><span class="fw-bold text-primary">Évitez les écrans :</span> Limitez l'utilisation des écrans avant de dormir.</li>
+            <li><span class="fw-bold text-info">Horaires réguliers :</span> Couchez-vous et levez-vous à des heures fixes.</li>
+            <li><span class="fw-bold text-success">Environnement calme :</span> Créez une chambre sombre et silencieuse.</li>
+            <li><span class="fw-bold text-warning">Routine relaxante :</span> Pratiquez une activité apaisante avant le coucher.</li>
+        </ul>
+        <div class="text-center">
+            <a href="https://youtu.be/knTqvBZtgDc?si=NQwJJQsV8VeaPNpf" target="_blank" class="btn btn-primary sleep-entry-btn px-4 py-2">
+                Voir une vidéo <i class="fas fa-play ms-1"></i>
+            </a>
+        </div>
+        <div class="text-center mt-3">
+            <a href="{{ path('app_dashboard') }}" class="btn btn-outline-primary px-4 py-2">
+                Retour au Dashboard <i class="fas fa-arrow-left ms-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .sleep-entry-card {
+            background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+            border-radius: 22px;
+            box-shadow: 0 12px 32px rgba(99,102,241,0.12);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .sleep-entry-card:hover {
+            transform: translateY(-8px) scale(1.04);
+            box-shadow: 0 24px 48px rgba(99,102,241,0.18);
+        }
+        .sleep-illustration svg {
+            display: block;
+            margin: 0 auto;
+        }
+        .sleep-entry-list li {
+            margin-bottom: 0.8rem;
+            padding-left: 0.7rem;
+            border-left: 4px solid #6366f1;
+            background: rgba(99,102,241,0.07);
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+        .sleep-entry-btn {
+            background: #6366f1;
+            color: #fff;
+            border-radius: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.12);
+            font-size: 1.1rem;
+        }
+        .sleep-entry-btn:hover {
+            background: #4338ca;
+            color: #fff;
+        }
+    </style>
+{% endblock %}

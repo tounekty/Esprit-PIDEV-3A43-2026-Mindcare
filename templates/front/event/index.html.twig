@@ -1,0 +1,192 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Evenements{% endblock %}
+
+{% block body %}
+    <style>
+        .event-hero {
+            background: linear-gradient(135deg, #0f766e 0%, #0ea5a0 100%);
+            padding: 80px 0;
+            color: white;
+            text-align: center;
+        }
+        .event-filter-bar {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
+        }
+        .event-filter-bar input {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14px;
+        }
+        .event-filter-bar button {
+            background: linear-gradient(135deg, #0f766e 0%, #0ea5a0 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-weight: 600;
+        }
+        .event-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(15, 118, 110, 0.2);
+        }
+        .event-card-header {
+            background: #f0fdfa;
+            padding: 18px 20px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .event-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 8px 0;
+        }
+        .event-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            color: #64748b;
+            flex-wrap: wrap;
+        }
+        .event-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .event-desc {
+            color: #475569;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        .event-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 13px;
+            color: #64748b;
+        }
+        .event-cta {
+            background: linear-gradient(135deg, #0f766e 0%, #0ea5a0 100%);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .event-cta:hover {
+            color: white;
+            box-shadow: 0 6px 16px rgba(15, 118, 110, 0.35);
+        }
+        .event-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .badge-open {
+            background: rgba(14, 165, 160, 0.15);
+            color: #0f766e;
+        }
+        .badge-full {
+            background: rgba(239, 68, 68, 0.15);
+            color: #b91c1c;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+        }
+    </style>
+
+    <div class="event-hero">
+        <div class="container">
+            <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 10px;">
+                <i class="ti-calendar" style="margin-right: 12px;"></i>Evenements
+            </h1>
+            <p style="font-size: 18px; opacity: 0.9; max-width: 600px; margin: 0 auto;">
+                Participez aux evenements MindCare et reservez votre place en quelques clics.
+            </p>
+        </div>
+    </div>
+
+    <div class="container" style="padding: 80px 0;">
+        <div class="event-filter-bar">
+            <form method="get" action="{{ path('front_events_index') }}" class="row g-2 align-items-end">
+                <div class="col-md-10">
+                    <label for="event-search" style="font-weight: 600; font-size: 13px;">Recherche</label>
+                    <input id="event-search" type="text" name="q" value="{{ q }}" placeholder="Titre, description, lieu" class="w-100">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="w-100">Filtrer</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="row" style="margin-top: 30px;">
+            {% if events|length > 0 %}
+                {% for event in events %}
+                    {% set remaining = remainingById[event.id] ?? 0 %}
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="event-card">
+                            <div class="event-card-header">
+                                <h3 class="event-title">{{ event.titre }}</h3>
+                                <div class="event-meta">
+                                    <span><i class="ti-calendar"></i> {{ event.dateEvent|date('d M Y, H:i') }}</span>
+                                    <span><i class="ti-location-pin"></i> {{ event.lieu }}</span>
+                                </div>
+                            </div>
+                            <div class="event-body">
+                                <p class="event-desc">
+                                    {{ event.description|length > 140 ? event.description|slice(0, 140) ~ '...' : event.description }}
+                                </p>
+                                <div class="event-footer">
+                                    {% if remaining > 0 %}
+                                        <span class="event-badge badge-open"><i class="ti-check"></i> {{ remaining }} places</span>
+                                    {% else %}
+                                        <span class="event-badge badge-full"><i class="ti-close"></i> Complet</span>
+                                    {% endif %}
+                                    <a href="{{ path('front_events_show', {id: event.id}) }}" class="event-cta">Voir details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="ti-calendar" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i>
+                        <p>Aucun evenement trouve.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

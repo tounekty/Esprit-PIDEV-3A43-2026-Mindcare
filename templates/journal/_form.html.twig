@@ -1,0 +1,99 @@
+<div class="card shadow-sm mb-4" style="border: 1px solid #D4E8FF; border-radius: 12px; box-shadow: 0 4px 12px rgba(127, 191, 255, 0.15);">
+    <div class="card-body">
+        <h5 class="card-title mb-4" style="color: #1a365d; font-weight: 700;">
+            <i class="fas fa-feather me-2" style="color: #7FBFFF;"></i>Nouvelle Entrée de Journal
+        </h5>
+
+        {{ form_start(form, {attr: {class: 'journal-form'}}) }}
+        
+        {% if form.vars.errors|length > 0 %}
+            <div class="alert alert-danger" role="alert">
+                <h6 class="alert-heading"><i class="fas fa-exclamation-circle me-2"></i>Erreurs de validation</h6>
+                <ul class="mb-0">
+                    {% for error in form.vars.errors %}
+                        <li>{{ error.message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                    {{ form_label(form.mood, 'Humeur associée', {label_attr: {class: 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.mood) }}
+                    {% if form.mood.vars.errors|length > 0 %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.mood.vars.errors %}
+                                {{ error.message }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group mb-4">
+                    {{ form_label(form.dateecriture, 'Date et heure', {label_attr: {class: 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.dateecriture) }}
+                    {% if form.dateecriture.vars.errors|length > 0 %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.dateecriture.vars.errors %}
+                                {{ error.message }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group mb-4">
+                    {{ form_label(form.contenu, 'Votre pensée', {label_attr: {class: 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.contenu) }}
+                    <small class="text-muted d-block mt-1">Minimum 10 caractères</small>
+                    {% if form.contenu.vars.errors|length > 0 %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.contenu.vars.errors %}
+                                {{ error.message }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex gap-3">
+            <button type="submit" class="btn" style="background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%); color: white; border: none; padding: 0.75rem 2rem; font-weight: 600; border-radius: 8px;">
+                <i class="fas fa-save me-2"></i>{{ button_label|default('Enregistrer') }}
+            </button>
+            <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-times me-2"></i>Annuler
+            </a>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<style>
+    .journal-form .form-control,
+    .journal-form .form-select {
+        border: 1px solid #D4E8FF;
+        border-radius: 8px;
+    }
+
+    .journal-form .form-control:focus,
+    .journal-form .form-select:focus {
+        border-color: #7FBFFF;
+        box-shadow: 0 0 0 0.2rem rgba(127, 191, 255, 0.25);
+    }
+
+    .journal-form .form-label {
+        color: #1a365d;
+        margin-bottom: 0.5rem;
+    }
+
+    .invalid-feedback {
+        color: #e53e3e;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+    }
+</style>

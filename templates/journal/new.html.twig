@@ -1,0 +1,397 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau Journal | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(127, 191, 255, 0.2);
+        }
+        
+        /* Card */
+        .card-modern {
+            background: white;
+            border: 1px solid #D4E8FF;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(127, 191, 255, 0.1);
+            transition: all 0.3s;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card-modern-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .card-modern-body {
+            padding: 2rem;
+        }
+        
+        /* Textarea */
+        textarea.form-control {
+            border: 2px solid #D4E8FF !important;
+            border-radius: 8px;
+            font-size: 1rem;
+            line-height: 1.6;
+            min-height: 300px;
+            resize: vertical;
+            transition: all 0.3s;
+        }
+        
+        textarea.form-control:focus {
+            border-color: #7FBFFF !important;
+            box-shadow: 0 0 0 0.2rem rgba(127, 191, 255, 0.25) !important;
+        }
+        
+        /* Stats */
+        .stats-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .stat-box {
+            background: #f0f7ff;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #D4E8FF;
+        }
+        
+        .stat-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #7FBFFF;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%) !important;
+            border: none !important;
+            color: #1a365d !important;
+            font-weight: 600 !important;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3) !important;
+        }
+        
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+        
+        .mood-option {
+            background: white;
+            border: 2px solid #D4E8FF;
+            border-radius: 10px;
+            padding: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .mood-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(127, 191, 255, 0.2);
+            border-color: #7FBFFF;
+        }
+        
+        .mood-option.active {
+            border-color: #7FBFFF;
+            background: rgba(127, 191, 255, 0.1);
+            font-weight: 600;
+        }
+        
+        .mood-emoji {
+            display: block;
+            font-size: 1.8rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .quick-date-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_journal_emotionnel_index') }}" class="text-decoration-none">Mes Entrées</a></li>
+            <li class="breadcrumb-item active">Nouvelle Entrée</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="d-flex align-items-center">
+            <div style="font-size: 48px; margin-right: 1rem;">📝</div>
+            <div>
+                <h1 class="h3 mb-1" style="color: white;">
+                    <i class="fas fa-book me-2"></i>Nouvelle Entrée
+                </h1>
+                <p class="mb-0 opacity-75">Exprimez vos pensées et émotions du moment</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Card -->
+    <div class="card-modern">
+        <div class="card-modern-header">
+            <i class="fas fa-pen-fancy me-2"></i>Rédiger une Entrée
+        </div>
+        <div class="card-modern-body">
+            {{ form_start(form, {'attr': {'id': 'journalForm', 'novalidate': 'novalidate'}}) }}
+            
+            <!-- Display Form Errors -->
+            {% if form.vars.errors|length > 0 %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h6 class="alert-heading mb-2"><i class="fas fa-exclamation-circle me-2"></i>Erreurs de validation</h6>
+                    <ul class="mb-0">
+                        {% for error in form.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- Display Field Errors -->
+            {% if form.contenu.vars.errors|length > 0 %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h6 class="alert-heading mb-2"><i class="fas fa-exclamation-circle me-2"></i>Erreur: Votre Réflexion</h6>
+                    <ul class="mb-0">
+                        {% for error in form.contenu.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% if form.dateecriture.vars.errors|length > 0 %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h6 class="alert-heading mb-2"><i class="fas fa-exclamation-circle me-2"></i>Erreur: Date et Heure</h6>
+                    <ul class="mb-0">
+                        {% for error in form.dateecriture.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            {% if form.mood.vars.errors|length > 0 %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <h6 class="alert-heading mb-2"><i class="fas fa-exclamation-circle me-2"></i>Erreur: Humeur Associée</h6>
+                    <ul class="mb-0">
+                        {% for error in form.mood.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            
+            <!-- Content -->
+            <div class="mb-4">
+                <label class="form-label fw-bold mb-3">
+                    <i class="fas fa-edit me-2" style="color: #7FBFFF;"></i>Votre Réflexion
+                </label>
+                {{ form_widget(form.contenu, {
+                    'attr': {
+                        'class': 'form-control',
+                        'rows': '12',
+                        'placeholder': 'Écrivez vos pensées, émotions, réflexions...',
+                        'id': 'journal_contenu',
+                        'oninput': 'updateStats()'
+                    }
+                }) }}
+                <small class="text-muted d-block mt-2">
+                    <i class="fas fa-lock me-1"></i>Votre journal est privé et confidentiel
+                </small>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-display">
+                <div class="stat-box">
+                    <div class="stat-number" id="wordCount">0</div>
+                    <div class="stat-label">Mots</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="charCount">0</div>
+                    <div class="stat-label">Caractères</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="readingTime">0</div>
+                    <div class="stat-label">Min. Lecture</div>
+                </div>
+            </div>
+
+            <!-- Date -->
+            <div class="mb-4 mt-4">
+                <label class="form-label fw-bold mb-3">
+                    <i class="far fa-calendar-alt me-2" style="color: #7FBFFF;"></i>Date et Heure
+                </label>
+                {{ form_widget(form.dateecriture, {
+                    'attr': {
+                        'class': 'form-control form-control-lg',
+                        'id': 'journal_dateecriture'
+                    }
+                }) }}
+                <div class="quick-date-buttons">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="setDate('today')">
+                        <i class="far fa-calendar-check me-1"></i> Aujourd'hui
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDate('yesterday')">
+                        Hier
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setDate('now')">
+                        <i class="fas fa-clock me-1"></i> Maintenant
+                    </button>
+                </div>
+            </div>
+
+            <!-- Mood Selection -->
+            <div class="mb-4">
+                <label class="form-label fw-bold mb-3">
+                    <i class="fas fa-smile me-2" style="color: #7FBFFF;"></i>Humeur Associée
+                </label>
+                <p class="text-muted small mb-3">Associer une humeur aide à mieux analyser vos émotions</p>
+                
+                <div class="mood-grid">
+                    {% set mood_options = [
+                        {value: '', emoji: '❓', name: 'Non spécifié'},
+                        {value: 'heureux', emoji: '😊', name: 'Heureux'},
+                        {value: 'neutre', emoji: '😐', name: 'Neutre'},
+                        {value: 'triste', emoji: '😢', name: 'Triste'},
+                        {value: 'colere', emoji: '😠', name: 'En colère'},
+                        {value: 'stresse', emoji: '😰', name: 'Stressé'},
+                        {value: 'calme', emoji: '😌', name: 'Calme'},
+                        {value: 'fatigue', emoji: '😴', name: 'Fatigué'},
+                        {value: 'excite', emoji: '😃', name: 'Excité'}
+                    ] %}
+                    
+                    {% for option in mood_options %}
+                    <div class="mood-option" onclick="selectMood('{{ option.value }}')" data-mood="{{ option.value }}">
+                        <span class="mood-emoji">{{ option.emoji }}</span>
+                        <div class="small">{{ option.name }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <input type="hidden" id="selectedMood" name="{{ form.mood.vars.full_name }}" value="">
+                <small class="text-danger d-block mt-2" id="moodError"></small>
+            </div>
+
+            <!-- Actions -->
+            <div class="d-flex gap-2 mt-5 pt-3 border-top">
+                <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="fas fa-times me-1"></i> Annuler
+                </a>
+                <button type="submit" class="btn btn-primary btn-lg ms-auto">
+                    <i class="fas fa-save me-1"></i> Enregistrer
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script>
+    function setDate(type) {
+        const dateInput = document.getElementById('journal_dateecriture');
+        if (!dateInput) return;
+        const now = new Date();
+        let targetDate = new Date();
+        let value = '';
+        
+        switch(type) {
+            case 'today':
+                targetDate = now;
+                value = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}T00:00`;
+                break;
+            case 'yesterday':
+                targetDate = new Date(now);
+                targetDate.setDate(now.getDate() - 1);
+                value = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}T00:00`;
+                break;
+            case 'now':
+                targetDate = now;
+                value = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}T${String(targetDate.getHours()).padStart(2, '0')}:${String(targetDate.getMinutes()).padStart(2, '0')}`;
+                break;
+        }
+        dateInput.value = value;
+    }
+
+    function selectMood(moodValue) {
+        document.getElementById('selectedMood').value = moodValue;
+        document.querySelectorAll('.mood-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        const selectedOption = document.querySelector(`[data-mood="${moodValue}"]`);
+        if (selectedOption) {
+            selectedOption.classList.add('active');
+        }
+        document.getElementById('moodError').textContent = '';
+    }
+    
+    function updateStats() {
+        let textarea = document.getElementById('journal_contenu');
+        if (textarea) {
+            const text = textarea.value;
+            const charCount = text.length;
+            const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            const minutes = Math.ceil(words / 200) || 0;
+            document.getElementById('wordCount').textContent = words;
+            document.getElementById('charCount').textContent = charCount;
+            document.getElementById('readingTime').textContent = minutes;
+        }
+    }
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        let textarea = document.getElementById('journal_contenu');
+        if (textarea) {
+            updateStats();
+            textarea.addEventListener('input', updateStats);
+        }
+        
+        setDate('now');
+        selectMood('');
+        
+        const form = document.getElementById('journalForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const content = document.getElementById('journal_contenu').value;
+                if (content.trim() === '') {
+                    e.preventDefault();
+                    alert('Veuillez écrire quelque chose dans votre journal.');
+                    return false;
+                }
+                return true;
+            });
+        }
+    });
+</script>
+{% endblock %}
