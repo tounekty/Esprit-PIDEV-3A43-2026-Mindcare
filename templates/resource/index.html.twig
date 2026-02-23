@@ -1,0 +1,251 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ressources Éducatives | MindCare{% endblock %}
+
+{% block body %}
+
+<section class="resources-section py-5">
+    <div class="container">
+        <!-- Simple Clean Header -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="text-center mb-5">
+                    <h1 class="display-5 fw-bold mb-3">📚 Ressources Éducatives</h1>
+                    <p class="lead text-muted mx-auto" style="max-width: 600px;">
+                        Des outils et contenus pour accompagner votre parcours de bien-être mental
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search Section -->
+        <div class="row mb-5">
+            <div class="col-md-8 mx-auto">
+                <div class="search-wrapper">
+                    <div class="input-group input-group-lg">
+                        <input type="text" class="form-control" 
+                               placeholder="Rechercher une ressource..." 
+                               id="searchResources">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resources Grid -->
+        <div class="row" id="resourcesGrid">
+            {% for resource in resources %}
+                <div class="col-lg-4 col-md-6 mb-4 resource-card">
+                    <div class="card h-100 border-0 shadow-sm hover-shadow">
+                        <div class="card-header position-relative border-0 pb-0 bg-transparent">
+                            {% if resource.filePath %}
+                                <div class="file-badge">
+                                    <i class="fas fa-file-pdf text-danger"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="card-body pt-3">
+                            <div class="resource-icon mb-3">
+                                <div class="icon-circle bg-light-primary">
+                                    <i class="fas fa-book text-primary"></i>
+                                </div>
+                            </div>
+                            
+                            <h4 class="card-title mb-3">{{ resource.title }}</h4>
+                            
+                            <p class="card-text text-muted mb-4">
+                                {{ resource.description|length > 150 
+                                    ? resource.description|slice(0,150) ~ '...' 
+                                    : resource.description }}
+                            </p>
+                            
+                            <div class="resource-meta d-flex justify-content-between align-items-center mb-4 pt-3 border-top">
+                                <div class="date">
+                                    <i class="far fa-calendar-alt text-muted me-1"></i>
+                                    <small class="text-muted">{{ resource.createdAt|date('d/m/Y') }}</small>
+                                </div>
+                                <div class="comments">
+                                    <i class="far fa-comments text-muted me-1"></i>
+                                    <small class="text-muted">{{ resource.commentaires|length }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-transparent border-0 pt-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ path('resource_show', {id: resource.id}) }}" 
+                                   class="btn btn-primary btn-sm px-3">
+                                    <i class="fas fa-eye me-1"></i>Voir
+                                </a>
+                                
+                                {% if resource.filePath %}
+                                    <a href="{{ asset('uploads/resources/' ~ resource.filePath) }}" 
+                                       target="_blank" 
+                                       class="btn btn-outline-primary btn-sm px-3">
+                                        <i class="fas fa-download me-1"></i>Télécharger
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <div class="empty-icon mb-3">
+                            <i class="fas fa-inbox fa-3x text-muted"></i>
+                        </div>
+                        <h4 class="mb-2">Aucune ressource disponible</h4>
+                        <p class="text-muted">Nous préparons de nouvelles ressources pour vous.</p>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+/* Custom Styles */
+.resources-section {
+    background-color: #f8f9fa;
+}
+
+.search-wrapper {
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.hover-shadow {
+    transition: all 0.3s ease;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+.icon-circle {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.bg-light-primary {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.file-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Card Styling */
+.card {
+    border: 1px solid rgba(0,0,0,0.05);
+}
+
+.card-title {
+    color: #333;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* Button Styling */
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    border-radius: 5px;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.btn-outline-primary {
+    border-radius: 5px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-footer .d-flex {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .card-footer .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .display-5 {
+        font-size: 2rem;
+    }
+}
+</style>
+
+<script>
+// Simple search functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchResources');
+    const resourceCards = document.querySelectorAll('.resource-card');
+    
+    if (searchInput && resourceCards.length > 0) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            
+            resourceCards.forEach(card => {
+                const title = card.querySelector('.card-title').textContent.toLowerCase();
+                const description = card.querySelector('.card-text').textContent.toLowerCase();
+                
+                if (searchTerm === '' || title.includes(searchTerm) || description.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
+    
+    // Add click effect to cards
+    document.querySelectorAll('.hover-shadow').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Only trigger if not clicking on a button or link
+            if (!e.target.closest('a') && !e.target.closest('button')) {
+                const link = this.querySelector('a.btn-primary');
+                if (link) {
+                    link.click();
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

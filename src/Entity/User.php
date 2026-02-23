@@ -25,7 +25,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column(type: 'string', length: 50)]
-    private string $role = 'etudiant'; // default role
+    private string $role = 'etudiant';
 
     #[ORM\Column(type: 'string')]
     private ?string $password = null;
@@ -33,135 +33,89 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'student', targetEntity: PatientFile::class)]
     private ?PatientFile $patientFile = null;
 
-    // -------------------- Ban logic --------------------
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $bannedUntil = null;
 
-    public function getBannedUntil(): ?\DateTimeInterface
-    {
-        return $this->bannedUntil;
-    }
+    // ------------------- EMAIL VERIFICATION -------------------
+    #[ORM\Column(type: 'boolean')]
+    private bool $isVerified = false;
 
-    public function setBannedUntil(?\DateTimeInterface $bannedUntil): self
-    {
-        $this->bannedUntil = $bannedUntil;
-        return $this;
-    }
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $verificationToken = null;
 
-    // Returns true if the user is currently banned
-    public function isBanned(): bool
-    {
-        return $this->bannedUntil !== null && $this->bannedUntil > new \DateTime();
-    }
+    // ------------------- TIMESTAMPS -------------------
+    #[ORM\Column(name: 'created_at', type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $createdAt = null;
 
-    // -------------------- Getters & Setters --------------------
+    // ------------------- FORGOT PASSWORD -------------------
+    #[ORM\Column(type: 'string', length: 6, nullable: true)]
+    private ?string $resetCode = null;
 
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+ #[ORM\Column(type: 'datetime', nullable: true)]
+private ?\DateTimeInterface $resetCodeExpiresAt = null;
 
-    public function getFirstName(): ?string
-    {
-        return $this->firstName;
-    }
+    // ------------------- Getters & Setters -------------------
 
-    public function setFirstName(string $firstName): self
-    {
-        $this->firstName = $firstName;
-        return $this;
-    }
+    public function getId(): ?int { return $this->id; }
 
-    public function getLastName(): ?string
-    {
-        return $this->lastName;
-    }
+    public function getFirstName(): ?string { return $this->firstName; }
+    public function setFirstName(string $firstName): self { $this->firstName = $firstName; return $this; }
 
-    public function setLastName(string $lastName): self
-    {
-        $this->lastName = $lastName;
-        return $this;
-    }
+    public function getLastName(): ?string { return $this->lastName; }
+    public function setLastName(string $lastName): self { $this->lastName = $lastName; return $this; }
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
+    public function getEmail(): ?string { return $this->email; }
+    public function setEmail(string $email): self { $this->email = $email; return $this; }
 
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
-        return $this;
-    }
-
-    public function getRole(): string
-    {
-        return $this->role;
-    }
-
-    public function setRole(string $role): self
-    {
+    public function getRole(): string { return $this->role; }
+    public function setRole(string $role): self {
         $allowedRoles = ['etudiant', 'psychologue', 'admin'];
-        if (!in_array($role, $allowedRoles)) {
+        if (!in_array($role, $allowedRoles, true)) {
             throw new \InvalidArgumentException("Invalid role: $role");
         }
         $this->role = $role;
         return $this;
     }
 
-    // -------------------- Symfony Security --------------------
+    public function getPassword(): string { return (string) $this->password; }
+    public function setPassword(string $password): self { $this->password = $password; return $this; }
 
-    public function getRoles(): array
-    {
-        $roleMap = [
-            'etudiant' => 'ROLE_ETUDIANT',
-            'psychologue' => 'ROLE_PSYCHOLOGUE',
-            'admin' => 'ROLE_ADMIN',
-        ];
+    public function getPatientFile(): ?PatientFile { return $this->patientFile; }
+    public function setPatientFile(?PatientFile $patientFile): self { $this->patientFile = $patientFile; return $this; }
 
-        return [$roleMap[$this->role] ?? 'ROLE_USER'];
+    public function getBannedUntil(): ?\DateTimeInterface { return $this->bannedUntil; }
+    public function setBannedUntil(?\DateTimeInterface $bannedUntil): self { $this->bannedUntil = $bannedUntil; return $this; }
+    public function isBanned(): bool { return $this->bannedUntil !== null && $this->bannedUntil > new \DateTime(); }
+
+    // ------------------- Forgot Password -------------------
+    public function getResetCode(): ?string { return $this->resetCode; }
+    public function setResetCode(?string $resetCode): self { $this->resetCode = $resetCode; return $this; }
+
+    public function getResetCodeExpiresAt(): ?\DateTimeInterface { return $this->resetCodeExpiresAt; }
+    public function setResetCodeExpiresAt(?\DateTimeInterface $expiresAt): self { $this->resetCodeExpiresAt = $expiresAt; return $this; }
+
+    // ------------------- Symfony Security -------------------
+    public function getRoles(): array {
+        return match ($this->role) {
+            'admin' => ['ROLE_ADMIN'],
+            'psychologue' => ['ROLE_PSYCHOLOGUE'],
+            'etudiant' => ['ROLE_ETUDIANT'],
+            default => ['ROLE_USER'],
+        };
     }
 
-    public function getUserIdentifier(): string
-    {
-        return (string) $this->email;
-    }
+    public function getUserIdentifier(): string { return (string) $this->email; }
 
-    public function getPassword(): string
-    {
-        return (string) $this->password;
-    }
+    // ------------------- Email Verification -------------------
+    public function isVerified(): bool { return $this->isVerified; }
+    public function setIsVerified(bool $verified): self { $this->isVerified = $verified; return $this; }
 
-    public function setPassword(string $password): self
-    {
-        $this->password = $password;
-        return $this;
-    }
+    public function getVerificationToken(): ?string { return $this->verificationToken; }
+    public function setVerificationToken(?string $token): self { $this->verificationToken = $token; return $this; }
 
-    public function getPatientFile(): ?PatientFile
-    {
-        return $this->patientFile;
-    }
+    // ------------------- Timestamps -------------------
+    public function getCreatedAt(): ?\DateTimeInterface { return $this->createdAt; }
+    public function setCreatedAt(?\DateTimeInterface $createdAt): self { $this->createdAt = $createdAt; return $this; }
 
-    public function setPatientFile(?PatientFile $patientFile): self
-    {
-        // unset the owning side of the relation if necessary
-        if ($patientFile === null && $this->patientFile !== null) {
-            $this->patientFile->setStudent(null);
-        }
-
-        // set the owning side of the relation if necessary
-        if ($patientFile !== null && $patientFile->getStudent() !== $this) {
-            $patientFile->setStudent($this);
-        }
-
-        $this->patientFile = $patientFile;
-
-        return $this;
-    }
-
-    public function eraseCredentials()
-    {
-        // Clear temporary sensitive data if any
-    }
+    public function eraseCredentials() { /* Clear sensitive data */ }
 }
