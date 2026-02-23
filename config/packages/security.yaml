@@ -56,6 +56,7 @@ security:
         - { path: ^/api/psychologue, roles: ROLE_PSYCHOLOGUE }
 
         # 🔐 LOGGED USERS
+        - { path: ^/test, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/redirect, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/logout, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/profile, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }

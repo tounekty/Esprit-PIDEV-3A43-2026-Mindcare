@@ -3,11 +3,12 @@
 namespace App\Form;
 
 use App\Entity\JournalEmotionnel;
-use App\Entity\Mood;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use App\Entity\Mood;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -18,6 +19,7 @@ class JournalEmotionnelType extends AbstractType
         $builder
             ->add('contenu', TextareaType::class, [
                 'label' => 'Votre pensée',
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control',
                     'rows' => 6,
@@ -28,23 +30,21 @@ class JournalEmotionnelType extends AbstractType
             ->add('dateecriture', DateTimeType::class, [
                 'label' => 'Date et heure',
                 'widget' => 'single_text',
-                'format' => 'yyyy-MM-dd HH:mm',
                 'input' => 'datetime',
-                'html5' => false,
+                'html5' => true,
+                'required' => true,
                 'attr' => [
-                    'class' => 'form-control'
+                    'class' => 'form-control',
+                    'type' => 'datetime-local'
                 ],
-                'row_attr' => ['class' => 'mb-4'],
-                'empty_data' => function() {
-                    return new \DateTime();
-                }
+                'row_attr' => ['class' => 'mb-4']
             ])
             ->add('mood', EntityType::class, [
-                'label' => 'Humeur associée',
                 'class' => Mood::class,
-                'choice_label' => function(Mood $mood) {
-                    return ucfirst($mood->getHumeur());
-                },
+                'choice_label' => 'humeur',
+                'label' => 'Humeur associée',
+                'placeholder' => 'Sélectionnez une humeur',
+                'required' => true,
                 'attr' => [
                     'class' => 'form-control'
                 ],

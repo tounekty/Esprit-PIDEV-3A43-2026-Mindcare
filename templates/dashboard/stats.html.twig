@@ -1,0 +1,189 @@
+{% extends "base.html.twig" %}
+
+{% block title %}Tableau de Bord - MindCare{% endblock %}
+
+{% block body %}
+<div class="container-fluid mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-1">
+                <i class="fas fa-star"></i> Tableau de Bord
+            </h1>
+            <p class="text-muted">Suivez votre progression et vos accomplissements</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ path('app_journal_emotionnel_new') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus-circle"></i> Nouvelle Entrée
+            </a>
+        </div>
+    </div>
+
+    <!-- Points et Statistiques principales -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card-body text-center">
+                    <div class="display-4 fw-bold mb-2">{{ user_stats.points }}</div>
+                    <p class="card-text mb-0">Points</p>
+                    <small>Continuez à écrire pour gagner plus</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <div class="card-body text-center">
+                    <div class="display-4 fw-bold mb-2">{{ user_stats.totalEntries }}</div>
+                    <p class="card-text mb-0">Entrées</p>
+                    <small>Vous progressez magnifiquement</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <div class="card-body text-center">
+                    <div class="display-4 fw-bold mb-2">
+                        🔥 {{ user_stats.consecutiveDays }}
+                    </div>
+                    <p class="card-text mb-0">Jours Consécutifs</p>
+                    <small>Vous êtes sur une belle lancée!</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Badges obtenus -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0"><i class="fas fa-trophy"></i> Vos Badges</h5>
+                </div>
+                <div class="card-body">
+                    {% if user_badges|length > 0 %}
+                        <div class="row">
+                            {% for badge, badgeInfo in user_badges %}
+                                <div class="col-md-3 col-sm-6 mb-3 text-center">
+                                    <div class="p-3 border rounded" style="background: #f8f9fa;">
+                                        <div class="display-1 mb-2">{{ badgeInfo.icon }}</div>
+                                        <h6 class="fw-bold">{{ badgeInfo.name }}</h6>
+                                        <small class="text-muted">{{ badgeInfo.description }}</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-star-half-alt"></i> 
+                            Commencez à écrire pour débloquer vos premiers badges!
+                        </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prochains badges -->
+    {% if next_badge %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-light border-bottom">
+                        <h5 class="mb-0"><i class="fas fa-target"></i> Prochain Badge</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            {% if next_badge == 'entries' %}
+                                <h6>10 Entrées - 📝</h6>
+                                <p class="text-muted">Vous avez écrit {{ user_stats.totalEntries }}/10 entrées</p>
+                            {% elseif next_badge == 'entries50' %}
+                                <h6>50 Entrées - ⭐</h6>
+                                <p class="text-muted">Vous avez écrit {{ user_stats.totalEntries }}/50 entrées</p>
+                            {% elseif next_badge == 'entries100' %}
+                                <h6>100 Entrées - 💎</h6>
+                                <p class="text-muted">Vous avez écrit {{ user_stats.totalEntries }}/100 entrées</p>
+                            {% elseif next_badge == 'days7' %}
+                                <h6>7 Jours d'Affilée - 🔥</h6>
+                                <p class="text-muted">Vous êtes à {{ user_stats.consecutiveDays }}/7 jours</p>
+                            {% endif %}
+                        </div>
+                        <div class="progress" style="height: 25px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ next_badge_progress }}%; font-size: 14px; line-height: 25px;"
+                                 aria-valuenow="{{ next_badge_progress }}" aria-valuemin="0" aria-valuemax="100">
+                                {{ next_badge_progress }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Sélection des templates -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light border-bottom">
+                    <h5 class="mb-0"><i class="fas fa-lightbulb"></i> Idées pour Écrire</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">Besoin d'inspiration? Choisissez un template pour démarrer votre journée:</p>
+                    
+                    <div class="row">
+                        {% for template in templates %}
+                            <div class="col-md-6 col-lg-4 mb-3">
+                                <div class="card h-100 border-0 shadow-sm hover-lifted" style="cursor: pointer; transition: all 0.3s ease;">
+                                    <div class="card-body" onclick="startWithTemplate('{{ template.prompt }}')">
+                                        <h6 class="card-title">
+                                            <span style="font-size: 1.5em; margin-right: 8px;">{{ template.getCategoryIcon() }}</span>
+                                            {{ template.title }}
+                                        </h6>
+                                        <p class="card-text text-muted small">{{ template.description }}</p>
+                                        <small class="text-primary">
+                                            <i class="fas fa-arrow-right"></i> Utiliser ce template
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Boutons de navigation -->
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-outline-primary btn-lg w-100">
+                <i class="fas fa-book"></i> Voir Mes Entrées
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a href="{{ path('app_mood_index') }}" class="btn btn-outline-info btn-lg w-100">
+                <i class="fas fa-smile"></i> Voir Mes Humeurs
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .hover-lifted:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    .display-1 {
+        line-height: 1;
+    }
+</style>
+
+<script>
+    function startWithTemplate(prompt) {
+        // Store the template in sessionStorage to access it from the form
+        sessionStorage.setItem('journalTemplate', prompt);
+        // Navigate to the new journal entry form
+        window.location.href = "{{ path('app_journal_emotionnel_new') }}";
+    }
+</script>
+{% endblock %}

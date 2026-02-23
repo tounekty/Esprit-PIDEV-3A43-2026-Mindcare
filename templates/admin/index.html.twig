@@ -151,6 +151,30 @@
         </div>
     </div>
 
+    {# Quick Navigation Buttons #}
+    <div class="row mt-4 mb-4">
+        <div class="col-12">
+            <h5 style="margin-bottom: 15px; color: #333;">Quick Access</h5>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                <a href="{{ path('admin_moods') }}" class="btn btn-primary" style="background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none;">
+                    <i class="feather-smile"></i> Moods
+                </a>
+                <a href="{{ path('admin_journals') }}" class="btn btn-info" style="background: #1abc9c; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none;">
+                    <i class="feather-book"></i> Journals
+                </a>
+                <a href="{{ path('admin_patient_file_index') }}" class="btn btn-success" style="background: #2ecc71; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none;">
+                    <i class="feather-file-text"></i> Patient Files
+                </a>
+                <a href="{{ path('sujet_forum_index') }}" class="btn btn-warning" style="background: #f39c12; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none;">
+                    <i class="feather-message-circle"></i> Forum
+                </a>
+                <a href="{{ path('admin_psychological_alerts_index') }}" class="btn btn-danger" style="background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 5px; text-decoration: none; font-weight: bold;">
+                    <i class="feather-alert-triangle"></i> 🚨 Alertes Psychologiques
+                </a>
+            </div>
+        </div>
+    </div>
+
     {# Charts Section #}
     <div class="row">
         {# Role Distribution Chart #}

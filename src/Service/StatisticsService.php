@@ -114,31 +114,44 @@ class StatisticsService
     {
         $conn = $this->em->getConnection();
         
-        // Get registration data for last 12 months
-        $registrations = $conn->executeQuery(
-            "SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count 
-             FROM user 
-             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
-             GROUP BY DATE_FORMAT(created_at, '%Y-%m')
-             ORDER BY month ASC"
-        )->fetchAllAssociative();
+        // Get registration data for last 12 months - SQLite compatible
+        try {
+            $registrations = $conn->executeQuery(
+                "SELECT strftime('%Y-%m', created_at) as month, COUNT(*) as count 
+                 FROM user 
+                 WHERE created_at >= datetime('now', '-12 months')
+                 GROUP BY strftime('%Y-%m', created_at)
+                 ORDER BY month ASC"
+            )->fetchAllAssociative();
 
-        $months = [];
-        $counts = [];
+            $months = [];
+            $counts = [];
 
-        foreach ($registrations as $reg) {
-            $months[] = $reg['month'];
-            $counts[] = (int)$reg['count'];
+            foreach ($registrations as $reg) {
+                $months[] = $reg['month'];
+                $counts[] = (int)$reg['count'];
+            }
+
+            return [
+                'labels' => $months,
+                'data' => $counts,
+                'borderColor' => '#3498db',
+                'backgroundColor' => 'rgba(52, 152, 219, 0.1)',
+                'borderWidth' => 2,
+                'fill' => true,
+                'tension' => 0.4,
+            ];
+        } catch (\Exception $e) {
+            // Return empty chart if query fails
+            return [
+                'labels' => [],
+                'data' => [],
+                'borderColor' => '#3498db',
+                'backgroundColor' => 'rgba(52, 152, 219, 0.1)',
+                'borderWidth' => 2,
+                'fill' => true,
+                'tension' => 0.4,
+            ];
         }
-
-        return [
-            'labels' => $months,
-            'data' => $counts,
-            'borderColor' => '#3498db',
-            'backgroundColor' => 'rgba(52, 152, 219, 0.1)',
-            'borderWidth' => 2,
-            'fill' => true,
-            'tension' => 0.4,
-        ];
     }
 }

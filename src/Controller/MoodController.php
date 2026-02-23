@@ -7,6 +7,7 @@ use App\Form\MoodType;
 use App\Repository\MoodRepository;
 use App\Repository\JournalEmotionnelRepository;
 use App\Service\MeditationService;
+use App\Service\AIJournalService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,8 +21,8 @@ final class MoodController extends AbstractController
     public function index(MoodRepository $moodRepository, JournalEmotionnelRepository $journalRepository, Request $request): Response
     {
         $search = $request->query->get('search');
-        $sort = $request->query->get('sort', 'id');
-        $direction = $request->query->get('direction', 'asc');
+        $sort = $request->query->get('sort', 'datemood');
+        $direction = $request->query->get('direction', 'desc');
 
         $qb = $moodRepository->createQueryBuilder('m');
 
@@ -35,11 +36,11 @@ final class MoodController extends AbstractController
         $allowedDirections = ['asc', 'desc'];
         
         if (!in_array($sort, $allowedSorts)) {
-            $sort = 'id';
+            $sort = 'datemood';
         }
         
         if (!in_array($direction, $allowedDirections)) {
-            $direction = 'asc';
+            $direction = 'desc';
         }
         
         $qb->orderBy('m.'.$sort, $direction);
@@ -53,27 +54,73 @@ final class MoodController extends AbstractController
         $dates = [];
         $intensites = [];
         $humeurs = [];
+        $moodCounts = [
+            'heureux' => 0,
+            'triste' => 0,
+            'colere' => 0,
+            'stresse' => 0,
+            'neutre' => 0
+        ];
 
         foreach ($moods as $mood) {
             $dates[] = $mood->getDatemood() ? $mood->getDatemood()->format('Y-m-d') : '';
             $intensites[] = $mood->getIntensite();
             $humeurs[] = $mood->getHumeur();
+            if (isset($moodCounts[$mood->getHumeur()])) {
+                $moodCounts[$mood->getHumeur()]++;
+            }
         }
+
+        // Calculer les statistiques
+        $stats = [
+            'total' => count($moods),
+            'moodCounts' => $moodCounts,
+            'moodPercentages' => [],
+            'averageIntensity' => 0,
+            'maxIntensity' => 0,
+            'minIntensity' => 0,
+        ];
+
+        if (!empty($moods)) {
+            $totalIntensity = array_sum($intensites);
+            $stats['averageIntensity'] = round($totalIntensity / count($moods), 1);
+            $stats['maxIntensity'] = max($intensites);
+            $stats['minIntensity'] = min($intensites);
+
+            foreach ($moodCounts as $mood => $count) {
+                $stats['moodPercentages'][$mood] = $stats['total'] > 0 ? round(($count / $stats['total']) * 100) : 0;
+            }
+        }
+
+        // Fetch points and badges
+        $points = 100; // Example points, replace with actual logic
+        $badges = ['Beginner', 'Explorer']; // Example badges, replace with actual logic
+
+        // Fetch 'metiers avancée' data
+        $metiersAvancee = [
+            'title' => 'Amélioration des compétences',
+            'description' => 'Des outils pour rendre votre travail plus avancé et efficace.',
+            'tips' => [
+                'Suivez vos humeurs quotidiennement.',
+                'Analysez les pics d’intensité émotionnelle.',
+                'Utilisez des techniques de relaxation pour équilibrer vos émotions.',
+            ],
+        ];
 
         return $this->render('mood/index.html.twig', [
             'moods' => $moods,
-            'journal_emotionnels' => $journalEmotionnels,
-            'dates' => json_encode($dates),
-            'intensites' => json_encode($intensites),
-            'humeurs' => json_encode($humeurs),
-            'direction' => $direction,
-            'sort' => $sort,
+            'stats' => $stats,
+            'points' => $points,
+            'badges' => $badges,
             'search' => $search,
+            'sort' => $sort,
+            'direction' => $direction,
+            'metiers_avancee' => $metiersAvancee,
         ]);
     }
 
     #[Route('/new', name: 'app_mood_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, AIJournalService $aiService): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -86,12 +133,30 @@ final class MoodController extends AbstractController
             $entityManager->persist($mood);
             $entityManager->flush();
 
-            return $this->redirectToRoute('app_mood_index', [], Response::HTTP_SEE_OTHER);
+            // Analyze mood with AI
+            $aiAnalysis = $aiService->analyzJournal($mood->getHumeur());
+
+            return $this->render('mood/new_success.html.twig', [
+                'mood' => $mood,
+                'ai_analysis' => $aiAnalysis,
+                'stats' => [
+                    'total' => 0,
+                    'moodCounts' => ['heureux' => 0, 'triste' => 0, 'colere' => 0, 'stresse' => 0, 'neutre' => 0],
+                    'moodPercentages' => ['heureux' => 0, 'triste' => 0, 'colere' => 0, 'stresse' => 0, 'neutre' => 0],
+                    'averageIntensity' => 0,
+                ],
+            ]);
         }
 
         return $this->render('mood/new.html.twig', [
             'mood' => $mood,
             'form' => $form,
+            'stats' => [
+                'total' => 0,
+                'moodCounts' => ['heureux' => 0, 'triste' => 0, 'colere' => 0, 'stresse' => 0, 'neutre' => 0],
+                'moodPercentages' => ['heureux' => 0, 'triste' => 0, 'colere' => 0, 'stresse' => 0, 'neutre' => 0],
+                'averageIntensity' => 0,
+            ],
         ]);
     }
 

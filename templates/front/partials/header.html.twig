@@ -43,13 +43,15 @@
                             <nav>
                                 <ul id="navigation">
                                     <li><a class="active" href="{{ path('app_home') }}">Accueil</a></li>
+                                    <li><a href="{{ path('app_dashboard_stats') }}">Dashboard</a></li>
+                                    <li><a href="{{ path('app_journal_emotionnel_index') }}">Journal</a></li>
+                                    <li><a href="{{ path('app_mood_index') }}">Mood</a></li>
                                     <li><a href="{{ path('app_reservation') }}">Prendre RDV</a></li>
                                     <li><a href="{{ path('student_mes_rendezvous') }}">Mes RDV</a></li>
                                     <li><a href="{{ path('student_patient_file') }}">Mon dossier médical</a></li>
                                     <li><a href="{{ path('resource_index') }}">Ressources</a></li>
                                     <li><a href="{{ path('front_events_index') }}">Evenements</a></li>
                                     <li><a href="{{ path('front_forum_index') }}">Forum</a></li>
-                                    <li><a href="{{ path('app_mood_index') }}">Mood</a></li>
                                 </ul>
                             </nav>
                         </div>
@@ -96,6 +98,14 @@
                                         </div>
                                         
                                         <ul class="list-unstyled mb-0">
+                                            <li>
+                                                <a href="{{ path('app_dashboard_stats') }}" 
+                                                   class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 rounded-2"
+                                                   style="transition: all 0.2s ease;">
+                                                    <i class="fas fa-star" style="color: #ffc107; width: 20px;"></i>
+                                                    <span>Tableau de Bord</span>
+                                                </a>
+                                            </li>
                                             <li>
                                                 <a href="{{ path('app_update_profile') }}" 
                                                    class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 rounded-2"

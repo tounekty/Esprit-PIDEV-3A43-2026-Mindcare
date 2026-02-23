@@ -26,12 +26,11 @@ class JournalEmotionnel
     #[ORM\Column]
     #[Assert\NotBlank(message: "La date est obligatoire.")]
     #[Assert\Type(type: "\DateTimeInterface", message: "La date doit être un objet DateTime valide.")]
-    #[Assert\LessThanOrEqual("today", message: "La date ne peut pas être dans le futur.")]
     private ?\DateTime $dateecriture = null;
 
     #[ORM\ManyToOne(targetEntity: Mood::class, inversedBy: 'journals')]
-    #[ORM\JoinColumn(nullable: false, onDelete: "CASCADE")]
-    #[Assert\NotBlank(message: "L'humeur est obligatoire.")]
+    #[ORM\JoinColumn(nullable: true, onDelete: "CASCADE")]
+    #[Assert\NotBlank(message: "L'humeur est obligatoire.", groups: ['Default'])]
     private ?Mood $mood = null;
 
     

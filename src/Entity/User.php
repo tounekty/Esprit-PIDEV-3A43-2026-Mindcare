@@ -33,6 +33,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'student', targetEntity: PatientFile::class)]
     private ?PatientFile $patientFile = null;
 
+    #[ORM\OneToOne(mappedBy: 'user', targetEntity: UserStats::class, cascade: ['persist', 'remove'])]
+    private ?UserStats $stats = null;
+
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $bannedUntil = null;
 
@@ -82,6 +85,9 @@ private ?\DateTimeInterface $resetCodeExpiresAt = null;
 
     public function getPatientFile(): ?PatientFile { return $this->patientFile; }
     public function setPatientFile(?PatientFile $patientFile): self { $this->patientFile = $patientFile; return $this; }
+
+    public function getStats(): ?UserStats { return $this->stats; }
+    public function setStats(?UserStats $stats): self { $this->stats = $stats; return $this; }
 
     public function getBannedUntil(): ?\DateTimeInterface { return $this->bannedUntil; }
     public function setBannedUntil(?\DateTimeInterface $bannedUntil): self { $this->bannedUntil = $bannedUntil; return $this; }

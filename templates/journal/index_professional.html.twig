@@ -1,6 +1,6 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Suivi des Humeurs | MindCare{% endblock %}
+{% block title %}Journal Émotionnel | MindCare{% endblock %}
 
 {% block stylesheets %}
     {{ parent() }}
@@ -244,49 +244,14 @@
             text-decoration: none;
         }
 
-        /* Navigation Buttons */
-        .header-nav {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-        }
-
-        .nav-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid white;
-            color: white;
-            padding: 0.6rem 1.3rem;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .nav-btn:hover {
-            background: white;
-            color: #7FBFFF;
-        }
-
-        .nav-btn.active {
-            background: white;
-            color: #7FBFFF;
-        }
-
-        /* Mood Grid */
-        .moods-grid {
+        /* Journal Grid */
+        .journal-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
             gap: 1.5rem;
         }
 
-        .mood-card {
+        .journal-card {
             background: white;
             border: 1px solid #E2F0FF;
             border-radius: 12px;
@@ -297,92 +262,87 @@
             flex-direction: column;
         }
 
-        .mood-card:hover {
+        .journal-card:hover {
             transform: translateY(-6px);
             box-shadow: 0 12px 30px rgba(127, 191, 255, 0.15);
         }
 
-        .mood-card-header {
+        .journal-card-header {
             background: linear-gradient(135deg, rgba(127, 191, 255, 0.1) 0%, rgba(168, 216, 255, 0.1) 100%);
             padding: 1.5rem;
             border-bottom: 1px solid #E2F0FF;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
 
-        .mood-emoji-large {
-            font-size: 2.5rem;
-        }
-
-        .mood-header-text h5 {
+        .journal-title {
             font-size: 1.1rem;
             font-weight: 700;
             color: #1a365d;
-            margin: 0 0 0.25rem 0;
+            margin-bottom: 0.25rem;
         }
 
-        .mood-header-text p {
+        .journal-meta {
             font-size: 0.85rem;
             color: #718096;
-            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
-        .intensity-badge {
-            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
-            color: white;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
-            font-weight: 700;
-            font-size: 0.9rem;
+        .journal-meta i {
+            color: #7FBFFF;
         }
 
-        .mood-card-body {
+        .journal-card-body {
             padding: 1.5rem;
             flex: 1;
         }
 
-        .mood-info {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
-            color: #718096;
+        .mood-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.2) 0%, rgba(168, 216, 255, 0.2) 100%);
+            color: #7FBFFF;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
             margin-bottom: 1rem;
         }
 
-        .mood-info i {
+        .journal-preview {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #4A5568;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .journal-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+            color: #718096;
+            padding: 1rem 0;
+            border-top: 1px solid #E2F0FF;
+            border-bottom: 1px solid #E2F0FF;
+        }
+
+        .journal-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .journal-stat i {
             color: #7FBFFF;
         }
 
-        .intensity-bar {
-            background: #E8F0FF;
-            border-radius: 10px;
-            height: 6px;
-            overflow: hidden;
-            margin: 1rem 0;
-        }
-
-        .intensity-fill {
-            background: linear-gradient(90deg, #7FBFFF, #A8D8FF);
-            height: 100%;
-            transition: width 0.3s;
-        }
-
-        .journal-count {
-            font-size: 0.85rem;
-            color: #718096;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #E2F0FF;
-        }
-
-        .mood-actions {
+        .journal-actions {
             display: flex;
             gap: 0.5rem;
             margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #E2F0FF;
         }
 
         .btn-sm {
@@ -442,50 +402,6 @@
             color: #A0AEC0;
             margin-bottom: 1.5rem;
         }
-
-        /* Metiers Avancée */
-        .metiers-avancee {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            margin-bottom: 30px;
-        }
-
-        .metiers-title {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #1565c0;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .metiers-description {
-            font-size: 1.2rem;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .tips-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .tip-item {
-            font-size: 1rem;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-
-        .tip-item i {
-            color: #28a745;
-            margin-right: 10px;
-        }
-
-        .metiers-cta .btn {
-            margin-top: 15px;
-        }
     </style>
 {% endblock %}
 
@@ -493,17 +409,8 @@
 <div class="page-container">
     <!-- Header -->
     <div class="header-hero">
-        <h1>Suivi des Humeurs</h1>
-        <p>Points: {{ points }}</p>
-        <p>Badges: {{ badges|join(', ') }}</p>
-        <div class="header-nav">
-            <a href="{{ path('app_mood_index') }}" class="nav-btn active">
-                <i class="fas fa-heart"></i> Humeurs
-            </a>
-            <a href="{{ path('app_journal_emotionnel_index') }}" class="nav-btn">
-                <i class="fas fa-book"></i> Journal
-            </a>
-        </div>
+        <h1><i class="fas fa-book me-2"></i>Journal Émotionnel</h1>
+        <p>Explorez vos pensées et émotions au fil du temps</p>
     </div>
 
     <!-- Controls -->
@@ -513,12 +420,12 @@
             <div class="search-sort-row">
                 <div class="input-group">
                     <span class="input-group-text"><i class="fas fa-search"></i></span>
-                    <input type="text" name="search" class="form-control" placeholder="Rechercher par humeur..." value="{{ search }}">
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher par contenu ou humeur..." value="{{ search }}">
                 </div>
                 <select name="sort" class="form-select">
-                    <option value="datemood" {{ sort == 'datemood' ? 'selected' : '' }}>Date</option>
-                    <option value="humeur" {{ sort == 'humeur' ? 'selected' : '' }}>Humeur</option>
-                    <option value="intensite" {{ sort == 'intensite' ? 'selected' : '' }}>Intensité</option>
+                    <option value="dateecriture" {{ sort == 'dateecriture' ? 'selected' : '' }}>Date</option>
+                    <option value="mood" {{ sort == 'mood' ? 'selected' : '' }}>Humeur</option>
+                    <option value="id" {{ sort == 'id' ? 'selected' : '' }}>ID</option>
                 </select>
                 <select name="direction" class="form-select">
                     <option value="desc" {{ direction == 'desc' ? 'selected' : '' }}>Décroissant</option>
@@ -530,26 +437,26 @@
     </div>
 
     <!-- Statistics -->
-    {% if stats is defined %}
+    {% if stats is defined and stats and stats.total > 0 %}
     <div class="stats-section">
         <div class="stats-grid">
             <div class="stat-card">
-                <div class="stat-label"><i class="fas fa-list me-1"></i>Total</div>
+                <div class="stat-label"><i class="fas fa-list me-1"></i>Total Entrées</div>
                 <div class="stat-value">{{ stats.total }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label"><i class="fas fa-average me-1"></i>Intensité Moy.</div>
-                <div class="stat-value">{{ stats.averageIntensity }}</div>
+                <div class="stat-label"><i class="fas fa-pencil me-1"></i>Mots Moyens</div>
+                <div class="stat-value">{{ stats.averageLength }}</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label"><i class="fas fa-chart-bar me-1"></i>Plage</div>
-                <div class="stat-value">{{ stats.minIntensity }}-{{ stats.maxIntensity }}</div>
+                <div class="stat-label"><i class="fas fa-calendar me-1"></i>Densité</div>
+                <div class="stat-value">{{ stats.total > 0 ? (stats.total / (((stats.dates|filter('') )|length / stats.total) | max(1))) : 0 }}</div>
             </div>
         </div>
     </div>
 
     <!-- Mood Distribution -->
-    {% if stats is defined and stats and stats.total > 0 %}
+    {% if stats.total > 0 %}
     <div class="distribution-card">
         <div class="distribution-title"><i class="fas fa-pie-chart me-2"></i>Distribution des Humeurs</div>
         <div class="mood-distribution">
@@ -573,54 +480,54 @@
     {% endif %}
     {% endif %}
 
-    <!-- Moods Content -->
+    <!-- Journal Content -->
     <div class="content-header">
-        <h2 class="content-title"><i class="fas fa-list me-2"></i>Mes Humeurs</h2>
-        <a href="{{ path('app_mood_new') }}" class="add-btn">
-            <i class="fas fa-plus-circle"></i>Nouvelle Humeur
+        <h2 class="content-title"><i class="fas fa-list me-2"></i>Mes Entrées</h2>
+        <a href="{{ path('app_journal_emotionnel_new') }}" class="add-btn">
+            <i class="fas fa-plus-circle"></i>Nouvelle Entrée
         </a>
     </div>
 
-    {% if moods|length > 0 %}
-        <div class="moods-grid">
-            {% for mood in moods %}
-            <div class="mood-card">
-                <div class="mood-card-header">
-                    <div class="d-flex align-items-center gap-2" style="flex: 1;">
-                        <div class="mood-emoji-large">
-                            {% if mood.humeur == 'heureux' %} 😊
-                            {% elseif mood.humeur == 'triste' %} 😢
-                            {% elseif mood.humeur == 'colere' %} 😠
-                            {% elseif mood.humeur == 'stresse' %} 😰
-                            {% else %} 😐
-                            {% endif %}
-                        </div>
-                        <div class="mood-header-text">
-                            <h5>{% if mood.humeur == 'heureux' %}Heureux{% elseif mood.humeur == 'triste' %}Triste{% elseif mood.humeur == 'colere' %}En colère{% elseif mood.humeur == 'stresse' %}Stressé{% else %}Neutre{% endif %}</h5>
-                            <p><i class="far fa-calendar me-1"></i>{{ mood.datemood|date('d/m/Y H:i') }}</p>
-                        </div>
+    {% if journal_emotionnels|length > 0 %}
+        <div class="journal-grid">
+            {% for entry in journal_emotionnels %}
+            <div class="journal-card">
+                <div class="journal-card-header">
+                    <h5 class="journal-title">Entrée #{{ entry.id }}</h5>
+                    <div class="journal-meta">
+                        <i class="far fa-calendar"></i>
+                        <span>{{ entry.dateecriture|date('d/m/Y') }} à {{ entry.dateecriture|date('H:i') }}</span>
                     </div>
-                    <div class="intensity-badge">{{ mood.intensite }}/5</div>
                 </div>
-                <div class="mood-card-body">
-                    <div class="mood-info">
-                        <i class="fas fa-gauge"></i>
-                        <span>Intensité</span>
-                    </div>
-                    <div class="intensity-bar">
-                        <div class="intensity-fill" style="width: {{ mood.intensite * 20 }}%;"></div>
-                    </div>
-                    {% if mood.journals|length > 0 %}
-                    <div class="journal-count">
-                        <i class="fas fa-book me-1"></i>{{ mood.journals|length }} entrée{{ mood.journals|length > 1 ? 's' : '' }}
+                <div class="journal-card-body">
+                    {% if entry.mood %}
+                    <div class="mood-badge">
+                        {% if entry.mood.humeur == 'heureux' %} 😊 Heureux
+                        {% elseif entry.mood.humeur == 'triste' %} 😢 Triste
+                        {% elseif entry.mood.humeur == 'colere' %} 😠 En colère
+                        {% elseif entry.mood.humeur == 'stresse' %} 😰 Stressé
+                        {% else %} 😐 Neutre
+                        {% endif %}
                     </div>
                     {% endif %}
-                    <div class="mood-actions">
-                        <a href="{{ path('app_mood_show', {'id': mood.id}) }}" class="btn-sm btn-view">
-                            <i class="fas fa-eye me-1"></i> Voir
+                    
+                    <div class="journal-preview">
+                        {{ entry.contenu|length > 200 ? entry.contenu|slice(0, 200) ~ '...' : entry.contenu }}
+                    </div>
+                    
+                    <div class="journal-stats">
+                        <div class="journal-stat">
+                            <i class="fas fa-pen-fancy"></i>
+                            <span>{{ (entry.contenu|split(' ')|length) }} mots</span>
+                        </div>
+                    </div>
+                    
+                    <div class="journal-actions">
+                        <a href="{{ path('app_journal_emotionnel_show', {'id': entry.id}) }}" class="btn-sm btn-view">
+                            <i class="fas fa-eye me-1"></i> Lire
                         </a>
-                        <a href="{{ path('app_mood_edit', {'id': mood.id}) }}" class="btn-sm btn-edit">
-                            <i class="fas fa-edit me-1"></i> Éditer
+                        <a href="{{ path('app_journal_emotionnel_edit', {'id': entry.id}) }}" class="btn-sm btn-edit">
+                            <i class="fas fa-edit me-1"></i> Modifier
                         </a>
                     </div>
                 </div>
@@ -629,11 +536,11 @@
         </div>
     {% else %}
         <div class="empty-state">
-            <i class="fas fa-heartbeat"></i>
-            <h3>Aucune humeur enregistrée</h3>
-            <p>Commencez à suivre votre bien-être émotionnel dès aujourd'hui!</p>
-            <a href="{{ path('app_mood_new') }}" class="add-btn">
-                <i class="fas fa-plus-circle"></i>Créer une Humeur
+            <i class="fas fa-feather"></i>
+            <h3>Aucune entrée de journal</h3>
+            <p>Commencez à documenter vos pensées et émotions!</p>
+            <a href="{{ path('app_journal_emotionnel_new') }}" class="add-btn">
+                <i class="fas fa-plus-circle"></i>Créer une Entrée
             </a>
         </div>
     {% endif %}
