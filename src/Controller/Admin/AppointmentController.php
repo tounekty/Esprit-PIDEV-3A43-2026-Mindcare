@@ -49,6 +49,10 @@ class AppointmentController extends AbstractController
             $acceptedCount = $appointmentRepository->countByPsychologueAndStatus($user, 'accepted');
             $refusedCount = $appointmentRepository->countByPsychologueAndStatus($user, 'refused');
             $cancelledCount = $appointmentRepository->countByPsychologueAndStatus($user, 'cancelled');
+            $inProgressCount = $appointmentRepository->countByPsychologueAndStatus($user, 'in_progress');
+            $completedCount = $appointmentRepository->countByPsychologueAndStatus($user, 'completed');
+            $archivedCount = $appointmentRepository->countByPsychologueAndStatus($user, 'archived');
+            $absentCount = $appointmentRepository->countByPsychologueAndStatus($user, 'absent');
             
             // Get accepted appointments for calendar
             $acceptedAppointments = $appointmentRepository->findBy(['psychologue' => $user, 'status' => 'accepted'], ['date' => 'ASC']);
@@ -59,6 +63,10 @@ class AppointmentController extends AbstractController
                 'acceptedCount' => $acceptedCount,
                 'refusedCount' => $refusedCount,
                 'cancelledCount' => $cancelledCount,
+                'inProgressCount' => $inProgressCount,
+                'completedCount' => $completedCount,
+                'archivedCount' => $archivedCount,
+                'absentCount' => $absentCount,
                 'acceptedAppointments' => $acceptedAppointments,
                 'isPsychologue' => true,
                 'currentStatus' => $statusFilter,
@@ -82,6 +90,10 @@ class AppointmentController extends AbstractController
             $acceptedCount = count($appointmentRepository->findBy(['status' => 'accepted']));
             $refusedCount = count($appointmentRepository->findBy(['status' => 'refused']));
             $cancelledCount = count($appointmentRepository->findBy(['status' => 'cancelled']));
+            $inProgressCount = count($appointmentRepository->findBy(['status' => 'in_progress']));
+            $completedCount = count($appointmentRepository->findBy(['status' => 'completed']));
+            $archivedCount = count($appointmentRepository->findBy(['status' => 'archived']));
+            $absentCount = count($appointmentRepository->findBy(['status' => 'absent']));
             
             return $this->render('admin/rdv/index.html.twig', [
                 'appointments' => $appointments,
@@ -89,6 +101,10 @@ class AppointmentController extends AbstractController
                 'acceptedCount' => $acceptedCount,
                 'refusedCount' => $refusedCount,
                 'cancelledCount' => $cancelledCount,
+                'inProgressCount' => $inProgressCount,
+                'completedCount' => $completedCount,
+                'archivedCount' => $archivedCount,
+                'absentCount' => $absentCount,
                 'isPsychologue' => false,
                 'currentStatus' => $statusFilter,
                 'currentSearch' => $searchQuery,
@@ -244,6 +260,67 @@ class AppointmentController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_rdv_pending');
+    }
+
+    #[Route('/admin/rdv/{id}/mark-absent', name: 'admin_rdv_mark_absent', methods: ['POST'])]
+    public function markAbsent(Appointment $appointment, EntityManagerInterface $em, MailerInterface $mailer): Response
+    {
+        $user = $this->getUser();
+        
+        // Only psychologist of this appointment can mark absent
+        if (!$user instanceof User || $appointment->getPsychologue()->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        // Can only mark absent if in_progress or completed
+        if (!in_array($appointment->getStatus(), ['in_progress', 'completed'])) {
+            $this->addFlash('error', 'Impossible de marquer comme absent. Statut actuel : ' . $appointment->getStatus());
+            return $this->redirectToRoute('admin_rdv_index');
+        }
+
+        $appointment->setStatus('absent');
+        $em->flush();
+
+        // Notify student by email
+        $student = $appointment->getEtudiant();
+        if ($student && $student->getEmail()) {
+            $email = (new Email())
+                ->from('noreply@mindcare.com')
+                ->to($student->getEmail())
+                ->subject('Rendez-vous manqué')
+                ->html('<p>Bonjour ' . $student->getFirstName() . ',</p>
+                        <p>Nous constatons que vous n\'avez pas assisté à votre rendez-vous prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . ' avec <strong>' . $appointment->getPsychologue()->getFirstName() . ' ' . $appointment->getPsychologue()->getLastName() . '</strong>.</p>
+                        <p>Si vous avez eu un empêchement, merci de nous contacter pour reprogrammer.</p>
+                        <p>Cordialement,<br>L\'équipe MindCare</p>');
+
+            $mailer->send($email);
+        }
+
+        $this->addFlash('success', 'Rendez-vous marqué comme "Patient absent".');
+        return $this->redirectToRoute('admin_rdv_index');
+    }
+
+    #[Route('/admin/rdv/{id}/undo-absent', name: 'admin_rdv_undo_absent', methods: ['POST'])]
+    public function undoAbsent(Appointment $appointment, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+        
+        // Only psychologist of this appointment can undo
+        if (!$user instanceof User || $appointment->getPsychologue()->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        if ($appointment->getStatus() !== 'absent') {
+            $this->addFlash('error', 'Ce rendez-vous n\'est pas marqué comme absent.');
+            return $this->redirectToRoute('admin_rdv_index');
+        }
+
+        // Return to completed (safest default)
+        $appointment->setStatus('completed');
+        $em->flush();
+
+        $this->addFlash('success', 'Statut "Absent" annulé. Rendez-vous marqué comme terminé.');
+        return $this->redirectToRoute('admin_rdv_index');
     }
 
     #[Route('/admin/rdv/{id}/edit', name: 'admin_rdv_edit', methods: ['GET','POST'])]

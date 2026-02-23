@@ -30,6 +30,10 @@
                        class="btn btn-sm {{ currentStatus == 'cancelled' ? 'btn-secondary' : 'btn-outline-secondary' }}">
                         Annulés
                     </a>
+                    <a href="{{ path('student_mes_rendezvous', {status: 'completed', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                       class="btn btn-sm {{ currentStatus == 'completed' ? 'btn-info' : 'btn-outline-info' }}">
+                        Terminés
+                    </a>
                 </div>
             </div>
             <div class="col-md-4">
@@ -102,6 +106,14 @@
                                         <span class="badge bg-danger">Refusé</span>
                                     {% elseif appointment.getStatus() == 'cancelled' %}
                                         <span class="badge bg-secondary">Annulé</span>
+                                    {% elseif appointment.getStatus() == 'in_progress' %}
+                                        <span class="badge bg-primary">En cours</span>
+                                    {% elseif appointment.getStatus() == 'completed' %}
+                                        <span class="badge bg-info">Terminé</span>
+                                    {% elseif appointment.getStatus() == 'absent' %}
+                                        <span class="badge bg-warning">Rendez-vous manqué</span>
+                                    {% elseif appointment.getStatus() == 'archived' %}
+                                        <span class="badge bg-dark">Archivé</span>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -115,8 +127,14 @@
                                                 <button class="btn btn-sm btn-danger">Annuler</button>
                                             </form>
                                         </div>
+                                    {% elseif appointment.getStatus() == 'in_progress' %}
+                                        <span class="text-muted small"><i class="fa fa-clock me-1"></i>Séance en cours</span>
+                                    {% elseif appointment.getStatus() == 'absent' %}
+                                        <span class="text-warning small"><i class="fa fa-exclamation-triangle me-1"></i>Vous étiez absent</span>
+                                    {% elseif appointment.getStatus() in ['completed', 'archived'] %}
+                                        <span class="text-muted small"><i class="fa fa-check me-1"></i>Terminé</span>
                                     {% else %}
-                                        -
+                                        <span class="text-muted">-</span>
                                     {% endif %}
                                 </td>
                             </tr>
