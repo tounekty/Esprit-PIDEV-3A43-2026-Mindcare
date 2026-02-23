@@ -43,6 +43,7 @@ security:
         - { path: ^/reset-password, roles: PUBLIC_ACCESS }
         - { path: ^/resend-code, roles: PUBLIC_ACCESS }
         - { path: ^/verify-email, roles: PUBLIC_ACCESS }
+        - { path: ^/cron, roles: PUBLIC_ACCESS }  # Cron webhook endpoint
 
         
 
