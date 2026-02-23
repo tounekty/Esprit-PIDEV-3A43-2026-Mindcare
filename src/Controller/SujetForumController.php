@@ -3,7 +3,9 @@
 namespace App\Controller;
 
 use App\Entity\SujetForum;
+use App\Repository\SujetForumRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -18,34 +20,52 @@ use Symfony\Component\Routing\Annotation\Route;
 class SujetForumController extends AbstractController
 {
     #[Route('/forum/sujets', name: 'sujet_forum_index', methods: ['GET'])]
-    public function index(Request $request, EntityManagerInterface $em): Response
+    public function index(Request $request, EntityManagerInterface $em, SujetForumRepository $repository, PaginatorInterface $paginator): Response
     {
         $filters = $this->extractFilters($request);
-        $rows = $this->loadSujetRows($em, $filters);
+        $pagination = $paginator->paginate(
+            $repository->createFilteredQueryBuilder(
+                $filters['query'] !== '' ? $filters['query'] : null,
+                $filters['status'],
+                $filters['sort'],
+                $filters['direction']
+            ),
+            max(1, (int) $request->query->get('page', 1)),
+            5
+        );
         $stats = $this->buildSujetStats($em);
 
         return $this->render('forum/sujet/index.html.twig', [
-            'rows' => $rows,
+            'sujets' => $pagination,
             'stats' => $stats,
             'filters' => $filters,
-            'visible_count' => count($rows),
+            'visible_count' => count($pagination),
             'statusChoices' => SujetForum::getStatusChoices(),
         ]);
     }
 
     #[Route('/forum/sujets/ajax', name: 'sujet_forum_ajax', methods: ['GET'])]
-    public function ajax(Request $request, EntityManagerInterface $em): Response
+    public function ajax(Request $request, EntityManagerInterface $em, SujetForumRepository $repository, PaginatorInterface $paginator): Response
     {
         $filters = $this->extractFilters($request);
-        $rows = $this->loadSujetRows($em, $filters);
+        $pagination = $paginator->paginate(
+            $repository->createFilteredQueryBuilder(
+                $filters['query'] !== '' ? $filters['query'] : null,
+                $filters['status'],
+                $filters['sort'],
+                $filters['direction']
+            ),
+            max(1, (int) $request->query->get('page', 1)),
+            5
+        );
         $stats = $this->buildSujetStats($em);
 
         return $this->json([
             'rowsHtml' => $this->renderView('forum/sujet/_rows.html.twig', [
-                'rows' => $rows,
+                'sujets' => $pagination,
             ]),
             'stats' => $stats,
-            'visibleCount' => count($rows),
+            'visibleCount' => count($pagination),
         ]);
     }
 
@@ -220,47 +240,6 @@ class SujetForumController extends AbstractController
             'sort' => $sort,
             'direction' => $direction,
         ];
-    }
-
-    private function loadSujetRows(EntityManagerInterface $em, array $filters): array
-    {
-        $qb = $em->createQueryBuilder()
-            ->select('s')
-            ->from(SujetForum::class, 's');
-
-        if ($filters['query'] !== '') {
-            $qb->andWhere('LOWER(s.titre) LIKE :q OR LOWER(s.description) LIKE :q')
-                ->setParameter('q', '%' . strtolower($filters['query']) . '%');
-        }
-
-        if ($filters['status'] !== 'all') {
-            $qb->andWhere('s.status = :status')
-                ->setParameter('status', $filters['status']);
-        }
-
-        $sortMap = [
-            'date' => 's.dateCreation',
-            'title' => 's.titre',
-            'status' => 's.status',
-        ];
-
-        $qb->orderBy($sortMap[$filters['sort']], $filters['direction'])
-            ->addOrderBy('s.id', 'DESC');
-
-        $sujets = $qb->getQuery()->getResult();
-        $rows = [];
-
-        foreach ($sujets as $sujet) {
-            if (!$sujet instanceof SujetForum) {
-                continue;
-            }
-
-            $rows[] = [
-                'sujet' => $sujet,
-            ];
-        }
-
-        return $rows;
     }
 
     private function buildSujetStats(EntityManagerInterface $em): array

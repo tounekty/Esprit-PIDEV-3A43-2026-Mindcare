@@ -6,6 +6,7 @@ use App\Entity\MessageForum;
 use App\Entity\SujetForum;
 use App\Repository\MessageForumRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -19,12 +20,17 @@ use Symfony\Component\Routing\Annotation\Route;
 class MessageForumController extends AbstractController
 {
     #[Route('/forum/messages', name: 'message_forum_index', methods: ['GET'])]
-    public function index(Request $request, MessageForumRepository $repository): Response
+    public function index(Request $request, MessageForumRepository $repository, PaginatorInterface $paginator): Response
     {
         $query = trim((string) $request->query->get('q', ''));
+        $pagination = $paginator->paginate(
+            $repository->createSearchQueryBuilder($query !== '' ? $query : null),
+            max(1, (int) $request->query->get('page', 1)),
+            5
+        );
 
         return $this->render('forum/message/index.html.twig', [
-            'messages' => $repository->findBySearch($query !== '' ? $query : null),
+            'messages' => $pagination,
             'q' => $query,
         ]);
     }
