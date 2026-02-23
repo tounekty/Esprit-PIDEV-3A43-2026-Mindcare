@@ -3,13 +3,11 @@
 namespace App\Controller;
 
 use App\Entity\SujetForum;
-use App\Repository\SujetForumRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -20,33 +18,64 @@ use Symfony\Component\Routing\Annotation\Route;
 class SujetForumController extends AbstractController
 {
     #[Route('/forum/sujets', name: 'sujet_forum_index', methods: ['GET'])]
-    public function index(Request $request, SujetForumRepository $repository): Response
+    public function index(Request $request, EntityManagerInterface $em): Response
     {
-        $query = trim((string) $request->query->get('q', ''));
-        $status = (string) $request->query->get('status', '');
-        if ($status === '' || !in_array($status, SujetForum::getStatusValues(), true)) {
-            $status = '';
-        }
+        $filters = $this->extractFilters($request);
+        $rows = $this->loadSujetRows($em, $filters);
+        $stats = $this->buildSujetStats($em);
 
         return $this->render('forum/sujet/index.html.twig', [
-            'sujets' => $repository->findBySearch($query !== '' ? $query : null, $status !== '' ? $status : null),
-            'q' => $query,
-            'status' => $status,
+            'rows' => $rows,
+            'stats' => $stats,
+            'filters' => $filters,
+            'visible_count' => count($rows),
             'statusChoices' => SujetForum::getStatusChoices(),
+        ]);
+    }
+
+    #[Route('/forum/sujets/ajax', name: 'sujet_forum_ajax', methods: ['GET'])]
+    public function ajax(Request $request, EntityManagerInterface $em): Response
+    {
+        $filters = $this->extractFilters($request);
+        $rows = $this->loadSujetRows($em, $filters);
+        $stats = $this->buildSujetStats($em);
+
+        return $this->json([
+            'rowsHtml' => $this->renderView('forum/sujet/_rows.html.twig', [
+                'rows' => $rows,
+            ]),
+            'stats' => $stats,
+            'visibleCount' => count($rows),
         ]);
     }
 
     #[Route('/forum/sujets/new', name: 'sujet_forum_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+       $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $sujet = new SujetForum();
         $sujet->setStatus(SujetForum::STATUS_VISIBLE);
+        $sujet->setUser($this->getUser());
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
-            ->add('idUser', IntegerType::class)
+            ->add('isAnonymous', ChoiceType::class, [
+                'label' => 'Publication anonyme',
+                'choices' => [
+                    'Normal' => false,
+                    'Anonyme' => true,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+            ])
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
+            ->add('status', ChoiceType::class, [
+                'choices' => SujetForum::getStatusChoices(),
+                'placeholder' => 'Aucun statut',
+                'required' => false,
+            ])
             ->add('category', TextType::class, ['required' => false])
             ->add('attachmentFile', FileType::class, ['mapped' => false, 'required' => false])
             ->getForm();
@@ -79,7 +108,15 @@ class SujetForumController extends AbstractController
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
-            ->add('idUser', IntegerType::class)
+            ->add('isAnonymous', ChoiceType::class, [
+                'label' => 'Publication anonyme',
+                'choices' => [
+                    'Normal' => false,
+                    'Anonyme' => true,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+            ])
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
             ->add('status', ChoiceType::class, [
@@ -155,5 +192,91 @@ class SujetForumController extends AbstractController
                 // Skip upload on error - file will not be saved
             }
         }
+    }
+
+    private function extractFilters(Request $request): array
+    {
+        $query = trim((string) $request->query->get('q', ''));
+        $status = (string) $request->query->get('status', 'all');
+        $sort = (string) $request->query->get('sort', 'date');
+        $direction = strtoupper((string) $request->query->get('direction', 'DESC'));
+
+        $validStatuses = array_merge(['all'], SujetForum::getStatusValues());
+        if (!in_array($status, $validStatuses, true)) {
+            $status = 'all';
+        }
+
+        if (!in_array($sort, ['date', 'title', 'status'], true)) {
+            $sort = 'date';
+        }
+
+        if (!in_array($direction, ['ASC', 'DESC'], true)) {
+            $direction = 'DESC';
+        }
+
+        return [
+            'query' => $query,
+            'status' => $status,
+            'sort' => $sort,
+            'direction' => $direction,
+        ];
+    }
+
+    private function loadSujetRows(EntityManagerInterface $em, array $filters): array
+    {
+        $qb = $em->createQueryBuilder()
+            ->select('s')
+            ->from(SujetForum::class, 's');
+
+        if ($filters['query'] !== '') {
+            $qb->andWhere('LOWER(s.titre) LIKE :q OR LOWER(s.description) LIKE :q')
+                ->setParameter('q', '%' . strtolower($filters['query']) . '%');
+        }
+
+        if ($filters['status'] !== 'all') {
+            $qb->andWhere('s.status = :status')
+                ->setParameter('status', $filters['status']);
+        }
+
+        $sortMap = [
+            'date' => 's.dateCreation',
+            'title' => 's.titre',
+            'status' => 's.status',
+        ];
+
+        $qb->orderBy($sortMap[$filters['sort']], $filters['direction'])
+            ->addOrderBy('s.id', 'DESC');
+
+        $sujets = $qb->getQuery()->getResult();
+        $rows = [];
+
+        foreach ($sujets as $sujet) {
+            if (!$sujet instanceof SujetForum) {
+                continue;
+            }
+
+            $rows[] = [
+                'sujet' => $sujet,
+            ];
+        }
+
+        return $rows;
+    }
+
+    private function buildSujetStats(EntityManagerInterface $em): array
+    {
+        $total = (int) $em->getRepository(SujetForum::class)->count([]);
+        $pinned = (int) $em->getRepository(SujetForum::class)->count(['isPinned' => true]);
+
+        $countsByStatus = [];
+        foreach (SujetForum::getStatusValues() as $status) {
+            $countsByStatus[$status] = (int) $em->getRepository(SujetForum::class)->count(['status' => $status]);
+        }
+
+        return [
+            'total' => $total,
+            'pinned' => $pinned,
+            'byStatus' => $countsByStatus,
+        ];
     }
 }

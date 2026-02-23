@@ -8,8 +8,8 @@ use App\Repository\MessageForumRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -32,6 +32,8 @@ class MessageForumController extends AbstractController
     #[Route('/forum/messages/new', name: 'message_forum_new', methods: ['GET', 'POST'])]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         $message = new MessageForum();
         $sujetId = $request->query->get('sujet');
         if ($sujetId) {
@@ -40,6 +42,7 @@ class MessageForumController extends AbstractController
                 $message->setSujet($sujet);
             }
         }
+        $message->setUser($this->getUser());
 
         $form = $this->createFormBuilder($message)
             ->add('sujet', EntityType::class, [
@@ -48,7 +51,15 @@ class MessageForumController extends AbstractController
                 'placeholder' => 'Choisir un sujet',
             ])
             ->add('contenu', TextareaType::class)
-            ->add('idUser', IntegerType::class)
+            ->add('isAnonymous', ChoiceType::class, [
+                'label' => 'Publication anonyme',
+                'choices' => [
+                    'Normal' => false,
+                    'Anonyme' => true,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+            ])
             ->add('attachmentFile', FileType::class, ['mapped' => false, 'required' => false])
             ->getForm();
 
@@ -84,7 +95,15 @@ class MessageForumController extends AbstractController
                 'placeholder' => 'Choisir un sujet',
             ])
             ->add('contenu', TextareaType::class)
-            ->add('idUser', IntegerType::class)
+            ->add('isAnonymous', ChoiceType::class, [
+                'label' => 'Publication anonyme',
+                'choices' => [
+                    'Normal' => false,
+                    'Anonyme' => true,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+            ])
             ->add('attachmentFile', FileType::class, ['mapped' => false, 'required' => false])
             ->getForm();
 

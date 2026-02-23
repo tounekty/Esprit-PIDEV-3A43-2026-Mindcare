@@ -1,0 +1,54 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}MindCare | Liste des Psychologues{% endblock %}
+
+{% block body %}
+    <!-- slider_area_start -->
+ 
+    <!-- slider_area_end -->
+
+    <!-- psychologue_table_start -->
+    <div class="psychologue_table_area">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="section_title text-center mb-55">
+                        <h3>Nos Psychologues</h3>
+                        <p>Voici la liste des psychologues disponibles pour des consultations.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-xl-12">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for psychologue in psychologues %}
+                                <tr>
+                                    <td>{{ psychologue.firstName }} {{ psychologue.lastName }}</td>
+                                    <td>{{ psychologue.email }}</td>
+                                    <td>
+                                        <a href="{{ path('reservation_new', {'psyId': psychologue.id}) }}" class="btn btn-primary">Prendre un rendez-vous</a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center">Aucun psychologue disponible pour le moment.</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- psychologue_table_end -->
+
+{% endblock %}

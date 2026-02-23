@@ -1,0 +1,72 @@
+{% extends "admin/base_admin.html.twig" %}
+
+{% block title %}Rapports - Admin{% endblock %}
+
+{% block content %}
+<div class="nxl-content-body">
+    <div class="nxl-content-top">
+        <div class="nxl-content-header">
+            <h3 class="nxl-content-title">Rapports</h3>
+            <a href="#" class="btn btn-primary btn-sm">Générer un rapport</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Rapport d'Activité Mensuelle</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Nombre total d'utilisateurs actifs: <strong>1,234</strong></p>
+                    <p class="text-muted">Entrées enregistrées: <strong>5,678</strong></p>
+                    <p class="text-muted">Séances complétées: <strong>789</strong></p>
+                    <a href="#" class="btn btn-primary btn-sm mt-3">Télécharger PDF</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Rapport de Satisfaction</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Score de satisfaction: <strong>4.5/5</strong></p>
+                    <p class="text-muted">Utilisateurs satisfaits: <strong>92%</strong></p>
+                    <p class="text-muted">Taux de rétention: <strong>87%</strong></p>
+                    <a href="#" class="btn btn-primary btn-sm mt-3">Télécharger PDF</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Rapport Financier</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Revenus totaux: <strong>€125,000</strong></p>
+                    <p class="text-muted">Dépenses: <strong>€45,000</strong></p>
+                    <p class="text-muted">Profit: <strong>€80,000</strong></p>
+                    <a href="#" class="btn btn-primary btn-sm mt-3">Télécharger PDF</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-3">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Rapport de Performance</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Temps de réponse moyen: <strong>0.5s</strong></p>
+                    <p class="text-muted">Taux de disponibilité: <strong>99.9%</strong></p>
+                    <p class="text-muted">Erreurs détectées: <strong>2</strong></p>
+                    <a href="#" class="btn btn-primary btn-sm mt-3">Télécharger PDF</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -152,6 +152,16 @@
                             <i class="ti-calendar"></i>
                             {{ sujet.dateCreation|date('d M Y, H:i') }}
                         </div>
+                        <div class="topic-meta-item">
+                            <i class="ti-user"></i>
+                            {% if sujet.isAnonymous %}
+                                Anonyme
+                            {% elseif sujet.user %}
+                                {{ sujet.user.firstName }} {{ sujet.user.lastName }}
+                            {% else %}
+                                Utilisateur
+                            {% endif %}
+                        </div>
                         {% if sujet.category %}
                         <div class="topic-meta-item">
                             <i class="ti-tag"></i>
@@ -214,11 +224,23 @@
                                 <div class="message-card">
                                     <div class="message-header">
                                         <div class="message-author">
+                                            {% if message.isAnonymous %}
+                                                {% set initials = 'A' %}
+                                                {% set displayName = 'Anonyme' %}
+                                            {% elseif message.user %}
+                                                {% set initials = (message.user.firstName|default('')|first ~ message.user.lastName|default('')|first)|upper %}
+                                                {% set displayName = message.user.firstName ~ ' ' ~ message.user.lastName %}
+                                            {% else %}
+                                                {% set initials = 'U' %}
+                                                {% set displayName = 'Utilisateur' %}
+                                            {% endif %}
                                             <div class="message-avatar">
-                                                U{{ message.idUser }}
+                                                {{ initials }}
                                             </div>
-                                            <div>
-                                                <div style="font-weight: 600; color: #333;">Utilisateur #{{ message.idUser }}</div>
+                                                <div>
+                                                    <div style="font-weight: 600; color: #333;">
+                                                        {{ displayName }}
+                                                    </div>
                                                 <div class="message-date">
                                                     <i class="ti-time"></i>
                                                     {{ message.dateMessage|date('d M Y à H:i') }}
@@ -254,18 +276,19 @@
                         <i class="ti-pencil-alt" style="margin-right: 10px;"></i>
                         Ajouter une réponse
                     </h3>
+                    {% if form %}
                     {{ form_start(form, {'attr': {'style': 'margin-top: 30px;', 'novalidate': 'novalidate'}}) }}
                         <div class="mb-4">
                             {{ form_label(form.contenu) }}
                             {{ form_widget(form.contenu, {'attr': {'rows': 6, 'placeholder': 'Ecrivez votre reponse ici...'}}) }}
                             {{ form_errors(form.contenu) }}
                         </div>
+                        <div class="mb-4">
+                            {{ form_label(form.isAnonymous) }}
+                            {{ form_widget(form.isAnonymous) }}
+                            {{ form_errors(form.isAnonymous) }}
+                        </div>
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                {{ form_label(form.idUser) }}
-                                {{ form_widget(form.idUser, {'attr': {'placeholder': 'Votre ID'}}) }}
-                                {{ form_errors(form.idUser) }}
-                            </div>
                             <div class="col-md-6 mb-3">
                                 {{ form_label(form.attachmentFile) }}
                                 {{ form_widget(form.attachmentFile) }}
@@ -281,6 +304,9 @@
                             </a>
                         </div>
                     {{ form_end(form) }}
+                    {% else %}
+                        <p style="margin-top: 20px; color: #666;">Connectez-vous pour repondre a ce sujet.</p>
+                    {% endif %}    
                 </div>
             </div>
         </div>

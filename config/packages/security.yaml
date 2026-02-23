@@ -1,39 +1,88 @@
 security:
-    # https://symfony.com/doc/current/security.html#registering-the-user-hashing-passwords
     password_hashers:
         Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
-    # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
+
     providers:
-        users_in_memory: { memory: null }
+        app_user_provider:
+            entity:
+                class: App\Entity\User
+                property: email
+
+    role_hierarchy:
+        ROLE_PSYCHOLOGUE: ROLE_ETUDIANT
+        ROLE_ADMIN:       [ROLE_PSYCHOLOGUE, ROLE_ETUDIANT]
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
+
         main:
             lazy: true
-            provider: users_in_memory
+            provider: app_user_provider
+            user_checker: App\Security\UserChecker # <-- Added this line
 
-            # activate different ways to authenticate
-            # https://symfony.com/doc/current/security.html#the-firewall
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                username_parameter: email
+                password_parameter: password
+                enable_csrf: false
+                default_target_path: app_redirect
 
-            # https://symfony.com/doc/current/security/impersonating_user.html
-            # switch_user: true
+            logout:
+                path: app_logout
+                target: app_login
 
-    # Easy way to control access for large sections of your site
-    # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        # 🔓 PUBLIC (MUST BE FIRST)
+        - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/register, roles: PUBLIC_ACCESS }
+        - { path: ^/forgot-password, roles: PUBLIC_ACCESS }
+        - { path: ^/verify-code, roles: PUBLIC_ACCESS }
+        - { path: ^/reset-password, roles: PUBLIC_ACCESS }
+        - { path: ^/resend-code, roles: PUBLIC_ACCESS }
+        - { path: ^/verify-email, roles: PUBLIC_ACCESS }
 
-when@test:
-    security:
-        password_hashers:
-            # By default, password hashers are resource intensive and take time. This is
-            # important to generate secure password hashes. In tests however, secure hashes
-            # are not important, waste resources and increase test times. The following
-            # reduces the work factor to the lowest possible values.
-            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
-                algorithm: auto
-                cost: 4 # Lowest possible value for bcrypt
-                time_cost: 3 # Lowest possible value for argon
-                memory_cost: 10 # Lowest possible value for argon
+        
+
+
+
+
+        # 🔐 API ENDPOINTS
+        # Public access for availability (students need this for booking, only shows busy slots)
+        - { path: ^/api/psychologue/\d+/availability$, roles: PUBLIC_ACCESS }
+        # Other psychologue API endpoints require psychologue role
+        - { path: ^/api/psychologue, roles: ROLE_PSYCHOLOGUE }
+
+        # 🔐 LOGGED USERS
+        - { path: ^/redirect, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/logout, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/profile, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/home, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/forum, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/events, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/resources, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/mood, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/journal, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/dashboard, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+
+
+
+        # 🔒 ROLE-SPECIFIC
+        - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_PSYCHOLOGUE] }
+        - { path: ^/forum, roles: ROLE_ADMIN }
+
+        - { path: ^/reservation, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+
+        # Student personal medical dossier
+        - { path: ^/mon-dossier-medical, roles: ROLE_ETUDIANT }
+        - { path: ^/mes-rendezvous, roles: ROLE_ETUDIANT }
+
+
+        # 🔒 ROLE-SPECIFIC
+        - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_PSYCHOLOGUE] }
+        - { path: ^/psychologue, roles: ROLE_PSYCHOLOGUE }
+
+        # 🚨 CATCH-ALL (MUST BE LAST)
+        - { path: ^/, roles: ROLE_USER }
