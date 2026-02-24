@@ -2,11 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\LikeMessage;
 use App\Entity\MessageForum;
 use App\Entity\SujetForum;
+use App\Entity\User;
+use App\Repository\LikeMessageRepository;
 use App\Repository\MessageForumRepository;
 use App\Repository\SujetForumRepository;
 use App\Service\ForumReplyNotificationService;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,6 +26,50 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class FrontForumController extends AbstractController
 {
+    #[Route('/forum/messages/{id}/like', name: 'front_forum_message_like', methods: ['POST'])]
+    public function toggleMessageLike(MessageForum $message, Request $request, EntityManagerInterface $entityManager, LikeMessageRepository $likeRepository): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->json(['error' => 'Utilisateur non autorisé.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $token = (string) $request->request->get('_token', '');
+        if (!$this->isCsrfTokenValid('like_message_' . $message->getId(), $token)) {
+            return $this->json(['error' => 'Token CSRF invalide.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $existingLike = $likeRepository->findOneByUserAndMessage($user, $message);
+        $liked = false;
+
+        if ($existingLike instanceof LikeMessage) {
+            $entityManager->remove($existingLike);
+            $entityManager->flush();
+        } else {
+            $newLike = (new LikeMessage())
+                ->setUser($user)
+                ->setMessage($message);
+
+            $entityManager->persist($newLike);
+
+            try {
+                $entityManager->flush();
+                $liked = true;
+            } catch (UniqueConstraintViolationException) {
+                $liked = true;
+            }
+        }
+
+        $likesCount = $likeRepository->count(['message' => $message]);
+
+        return $this->json([
+            'liked' => $liked,
+            'likesCount' => $likesCount,
+        ]);
+    }
+
     #[Route('/forum', name: 'front_forum_index', methods: ['GET'])]
     public function index(Request $request, SujetForumRepository $repository, PaginatorInterface $paginator): Response
     {
@@ -105,7 +153,7 @@ class FrontForumController extends AbstractController
     }
 
     #[Route('/forum/sujet/{id}', name: 'front_forum_show', methods: ['GET', 'POST'])]
-    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ForumReplyNotificationService $notificationService): Response
+    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, LikeMessageRepository $likeMessageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ForumReplyNotificationService $notificationService): Response
     {
         $message = new MessageForum();
         $message->setSujet($sujet);
@@ -123,6 +171,19 @@ class FrontForumController extends AbstractController
             max(1, (int) $request->query->get('page', 1)),
             5
         );
+
+        $messageIds = [];
+        foreach ($messages as $messageItem) {
+            if ($messageItem instanceof MessageForum && $messageItem->getId() !== null) {
+                $messageIds[] = $messageItem->getId();
+            }
+        }
+
+        $likeCounts = $likeMessageRepository->getLikeCountsByMessageIds($messageIds);
+        $likedMessageIds = [];
+        if ($user instanceof User) {
+            $likedMessageIds = $likeMessageRepository->findLikedMessageIdsForUserAndMessages($user, $messageIds);
+        }
 
         $form = null;
         if ($user) {
@@ -162,6 +223,8 @@ class FrontForumController extends AbstractController
             'messages' => $messages,
             'q' => $query,
             'form' => $form ? $form->createView() : null,
+            'likeCounts' => $likeCounts,
+            'likedMessageIds' => $likedMessageIds,
         ]);
     }
 

@@ -221,6 +221,8 @@
                     {% if messages|length > 0 %}
                         <div style="margin-top: 30px;">
                             {% for message in messages %}
+                                {% set likesCount = likeCounts[message.id]|default(0) %}
+                                {% set isLiked = message.id in likedMessageIds %}
                                 <div class="message-card">
                                     <div class="message-header">
                                         <div class="message-author">
@@ -250,6 +252,25 @@
                                     </div>
                                     <div class="message-content">
                                         {{ message.contenu }}
+                                    </div>
+                                    <div style="margin-top: 12px; display: flex; align-items: center; gap: 10px;">
+                                        {% if app.user %}
+                                            <button
+                                                type="button"
+                                                class="like-btn js-like-btn {{ isLiked ? 'liked' : '' }}"
+                                                data-url="{{ path('front_forum_message_like', {id: message.id}) }}"
+                                                data-token="{{ csrf_token('like_message_' ~ message.id) }}"
+                                                data-message-id="{{ message.id }}"
+                                            >
+                                                <i class="ti-heart"></i>
+                                                <span>{{ isLiked ? 'Aimé' : 'J’aime' }}</span>
+                                            </button>
+                                        {% else %}
+                                            <span style="font-size: 13px; color: #888;">Connectez-vous pour aimer</span>
+                                        {% endif %}
+                                        <span style="font-size: 13px; color: #666;">
+                                            <strong class="js-like-count" data-message-id="{{ message.id }}">{{ likesCount }}</strong> like{{ likesCount > 1 ? 's' : '' }}
+                                        </span>
                                     </div>
                                     {% if message.attachmentPath %}
                                         <div style="margin-top: 15px;">
@@ -314,4 +335,83 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .like-btn {
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #444;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .like-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .like-btn.liked {
+            border-color: #e74c3c;
+            color: #e74c3c;
+            background: #fff4f4;
+        }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const likeButtons = document.querySelectorAll('.js-like-btn');
+        if (!likeButtons.length) {
+            return;
+        }
+
+        likeButtons.forEach((button) => {
+            button.addEventListener('click', async function () {
+                const url = button.dataset.url;
+                const token = button.dataset.token;
+                const messageId = button.dataset.messageId;
+                const countEl = document.querySelector(`.js-like-count[data-message-id="${messageId}"]`);
+
+                button.disabled = true;
+
+                try {
+                    const body = new URLSearchParams({ _token: token });
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: body.toString()
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Erreur de like.');
+                    }
+
+                    button.classList.toggle('liked', !!data.liked);
+                    button.querySelector('span').textContent = data.liked ? 'Aimé' : 'J’aime';
+                    if (countEl) {
+                        const count = Number(data.likesCount || 0);
+                        countEl.textContent = count;
+                        const textNode = countEl.parentElement;
+                        if (textNode) {
+                            textNode.lastChild.textContent = ` like${count > 1 ? 's' : ''}`;
+                        }
+                    }
+                } catch (error) {
+                    alert(error.message || 'Impossible de traiter le like.');
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        });
+    });
+    </script>
 {% endblock %}
