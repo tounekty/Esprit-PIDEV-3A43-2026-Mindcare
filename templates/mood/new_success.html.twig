@@ -2,6 +2,11 @@
 
 {% block title %}Mood Enregistré | MindCare{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+{% endblock %}
+
 {% block body %}
 <div class="page-container" style="max-width: 900px; margin: 0 auto; padding: 2rem 1rem;">
     <!-- Success Message -->
@@ -11,7 +16,27 @@
             Votre mood a été enregistré ! ✨
         </h2>
         <p style="margin: 0.5rem 0 0 0; color: #155724;">Humeur: <strong>{{ mood.humeur|upper }}</strong> (Intensité: {{ mood.intensite }}/5)</p>
+        {% set moodDiffSeconds = date().timestamp - (mood.datemood|date('U')) %}
+        {% if moodDiffSeconds < 0 %}{% set moodDiffSeconds = 0 %}{% endif %}
+        <p style="margin: 0.5rem 0 0 0; color: #155724;">
+            <i class="far fa-clock me-1"></i>
+            {% if moodDiffSeconds < 60 %}
+                a l'instant
+            {% elseif moodDiffSeconds < 3600 %}
+                il y a {{ (moodDiffSeconds / 60)|round(0, 'floor') }} min
+            {% elseif moodDiffSeconds < 86400 %}
+                il y a {{ (moodDiffSeconds / 3600)|round(0, 'floor') }} h
+            {% else %}
+                il y a {{ (moodDiffSeconds / 86400)|round(0, 'floor') }} j
+            {% endif %}
+        </p>
     </div>
+
+    {% for message in app.flashes('mood_positive') %}
+    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem 1.25rem; border-radius: 6px; margin-bottom: 1.25rem; color: #664d03;">
+        <strong>Bonne continuation :</strong> {{ message }}
+    </div>
+    {% endfor %}
 
     <!-- AI Analysis Section -->
     {% if ai_analysis %}
@@ -90,6 +115,17 @@
            style="background: #28a745; color: white; padding: 12px 24px; border-radius: 4px; text-decoration: none; display: inline-block; font-weight: bold; text-align: center;">
             ➕ Ajouter un mood
         </a>
+    </div>
+
+    <!-- View Details & Download PDF -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <a href="{{ path('app_mood_show', {'id': mood.id}) }}" 
+           style="background: #17a2b8; color: white; padding: 12px 24px; border-radius: 4px; text-decoration: none; display: inline-block; font-weight: bold; text-align: center;">
+            👁️ Voir les détails
+        </a>
+        <button class="btn btn-warning" style="background: #ffc107; color: black; padding: 12px 24px; border-radius: 4px; border: none; font-weight: bold; cursor: not-allowed; opacity: 0.7;" disabled>
+            📄 PDF en cours de génération...
+        </button>
     </div>
 
     <!-- Related Action Cards -->

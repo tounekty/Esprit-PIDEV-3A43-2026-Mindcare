@@ -4,6 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
     <style>
         /* Page Header */
         .page-header {
@@ -204,6 +205,9 @@
                         {% elseif journal_emotionnel.mood.humeur == 'triste' %} 😢
                         {% elseif journal_emotionnel.mood.humeur == 'colere' %} 😠
                         {% elseif journal_emotionnel.mood.humeur == 'stresse' %} 😰
+                        {% elseif journal_emotionnel.mood.humeur == 'calme' %} 😌
+                        {% elseif journal_emotionnel.mood.humeur == 'fatigue' %} 😴
+                        {% elseif journal_emotionnel.mood.humeur == 'excite' %} 😃
                         {% elseif journal_emotionnel.mood.humeur == 'neutre' %} 😐
                         {% else %} 😊
                         {% endif %}
@@ -242,6 +246,9 @@
                             {% elseif journal_emotionnel.mood.humeur == 'triste' %} 😢
                             {% elseif journal_emotionnel.mood.humeur == 'colere' %} 😠
                             {% elseif journal_emotionnel.mood.humeur == 'stresse' %} 😰
+                            {% elseif journal_emotionnel.mood.humeur == 'calme' %} 😌
+                            {% elseif journal_emotionnel.mood.humeur == 'fatigue' %} 😴
+                            {% elseif journal_emotionnel.mood.humeur == 'excite' %} 😃
                             {% elseif journal_emotionnel.mood.humeur == 'neutre' %} 😐
                             {% else %} 😊
                             {% endif %}
@@ -253,6 +260,9 @@
                                     {% elseif journal_emotionnel.mood.humeur == 'triste' %} Triste
                                     {% elseif journal_emotionnel.mood.humeur == 'colere' %} En colère
                                     {% elseif journal_emotionnel.mood.humeur == 'stresse' %} Stressé(e)
+                                    {% elseif journal_emotionnel.mood.humeur == 'calme' %} Calme
+                                    {% elseif journal_emotionnel.mood.humeur == 'fatigue' %} Fatigué(e)
+                                    {% elseif journal_emotionnel.mood.humeur == 'excite' %} Excité(e)
                                     {% elseif journal_emotionnel.mood.humeur == 'neutre' %} Neutre
                                     {% else %} {{ journal_emotionnel.mood.humeur|capitalize }}
                                     {% endif %}
@@ -308,6 +318,15 @@
                         <a href="{{ path('app_journal_emotionnel_edit', {'id': journal_emotionnel.id}) }}" class="btn btn-primary">
                             <i class="fas fa-edit me-1"></i> Modifier
                         </a>
+                        {% if journal_emotionnel.pdfPath %}
+                        <a href="{{ path('app_journal_emotionnel_download_pdf', {'id': journal_emotionnel.id}) }}" class="btn btn-info">
+                            <i class="fas fa-file-pdf me-1"></i> Télécharger PDF
+                        </a>
+                        {% else %}
+                        <button class="btn btn-info" disabled>
+                            <i class="fas fa-spinner me-1"></i> PDF en cours...
+                        </button>
+                        {% endif %}
                         <a href="{{ path('app_journal_emotionnel_new') }}" class="btn btn-success">
                             <i class="fas fa-plus me-1"></i> Nouvelle Entrée
                         </a>
@@ -397,3 +416,4 @@
 </div>
 {% endfor %}
 {% endblock %}
+

@@ -4,6 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
     <style>
         body {
             background: #f8fafc;
@@ -379,12 +380,7 @@
                     <i class="fas fa-smile"></i>Humeur Associée
                 </label>
                 <span class="form-text">Choisissez l'humeur qui reflète le mieux votre état émotionnel</span>
-                {{ form_widget(form.mood, {
-                    'attr': {
-                        'class': 'form-select',
-                        'id': 'journal_mood'
-                    }
-                }) }}
+                {{ form_widget(form.mood) }}
                 {% if form.mood.vars.errors %}
                     <div class="text-danger small mt-2">
                         {% for error in form.mood.vars.errors %}
@@ -454,3 +450,4 @@
     });
 </script>
 {% endblock %}
+

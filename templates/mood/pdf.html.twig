@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mood Report - {{ mood.humeur }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .header {
+            border-bottom: 3px solid #333;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #333;
+        }
+        .header p {
+            margin: 5px 0 0 0;
+            color: #666;
+        }
+        .content {
+            margin: 20px 0;
+        }
+        .section {
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+        }
+        .section h2 {
+            color: #444;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .mood-info {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .info-row {
+            margin-bottom: 10px;
+        }
+        .label {
+            font-weight: bold;
+            color: #333;
+        }
+        .label::after {
+            content: ":";
+        }
+        .value {
+            color: #666;
+            margin-left: 10px;
+        }
+        .description {
+            background-color: #fff;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+        }
+        .ai-analysis {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Rapport d'Humeur</h1>
+        <p>{{ mood.datemood|date('d/m/Y H:i') }}</p>
+    </div>
+
+    <div class="content">
+        <div class="section mood-info">
+            <div class="info-row">
+                <span class="label">Humeur</span>
+                <span class="value">{{ mood.humeur|capitalize }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Intensité</span>
+                <span class="value">{{ mood.intensite }}/10</span>
+            </div>
+        </div>
+
+        {% if ai_analysis %}
+            <div class="section ai-analysis">
+                <h2>Analyse IA</h2>
+                
+                {% if ai_analysis.sentiment is defined %}
+                <div class="info-row">
+                    <span class="label">Sentiment</span>
+                    <span class="value">{{ ai_analysis.sentiment }}</span>
+                </div>
+                {% endif %}
+
+                {% if ai_analysis.keywords is defined and ai_analysis.keywords|length > 0 %}
+                <div class="info-row" style="margin-top: 10px;">
+                    <span class="label">Mots-clés</span><br>
+                    {% for keyword in ai_analysis.keywords %}
+                        <span style="display: inline-block; background-color: #d4e8f0; padding: 5px 10px; margin: 5px 5px 5px 0; border-radius: 3px; font-size: 12px;">{{ keyword }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if ai_analysis.suggestions is defined and ai_analysis.suggestions|length > 0 %}
+                <div style="margin-top: 10px;">
+                    <span class="label">Suggestions</span>
+                    <ol style="margin-left: 20px; margin-top: 5px;">
+                        {% for suggestion in ai_analysis.suggestions %}
+                            <li style="margin: 5px 0; font-size: 12px;">{{ suggestion }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+                {% endif %}
+
+                {% if ai_analysis.wellness_tip is defined and ai_analysis.wellness_tip %}
+                <div style="margin-top: 10px; padding: 10px; background-color: #c8e6c9; border-radius: 3px; font-size: 12px;">
+                    <strong>💡 Conseil Bien-être:</strong> {{ ai_analysis.wellness_tip }}
+                </div>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="section ai-analysis">
+                <p><em>L'analyse IA est en cours de traitement...</em></p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="footer">
+        <p>Document généré automatiquement le {{ "now"|date('d/m/Y H:i:s') }}</p>
+    </div>
+</body>
+</html>

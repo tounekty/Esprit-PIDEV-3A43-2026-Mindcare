@@ -26,7 +26,7 @@ class PsychologicalAlertService
         'sans espoir',
     ];
 
-    private const NEGATIVE_MOODS = ['triste', 'colere', 'stresse'];
+    private const NEGATIVE_MOODS = ['triste', 'colere', 'stresse', 'fatigue'];
 
     public function __construct(
         private MoodRepository $moodRepository,
@@ -42,6 +42,31 @@ class PsychologicalAlertService
         $this->checkDangerousKeywords($user);
     }
 
+    public function getPositiveMomentumMessage(User $user): ?string
+    {
+        $moods = $this->moodRepository
+            ->createQueryBuilder('m')
+            ->where('m.user = :user')
+            ->setParameter('user', $user)
+            ->orderBy('m.datemood', 'DESC')
+            ->addOrderBy('m.id', 'DESC')
+            ->setMaxResults(3)
+            ->getQuery()
+            ->getResult();
+
+        if (count($moods) < 3) {
+            return null;
+        }
+
+        foreach ($moods as $mood) {
+            if (strtolower((string) $mood->getHumeur()) !== 'heureux') {
+                return null;
+            }
+        }
+
+        return "Excellent travail ! 3 moods heureux consecutifs. Continuez comme ca !";
+    }
+
     private function checkConsecutiveNegativeMoods(User $user): void
     {
         $moods = $this->moodRepository
@@ -50,15 +75,13 @@ class PsychologicalAlertService
             ->setParameter('user', $user)
             ->orderBy('m.datemood', 'DESC')
             ->addOrderBy('m.id', 'DESC')
-            ->setMaxResults(5)
+            ->setMaxResults(3)
             ->getQuery()
             ->getResult();
 
-        if (count($moods) < 5) {
+        if (count($moods) < 3) {
             return;
         }
-
-        $moods = array_reverse($moods);
         $consecutiveNegative = 0;
         $debugInfo = [];
 
@@ -69,11 +92,11 @@ class PsychologicalAlertService
             if ($isNegative) {
                 $consecutiveNegative++;
             } else {
-                $consecutiveNegative = 0;
+                return;
             }
         }
 
-        if ($consecutiveNegative >= 5) {
+        if ($consecutiveNegative >= 3) {
             // Check if alert already exists
             $existingAlert = $this->alertRepository
                 ->createQueryBuilder('p')
@@ -89,9 +112,9 @@ class PsychologicalAlertService
                 $alert = new PsychologicalAlert();
                 $alert->setUser($user);
                 $alert->setAlertType('consecutive_negative_moods');
-                $alert->setDescription('Humeur négative détectée pendant 5 jours consécutifs');
+                $alert->setDescription('3 humeurs negatives consecutives detectees');
                 $alert->setDetails(
-                    'L\'utilisateur ' . $user->getFirstName() . ' a eu une humeur négative (triste, colère, stressé) pendant 5 jours consécutifs. Moods: ' . implode(', ', $debugInfo)
+                    'L\'utilisateur ' . $user->getFirstName() . ' a eu 3 humeurs negatives consecutives. Moods recents: ' . implode(', ', $debugInfo)
                 );
 
                 $this->em->persist($alert);
@@ -165,7 +188,7 @@ class PsychologicalAlertService
 
             // Notify psychologists
             $this->notificationService->notifyAlert(
-                'psychologist',
+                'psychologue',
                 'Alerte Psychologique',
                 'Une alerte psychologique a été détectée pour l\'utilisateur: ' . ($alert->getUser()?->getEmail() ?? 'Unknown'),
                 $alert
@@ -182,8 +205,12 @@ class PsychologicalAlertService
 
     public function resolveAlert(PsychologicalAlert $alert, string $adminNotes = ''): void
     {
+        // Send follow-up email to the student when alert is resolved
+        $this->notificationService->notifyStudentAfterAlertResolution($alert, $adminNotes);
+
         $alert->setResolved(true);
         $alert->setAdminNotes($adminNotes);
         $this->em->flush();
     }
 }
+

@@ -23,20 +23,22 @@ class JournalEmotionnel
     )]
     private ?string $contenu = null;
 
-    #[ORM\Column]
+    #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     #[Assert\NotBlank(message: "La date est obligatoire.")]
-    #[Assert\Type(type: "\DateTimeInterface", message: "La date doit être un objet DateTime valide.")]
-    private ?\DateTime $dateecriture = null;
+    #[Assert\Type(type: "\\DateTimeInterface", message: "La date doit être un objet DateTime valide.")]
+    private ?\DateTimeInterface $dateecriture = null;
 
     #[ORM\ManyToOne(targetEntity: Mood::class, inversedBy: 'journals')]
     #[ORM\JoinColumn(nullable: true, onDelete: "CASCADE")]
-    #[Assert\NotBlank(message: "L'humeur est obligatoire.", groups: ['Default'])]
     private ?Mood $mood = null;
 
     
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $pdfPath = null;
 
     public function __construct()
     {
@@ -61,24 +63,24 @@ class JournalEmotionnel
         return $this;
     }
 
-    public function getDateecriture(): ?\DateTime
+    public function getDateecriture(): ?\DateTimeInterface
     {
         return $this->dateecriture;
     }
 
-    public function setDateecriture(\DateTime $dateecriture): static
+    public function setDateecriture(\DateTimeInterface $dateecriture): static
     {
         $this->dateecriture = $dateecriture;
 
         return $this;
     }
 
-    public function getMood(): ?mood
+    public function getMood(): ?Mood
     {
         return $this->mood;
     }
 
-    public function setMood(?mood $mood): static
+    public function setMood(?Mood $mood): static
     {
         $this->mood = $mood;
 
@@ -93,6 +95,18 @@ class JournalEmotionnel
     public function setUser(?User $user): static
     {
         $this->user = $user;
+
+        return $this;
+    }
+
+    public function getPdfPath(): ?string
+    {
+        return $this->pdfPath;
+    }
+
+    public function setPdfPath(?string $pdfPath): static
+    {
+        $this->pdfPath = $pdfPath;
 
         return $this;
     }

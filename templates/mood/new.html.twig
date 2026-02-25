@@ -4,6 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
     <style>
        
         /* AJOUTEZ CE CSS POUR DÉSACTIVER HTML5 */
@@ -362,7 +363,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 2. VALIDATION PERSONNALISÉE
     form.addEventListener('submit', function(e) {
-        e.preventDefault();
         
         let isValid = true;
         const errors = [];
@@ -434,17 +434,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // 3. RÉSULTAT DE LA VALIDATION
-        if (isValid) {
-            // Tout est bon, on peut soumettre
-            console.log('✅ Formulaire valide, soumission en cours...');
-            
-            // Animation de succès
-            form.style.opacity = '0.9';
-            setTimeout(() => {
-                form.style.opacity = '1';
-                form.submit(); // Soumission réelle
-            }, 300);
-        } else {
+        if (!isValid) {
+            e.preventDefault();
             // Afficher message général
             if (!document.querySelector('.validation-summary')) {
                 const summary = document.createElement('div');
@@ -470,8 +461,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 audio.play().catch(() => {});
             }
         }
-        
-        return false;
     });
     
     // 4. VALIDATION EN TEMPS RÉEL
@@ -534,3 +523,5 @@ document.addEventListener('DOMContentLoaded', function() {
 // === FIN DU CONTRÔLE DE SAISIE ===
 </script>
 {% endblock %}
+
+

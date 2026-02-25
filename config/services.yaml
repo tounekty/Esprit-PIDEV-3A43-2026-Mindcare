@@ -24,3 +24,7 @@ services:
             $recaptchaSecret: '%env(RECAPTCHA_SECRET_KEY)%'
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 10 }
+
+    App\MessageHandler\GenerateMoodPdfMessageHandler:
+        arguments:
+            $projectDir: '%kernel.project_dir%'

@@ -4,6 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
     <style>
         body {
             background: #f8fafc;
@@ -450,7 +451,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-label"><i class="fas fa-calendar me-1"></i>Densité</div>
-                <div class="stat-value">{{ stats.total > 0 ? (stats.total / (((stats.dates|filter('') )|length / stats.total) | max(1))) : 0 }}</div>
+                <div class="stat-value">{{ stats.total > 0 ? (stats.total / max(1, (stats.dates|length / stats.total)))|round(1) : 0 }}</div>
             </div>
         </div>
     </div>
@@ -546,3 +547,4 @@
     {% endif %}
 </div>
 {% endblock %}
+

@@ -17,7 +17,7 @@ final class PsychologicalAlertController extends AbstractController
     #[Route(name: 'admin_psychological_alerts_index', methods: ['GET'])]
     public function index(PsychologicalAlertRepository $alertRepository, Request $request): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN', null, 'You must be an admin or psychologist to view alerts.');
+        $this->denyAccessToAlerts();
 
         $filter = $request->query->get('filter', 'unresolved');
         $page = (int) $request->query->get('page', 1);
@@ -46,7 +46,7 @@ final class PsychologicalAlertController extends AbstractController
     #[Route('/{id}', name: 'admin_psychological_alert_show', methods: ['GET'])]
     public function show(PsychologicalAlert $alert): Response
     {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessToAlerts();
 
         return $this->render('admin/psychological_alert/show.html.twig', [
             'alert' => $alert,
@@ -60,13 +60,21 @@ final class PsychologicalAlertController extends AbstractController
         PsychologicalAlertService $alertService,
         EntityManagerInterface $em
     ): Response {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $this->denyAccessToAlerts();
 
         $adminNotes = $request->request->get('admin_notes', '');
         $alertService->resolveAlert($alert, $adminNotes);
 
-        $this->addFlash('success', 'Alerte psychologique marquée comme résolue.');
+        $this->addFlash('success', 'Alerte resolue. Un email de suivi et de conseils a ete envoye a l\'etudiant.');
 
         return $this->redirectToRoute('admin_psychological_alerts_index');
     }
+
+    private function denyAccessToAlerts(): void
+    {
+        if (!$this->isGranted('ROLE_ADMIN') && !$this->isGranted('ROLE_PSYCHOLOGUE')) {
+            throw $this->createAccessDeniedException('You must be an admin or psychologist to view alerts.');
+        }
+    }
 }
+

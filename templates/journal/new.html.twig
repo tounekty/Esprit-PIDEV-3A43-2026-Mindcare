@@ -4,6 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
     <style>
         body {
             background: #f8fafc;
@@ -180,6 +181,44 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             margin-top: 0.25rem;
+        }
+
+        /* Therapeutic coach */
+        .coach-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .coach-item {
+            border: 1px solid #D4E8FF;
+            border-radius: 10px;
+            padding: 0.9rem;
+            background: #f8fcff;
+        }
+
+        .coach-item-text {
+            font-size: 0.92rem;
+            color: #1a365d;
+            margin-bottom: 0.6rem;
+            line-height: 1.45;
+        }
+
+        .coach-use-btn {
+            border: 1px solid #7FBFFF;
+            background: #ffffff;
+            color: #3e84c7;
+            border-radius: 8px;
+            padding: 0.4rem 0.7rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .coach-use-btn:hover {
+            background: #edf6ff;
         }
 
         /* Quick Buttons */
@@ -373,6 +412,14 @@
         <!-- Start Form -->
         {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
 
+        <!-- Initialize Mood Map for JavaScript -->
+        <script>
+            // Initialize the mood map from server (maps mood name to mood ID)
+            window.moodMap = {{ mood_map|json_encode|raw }};
+            // Therapeutic writing prompts by mood
+            window.therapyPromptMap = {{ prompt_map|json_encode|raw }};
+        </script>
+
         <!-- Content Card -->
         <div>
             <div class="form-card">
@@ -454,6 +501,28 @@
             </div>
         </div>
 
+        <!-- Therapeutic Writing Coach -->
+        <div>
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h3><i class="fas fa-lightbulb me-2"></i>Coach d'ecriture therapeutique</h3>
+                </div>
+                <div class="sidebar-card-body">
+                    <p class="form-text" style="margin-bottom: 0.9rem;">Choisissez un prompt et utilisez-le comme point de depart.</p>
+                    <ul class="coach-list" id="coachPromptList">
+                        {% for prompt in therapeutic_prompts %}
+                            <li class="coach-item">
+                                <div class="coach-item-text">{{ prompt }}</div>
+                                <button type="button" class="coach-use-btn" data-prompt="{{ prompt|e('html_attr') }}" onclick="usePrompt(this.dataset.prompt)">
+                                    Utiliser ce prompt
+                                </button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
         <!-- Metadata Card -->
         <div>
             <div class="sidebar-card">
@@ -507,37 +576,44 @@
                                 </label>
                                 <span class="form-text">Sélectionnez votre humeur</span>
                                 
-                                <!-- Hidden Select for Form Submission -->
-                                <div style="display: none;">
-                                    {{ form_widget(form.mood, {
-                                        'attr': {
-                                            'class': 'form-select',
-                                            'id': 'journal_mood'
-                                        }
-                                    }) }}
+                                <!-- Hidden input for Symfony form (rendered by form_widget) -->
+                                <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;">
+                                    {{ form_widget(form.mood) }}
                                 </div>
 
                                 <!-- Visual Mood Buttons -->
                                 <div class="mood-buttons">
-                                    <button type="button" class="mood-btn" onclick="selectMood('heureux', this)">
+                                    <button type="button" class="mood-btn" data-mood="heureux" onclick="selectMood('heureux', this)">
                                         <span class="mood-emoji">😊</span>
                                         <span>Heureux</span>
                                     </button>
-                                    <button type="button" class="mood-btn" onclick="selectMood('triste', this)">
+                                    <button type="button" class="mood-btn" data-mood="triste" onclick="selectMood('triste', this)">
                                         <span class="mood-emoji">😢</span>
                                         <span>Triste</span>
                                     </button>
-                                    <button type="button" class="mood-btn" onclick="selectMood('colere', this)">
+                                    <button type="button" class="mood-btn" data-mood="colere" onclick="selectMood('colere', this)">
                                         <span class="mood-emoji">😠</span>
                                         <span>Colère</span>
                                     </button>
-                                    <button type="button" class="mood-btn" onclick="selectMood('stresse', this)">
+                                    <button type="button" class="mood-btn" data-mood="stresse" onclick="selectMood('stresse', this)">
                                         <span class="mood-emoji">😰</span>
                                         <span>Stressé</span>
                                     </button>
-                                    <button type="button" class="mood-btn" onclick="selectMood('neutre', this)">
+                                    <button type="button" class="mood-btn" data-mood="neutre" onclick="selectMood('neutre', this)">
                                         <span class="mood-emoji">😐</span>
                                         <span>Neutre</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="calme" onclick="selectMood('calme', this)">
+                                        <span class="mood-emoji">😌</span>
+                                        <span>Calme</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="fatigue" onclick="selectMood('fatigue', this)">
+                                        <span class="mood-emoji">😴</span>
+                                        <span>Fatigué</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="excite" onclick="selectMood('excite', this)">
+                                        <span class="mood-emoji">😃</span>
+                                        <span>Excité</span>
                                     </button>
                                 </div>
 
@@ -580,35 +656,65 @@
 </div>
 
 <script>
+    function renderCoachPrompts(moodValue) {
+        const list = document.getElementById('coachPromptList');
+        if (!list) return;
+
+        const map = window.therapyPromptMap || {};
+        const prompts = map[moodValue] || map.neutre || [];
+        list.innerHTML = '';
+
+        prompts.forEach(prompt => {
+            const li = document.createElement('li');
+            li.className = 'coach-item';
+            li.innerHTML = `
+                <div class="coach-item-text">${prompt}</div>
+                <button type="button" class="coach-use-btn" data-prompt="${prompt.replace(/"/g, '&quot;')}" onclick="usePrompt(this.dataset.prompt)">Utiliser ce prompt</button>
+            `;
+            list.appendChild(li);
+        });
+
+        bindCoachButtons();
+    }
+
+    function usePrompt(promptText) {
+        const textarea =
+            document.getElementById('journal_contenu') ||
+            document.getElementById('journal_emotionnel_contenu') ||
+            document.querySelector('textarea[name="journal_emotionnel[contenu]"]');
+        if (!textarea) return;
+
+        const prefix = textarea.value.trim() === '' ? '' : '\n\n';
+        textarea.value = `${textarea.value}${prefix}${promptText}\n`;
+        textarea.focus();
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function bindCoachButtons() {
+        // Inline onclick on buttons handles prompt insertion.
+    }
+
     function selectMood(moodValue, buttonElement) {
-        // Mise à jour du select caché (EntityType uses option values = entity ids)
-        const select = document.getElementById('journal_mood');
-        if (select) {
-            let found = false;
-            const target = (moodValue || '').toLowerCase();
-            for (let i = 0; i < select.options.length; i++) {
-                const optText = (select.options[i].text || '').trim().toLowerCase();
-                if (!optText) continue;
-                // permissive match: exact, substring or reversed substring
-                if (optText === target || optText.indexOf(target) !== -1 || target.indexOf(optText) !== -1) {
-                    select.selectedIndex = i;
-                    found = true;
-                    break;
-                }
+        // Mise à jour du select caché avec l'ID de la Mood (via the mood_map)
+        const select = document.getElementById('journal_emotionnel_mood');
+        if (select && window.moodMap) {
+            const moodId = window.moodMap[moodValue];
+            if (moodId) {
+                select.value = moodId;
+                // trigger change so Symfony form processors see the selection
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                select.value = '';
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                console.warn(`Aucune humeur existante trouvée en base pour: ${moodValue}`);
             }
-            // fallback: try to match by value if moodValue looks numeric
-            if (!found && !isNaN(Number(moodValue))) {
-                select.value = moodValue;
-                if (select.value) found = true;
-            }
-            // trigger change so Symfony form processors see the selection
-            select.dispatchEvent(new Event('change', { bubbles: true }));
         }
 
         // Mise à jour du style des boutons
         const buttons = document.querySelectorAll('.mood-btn');
         buttons.forEach(btn => btn.classList.remove('active'));
         if (buttonElement) buttonElement.classList.add('active');
+        renderCoachPrompts(moodValue);
     }
 
     function formatDateTimeLocal(date) {
@@ -664,6 +770,7 @@
     }
     
     document.addEventListener('DOMContentLoaded', () => {
+        bindCoachButtons();
         // Check if there's a template from sessionStorage
         const template = sessionStorage.getItem('journalTemplate');
         const textarea = document.getElementById('journal_contenu');
@@ -689,22 +796,36 @@
         }
         
         // Set initial mood selection if one exists
-        const moodSelect = document.getElementById('journal_mood');
+        const moodSelect = document.getElementById('journal_emotionnel_mood');
         const buttons = document.querySelectorAll('.mood-btn');
         if (moodSelect && moodSelect.value) {
-            const selectedIndex = moodSelect.selectedIndex;
-            const selectedText = (moodSelect.options[selectedIndex]?.text || '').trim().toLowerCase();
-            if (selectedText) {
-                buttons.forEach(btn => {
-                    if ((btn.textContent || '').trim().toLowerCase().includes(selectedText)) {
-                        btn.classList.add('active');
-                    }
-                });
+            const selectedId = parseInt(moodSelect.value);
+            // Find the mood name from the map by reverse lookup
+            for (const [moodName, moodId] of Object.entries(window.moodMap || {})) {
+                if (moodId === selectedId) {
+                    // Find the button with this mood
+                    buttons.forEach(btn => {
+                        if (btn.dataset.mood === moodName) {
+                            btn.classList.add('active');
+                        }
+                    });
+                    renderCoachPrompts(moodName);
+                    break;
+                }
             }
-        } else if (moodSelect) {
-            // Set default to 'neutre' (last button)
-            selectMood('neutre', buttons[4]);
+        } else if (moodSelect && buttons.length > 0) {
+            const neutralButton = document.querySelector('.mood-btn[data-mood="neutre"]');
+            if (neutralButton) {
+                selectMood('neutre', neutralButton);
+            }
+        }
+
+        if (!document.querySelector('.mood-btn.active')) {
+            renderCoachPrompts('neutre');
         }
     });
 </script>
 {% endblock %}
+
+
+

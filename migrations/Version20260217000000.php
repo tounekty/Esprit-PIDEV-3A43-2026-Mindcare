@@ -22,11 +22,11 @@ final class Version20260217000000 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         // Check if table doesn't already exist to avoid errors
         if (!$schema->hasTable('user_stats')) {
-            $this->addSql('CREATE TABLE user_stats (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, user_id INTEGER NOT NULL, points INTEGER NOT NULL DEFAULT 0, badges CLOB NOT NULL DEFAULT \'[]\', total_entries INTEGER NOT NULL DEFAULT 0, consecutive_days INTEGER NOT NULL DEFAULT 0, last_entry_date DATETIME, UNIQUE INDEX UNIQ_D49F6DF6A76ED395 (user_id), CONSTRAINT FK_D49F6DF6A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE)');
+            $this->addSql('CREATE TABLE user_stats (id INT AUTO_INCREMENT NOT NULL, user_id INT NOT NULL, points INT NOT NULL DEFAULT 0, badges LONGTEXT NOT NULL DEFAULT \'[]\', total_entries INT NOT NULL DEFAULT 0, consecutive_days INT NOT NULL DEFAULT 0, last_entry_date DATETIME, UNIQUE INDEX UNIQ_D49F6DF6A76ED395 (user_id), CONSTRAINT FK_D49F6DF6A76ED395 FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         }
         
         if (!$schema->hasTable('entry_template')) {
-            $this->addSql('CREATE TABLE entry_template (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, title VARCHAR(255) NOT NULL, prompt CLOB NOT NULL, category VARCHAR(50) NOT NULL, description CLOB, display_order INTEGER NOT NULL DEFAULT 0, is_active BOOLEAN NOT NULL DEFAULT 1)');
+            $this->addSql('CREATE TABLE entry_template (id INT AUTO_INCREMENT NOT NULL, title VARCHAR(255) NOT NULL, prompt LONGTEXT NOT NULL, category VARCHAR(50) NOT NULL, description LONGTEXT, display_order INT NOT NULL DEFAULT 0, is_active BOOLEAN NOT NULL DEFAULT 1, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         }
     }
 

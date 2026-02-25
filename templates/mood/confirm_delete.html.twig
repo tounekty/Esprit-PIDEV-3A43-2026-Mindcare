@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Confirmer suppression mood{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="page-container" style="max-width: 760px; margin: 0 auto; padding: 2rem 1rem;">
+    <div style="background: #fff5f5; border-left: 4px solid #f56565; padding: 1.5rem; border-radius: 8px;">
+        <h2 style="margin: 0 0 0.75rem 0; color: #742a2a;">Confirmer la suppression</h2>
+        <p style="margin: 0 0 0.5rem 0; color: #742a2a;">
+            Vous allez supprimer ce mood: <strong>{{ mood.humeur|capitalize }}</strong>
+            (intensite {{ mood.intensite }}/5, date {{ mood.datemood|date('d/m/Y') }}).
+        </p>
+        <p style="margin: 0; color: #742a2a;">Cette action est irreversible.</p>
+    </div>
+
+    <form method="post" action="{{ path('app_mood_delete', {'id': mood.id}) }}" style="margin-top: 1.25rem;">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ mood.id) }}">
+        <input type="hidden" name="confirm_delete" value="yes">
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash me-1"></i> Confirmer suppression
+            </button>
+            <a href="{{ path('app_mood_index') }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

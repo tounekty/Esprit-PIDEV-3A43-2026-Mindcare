@@ -18,7 +18,11 @@ final class DashboardStatsController extends AbstractController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         
         $user = $this->getUser();
-        $userStats = $statsService->getOrCreateStats($user);
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException('Utilisateur invalide.');
+        }
+
+        $userStats = $statsService->recomputeStats($user);
         $templates = $templateRepository->findActiveTemplates();
         
         // Calculate badge information
@@ -29,11 +33,17 @@ final class DashboardStatsController extends AbstractController
         
         // All available badges for comparison
         $allBadges = [
-            '10_entries' => $statsService->getBadgeInfo('10_entries'),
-            '50_entries' => $statsService->getBadgeInfo('50_entries'),
-            '100_entries' => $statsService->getBadgeInfo('100_entries'),
-            'seven_days' => $statsService->getBadgeInfo('seven_days'),
-            'thirty_days' => $statsService->getBadgeInfo('thirty_days'),
+            'first_entry' => $statsService->getBadgeInfo('first_entry'),
+            'ten_entries' => $statsService->getBadgeInfo('ten_entries'),
+            'thirty_entries' => $statsService->getBadgeInfo('thirty_entries'),
+            'hundred_entries' => $statsService->getBadgeInfo('hundred_entries'),
+            'streak_3' => $statsService->getBadgeInfo('streak_3'),
+            'streak_7' => $statsService->getBadgeInfo('streak_7'),
+            'streak_30' => $statsService->getBadgeInfo('streak_30'),
+            'mood_explorer' => $statsService->getBadgeInfo('mood_explorer'),
+            'mood_master' => $statsService->getBadgeInfo('mood_master'),
+            'journal_writer' => $statsService->getBadgeInfo('journal_writer'),
+            'journal_pro' => $statsService->getBadgeInfo('journal_pro'),
         ];
         
         // Calculate next badge progress
@@ -43,15 +53,15 @@ final class DashboardStatsController extends AbstractController
         if ($userStats->getTotalEntries() < 10) {
             $nextBadge = 'entries';
             $nextBadgeProgress = round(($userStats->getTotalEntries() / 10) * 100);
-        } elseif ($userStats->getTotalEntries() < 50) {
-            $nextBadge = 'entries50';
-            $nextBadgeProgress = round(($userStats->getTotalEntries() / 50) * 100);
+        } elseif ($userStats->getTotalEntries() < 30) {
+            $nextBadge = 'entries30';
+            $nextBadgeProgress = round(($userStats->getTotalEntries() / 30) * 100);
         } elseif ($userStats->getTotalEntries() < 100) {
             $nextBadge = 'entries100';
             $nextBadgeProgress = round(($userStats->getTotalEntries() / 100) * 100);
         }
         
-        if ($userStats->getConsecutiveDays() < 7 && !in_array('seven_days', $userStats->getBadges())) {
+        if ($userStats->getConsecutiveDays() < 7 && !in_array('streak_7', $userStats->getBadges(), true)) {
             $nextBadge = 'days7';
             $nextBadgeProgress = round(($userStats->getConsecutiveDays() / 7) * 100);
         }
