@@ -34,7 +34,9 @@ class MessageForumRepository extends ServiceEntityRepository
 
     public function createSearchQueryBuilder(?string $query): QueryBuilder
     {
-        $qb = $this->createQueryBuilder('m');
+        $qb = $this->createQueryBuilder('m')
+            ->leftJoin('m.analysis', 'a')
+            ->addSelect('a');
 
         if ($query !== null && $query !== '') {
             $qb->andWhere('LOWER(m.contenu) LIKE :query')
