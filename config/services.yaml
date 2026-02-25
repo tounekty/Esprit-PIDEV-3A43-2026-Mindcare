@@ -8,6 +8,9 @@ services:
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            string $groqApiKey: '%env(string:GROQ_API_KEY)%'
+            string $hfApiToken: '%env(string:HF_API_TOKEN)%'
 
     # Makes classes in src/ available to be used as services
     # This creates a service per class whose id is the fully-qualified class name
@@ -37,3 +40,10 @@ services:
             $baseUrl: '%env(COMPREFACE_BASE_URL)%'
             $apiKey: '%env(COMPREFACE_API_KEY)%'
             $minSimilarity: '%env(float:COMPREFACE_MIN_SIMILARITY)%'
+
+    App\Service\GoogleAnalyticsResourceMetricsService:
+        arguments:
+            $ga4PropertyId: '%env(string:GA4_PROPERTY_ID)%'
+            $ga4CredentialsPath: '%env(string:GA4_CREDENTIALS_PATH)%'
+            $ga4LookbackDays: '%env(int:GA4_LOOKBACK_DAYS)%'
+            $projectDir: '%kernel.project_dir%'

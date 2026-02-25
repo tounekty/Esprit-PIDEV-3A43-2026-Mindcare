@@ -70,7 +70,8 @@ class Resource
         max: 500,
         maxMessage: 'Le lien image ne doit pas depasser {{ limit }} caracteres.'
     )]
-    #[Assert\Url(
+    #[Assert\Regex(
+        pattern: '/^(https?:\/\/|\/uploads\/).+/',
         message: 'Le lien image doit etre une URL complete (ex: https://exemple.com/image.jpg).'
     )]
     private ?string $imageUrl = null;

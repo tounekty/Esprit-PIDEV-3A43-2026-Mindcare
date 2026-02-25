@@ -47,6 +47,12 @@
             "./config/packages/karser_recaptcha3.yaml"
         ]
     },
+    "knplabs/knp-paginator-bundle": {
+        "version": "v6.10.0"
+    },
+    "knplabs/knp-time-bundle": {
+        "version": "2.5.0"
+    },
     "phpunit/phpunit": {
         "version": "9.6",
         "recipe": {
@@ -269,6 +275,9 @@
             "./config/packages/twig.yaml",
             "./templates/base.html.twig"
         ]
+    },
+    "symfony/ux-chartjs": {
+        "version": "v2.32.0"
     },
     "symfony/ux-turbo": {
         "version": "2.32",
