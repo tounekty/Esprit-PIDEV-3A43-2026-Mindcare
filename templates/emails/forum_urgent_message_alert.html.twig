@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        .container {
+            max-width: 620px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header { text-align: center; color: #333; }
+        .header h1 { margin: 0 0 10px 0; color: #d9534f; }
+        .content { padding: 20px 0; line-height: 1.6; color: #555; }
+        .risk {
+            background-color: #fff3f3;
+            border-left: 4px solid #d9534f;
+            padding: 12px;
+            border-radius: 4px;
+            margin: 15px 0;
+        }
+        .preview {
+            background-color: #f8f8f8;
+            border-left: 4px solid #6f42c1;
+            padding: 12px;
+            border-radius: 4px;
+            color: #333;
+            margin: 14px 0;
+        }
+        .button {
+            display: inline-block;
+            background-color: #d9534f;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 18px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⚠️ Alerte IA - Message potentiellement urgent</h1>
+        <p>Détection automatique MindCare via Hugging Face</p>
+    </div>
+
+    <div class="content">
+        <p>Bonjour {{ psychologueName is not empty ? psychologueName : 'Psychologue' }},</p>
+
+        <p>Un nouveau message potentiellement urgent a été détecté dans le sujet :</p>
+        <p><strong>{{ topicTitle }}</strong></p>
+
+        <div class="risk">
+            <strong>Score d'urgence :</strong> {{ urgencyScore is not null ? (urgencyScore * 100)|round(1) ~ '%' : 'N/A' }}<br>
+            <strong>Sentiment dominant :</strong> {{ sentimentLabel|default('inconnu') }}
+        </div>
+
+        <p><strong>Auteur :</strong> {{ authorName }}</p>
+
+        {% if excerpt is not empty %}
+            <div class="preview">
+                {{ excerpt }}
+            </div>
+        {% endif %}
+
+        <center>
+            <a href="{{ topicUrl }}" class="button">Voir le message</a>
+        </center>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 MindCare</p>
+    </div>
+</div>
+</body>
+</html>

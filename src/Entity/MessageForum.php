@@ -59,6 +59,9 @@ class MessageForum
     #[ORM\Column(name: 'attachment_size', type: 'integer', nullable: true)]
     private ?int $attachmentSize = null;
 
+    #[ORM\OneToOne(mappedBy: 'message', targetEntity: MessageForumAnalysis::class, cascade: ['persist', 'remove'])]
+    private ?MessageForumAnalysis $analysis = null;
+
     public function __construct()
     {
         $this->dateMessage = new \DateTimeImmutable();
@@ -203,6 +206,22 @@ class MessageForum
     public function setAttachmentSize(?int $attachmentSize): self
     {
         $this->attachmentSize = $attachmentSize;
+
+        return $this;
+    }
+
+    public function getAnalysis(): ?MessageForumAnalysis
+    {
+        return $this->analysis;
+    }
+
+    public function setAnalysis(?MessageForumAnalysis $analysis): self
+    {
+        if ($analysis !== null && $analysis->getMessage() !== $this) {
+            $analysis->setMessage($this);
+        }
+
+        $this->analysis = $analysis;
 
         return $this;
     }
