@@ -71,6 +71,8 @@ security:
         - { path: ^/forum, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/events, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/resources, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/translate, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
+        - { path: ^/commentaire, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/mood, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/journal, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
         - { path: ^/dashboard, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
@@ -91,6 +93,9 @@ security:
         # 🔒 ROLE-SPECIFIC
         - { path: ^/admin, roles: [ROLE_ADMIN, ROLE_PSYCHOLOGUE] }
         - { path: ^/psychologue, roles: ROLE_PSYCHOLOGUE }
+
+        # 🤖 CHATBOT API
+        - { path: ^/chatbot, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
 
         # 🚨 CATCH-ALL (MUST BE LAST)
         - { path: ^/, roles: ROLE_USER }

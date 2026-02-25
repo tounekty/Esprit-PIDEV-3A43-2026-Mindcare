@@ -1,0 +1,172 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block page_title %}Stats Ressources{% endblock %}
+
+{% block body %}
+<div class="row g-3 mb-4">
+    <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0">Tests UX ChartJS - Ressources</h5>
+        <a href="{{ path('admin_resources_index') }}" class="btn btn-outline-secondary btn-sm">Retour gestion ressources</a>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-xl-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pb-0">
+                <h6 class="mb-0">Commentaires par ressource</h6>
+                <small class="text-muted">Top ressources selon le volume de commentaires</small>
+            </div>
+            <div class="card-body">
+                {{ render_chart(commentsChart) }}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-6">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 pb-0">
+                <h6 class="mb-0">Note moyenne par ressource</h6>
+                <small class="text-muted">Moyenne des notes utilisateurs (/5)</small>
+            </div>
+            <div class="card-body">
+                {{ render_chart(ratingsChart) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% set ga = ga_analytics ?? null %}
+{% if ga %}
+    <div class="row g-3 mt-1">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0">Google Analytics (GA4)</h5>
+                <small class="text-muted">Periode: {{ ga.periodDays }} derniers jours</small>
+            </div>
+        </div>
+    </div>
+
+    {% if not ga.enabled %}
+        <div class="alert alert-info mt-3 mb-0">
+            {{ ga.error ?? 'Google Analytics non configure.' }}
+        </div>
+    {% elseif not ga.available %}
+        <div class="alert alert-warning mt-3 mb-0">
+            Donnees Google Analytics indisponibles. {{ ga.error ?? '' }}
+        </div>
+    {% else %}
+        <div class="row g-3 mt-1">
+            <div class="col-xl-4 col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <small class="text-muted d-block mb-1">Vues totales</small>
+                        <h4 class="mb-0">{{ ga.overview.totalViews|number_format(0, ',', ' ') }}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <small class="text-muted d-block mb-1">Temps moyen d engagement</small>
+                        <h4 class="mb-0">{{ ga.overview.avgEngagementSeconds|number_format(2, ',', ' ') }} s</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-4 col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <small class="text-muted d-block mb-1">Taux de rebond</small>
+                        <h4 class="mb-0">{{ ga.overview.bounceRate|number_format(2, ',', ' ') }} %</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pb-0">
+                        <h6 class="mb-0">Ressources les plus vues</h6>
+                        <small class="text-muted">Top pages /resources/{id}</small>
+                    </div>
+                    <div class="card-body">
+                        {% if ga_views_chart %}
+                            {{ render_chart(ga_views_chart) }}
+                        {% else %}
+                            <p class="text-muted mb-0">Aucune donnee de vues disponible.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pb-0">
+                        <h6 class="mb-0">Top categories</h6>
+                        <small class="text-muted">Repartition des vues par type de ressource</small>
+                    </div>
+                    <div class="card-body">
+                        {% if ga_categories_chart %}
+                            {{ render_chart(ga_categories_chart) }}
+                        {% else %}
+                            <p class="text-muted mb-0">Aucune categorie detectee.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-white border-0 pb-0">
+                        <h6 class="mb-0">Engagement par ressource</h6>
+                        <small class="text-muted">Vues, temps moyen et rebond</small>
+                    </div>
+                    <div class="card-body">
+                        {% if ga.topResources is not empty %}
+                            <div class="table-responsive">
+                                <table class="table table-striped align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Ressource</th>
+                                            <th>Type</th>
+                                            <th>Vues</th>
+                                            <th>Temps moyen</th>
+                                            <th>Rebond</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in ga.topResources %}
+                                            <tr>
+                                                <td>
+                                                    <a href="{{ path('resource_show', {id: item.resourceId}) }}" target="_blank" rel="noopener">
+                                                        {{ item.title }}
+                                                    </a>
+                                                </td>
+                                                <td>{{ item.type }}</td>
+                                                <td>{{ item.views|number_format(0, ',', ' ') }}</td>
+                                                <td>{{ item.avgEngagementSeconds|number_format(2, ',', ' ') }} s</td>
+                                                <td>{{ item.bounceRate|number_format(2, ',', ' ') }} %</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <p class="text-muted mb-0">Aucune ressource /resources/{id} trouvee dans GA.</p>
+                            <p class="text-muted mb-0 mt-2">Verifiez GA4_MEASUREMENT_ID, visitez des pages /resources/{id}, puis attendez la synchronisation GA (quelques minutes a 24h).</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('app') }}
+{% endblock %}
