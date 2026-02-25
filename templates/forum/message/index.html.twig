@@ -30,7 +30,31 @@
             {% for message in messages %}
                 <tr>
                     <td style="padding: .5rem;">{{ message.sujet ? message.sujet.titre : '-' }}</td>
-                    <td style="padding: .5rem;">{{ message.contenu }}</td>
+                    <td style="padding: .5rem;">
+                        <div>{{ message.contenu }}</div>
+                        <div style="margin-top: .35rem; display: flex; flex-wrap: wrap; gap: .3rem;">
+                            {% set analysis = message.analysis %}
+                            {% if analysis is null %}
+                                <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: #e9ecef; color: #495057; font-size: 12px;">IA: non analysé</span>
+                            {% elseif analysis.status == 'pending' %}
+                                <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: #fff3cd; color: #856404; font-size: 12px;">IA: en attente</span>
+                            {% elseif analysis.status == 'failed' %}
+                                <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: #f8d7da; color: #842029; font-size: 12px;">IA: échec</span>
+                            {% elseif analysis.status == 'success' %}
+                                <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: #d1e7dd; color: #0f5132; font-size: 12px;">IA: analysé</span>
+
+                                {% if analysis.sentimentLabel %}
+                                    <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: #e2e3ff; color: #3f3d9a; font-size: 12px;">
+                                        Sentiment: {{ analysis.sentimentLabel }}{% if analysis.sentimentScore is not null %} ({{ (analysis.sentimentScore * 100)|round(1) }}%){% endif %}
+                                    </span>
+                                {% endif %}
+
+                                <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: {{ analysis.isUrgent ? '#f8d7da' : '#d1e7dd' }}; color: {{ analysis.isUrgent ? '#842029' : '#0f5132' }}; font-size: 12px;">
+                                    Urgence: {{ analysis.isUrgent ? 'Urgent' : 'Non urgent' }}{% if analysis.urgencyScore is not null %} ({{ (analysis.urgencyScore * 100)|round(1) }}%){% endif %}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </td>
                     <td style="padding: .5rem;">{{ message.dateMessage|date('Y-m-d H:i') }}</td>
                     <td style="padding: .5rem;">
                         {% if message.user %}
