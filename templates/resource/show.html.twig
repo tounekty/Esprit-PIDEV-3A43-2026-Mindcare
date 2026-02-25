@@ -13,7 +13,7 @@
                     <li class="breadcrumb-item active" aria-current="page">{{ resource.title }}</li>
                 </ol>
             </nav>
-            <h1 class="display-5 fw-bold">{{ resource.title }}</h1>
+            <h1 class="display-5 fw-bold" id="resource-title">{{ resource.title }}</h1>
             <p class="text-muted">
                 Publie le {{ resource.createdAt|date('d/m/Y H:i') }}
                 <span class="relative-time">({{ time_diff(resource.createdAt, null, 'fr') }})</span>
@@ -48,7 +48,26 @@
                         </div>
                     {% endif %}
 
-                    <p class="resource-description mb-4">{{ resource.description }}</p>
+                    <p class="resource-description mb-4" id="resource-description">{{ resource.description }}</p>
+
+                    {# ── Translation widget ── #}
+                    <div class="translate-widget mb-4 p-3 rounded" style="background:#f8f9ff; border:1px solid #e0e4f0;">
+                        <div class="d-flex align-items-center flex-wrap gap-2">
+                            <span style="font-size:.85rem; font-weight:600; color:#555;">
+                                🌐 Traduire :
+                            </span>
+                            <button onclick="translateResource('en')" class="btn btn-sm btn-outline-secondary translate-btn" data-lang="en">🇬🇧 Anglais</button>
+                            <button onclick="translateResource('ar')" class="btn btn-sm btn-outline-secondary translate-btn" data-lang="ar">🇸🇦 Arabe</button>
+                            <button onclick="translateResource('de')" class="btn btn-sm btn-outline-secondary translate-btn" data-lang="de">🇩🇪 Allemand</button>
+                            <button onclick="translateResource('es')" class="btn btn-sm btn-outline-secondary translate-btn" data-lang="es">🇪🇸 Espagnol</button>
+                            <button onclick="translateResource('fr')" class="btn btn-sm btn-outline-secondary translate-btn" data-lang="fr">🇫🇷 Français</button>
+                            <span id="translate-spinner" style="display:none;">
+                                <span class="spinner-border spinner-border-sm text-primary ms-2" role="status"></span>
+                                <small class="text-muted ms-1">Traduction...</small>
+                            </span>
+                        </div>
+                        <div id="translate-error" class="text-danger mt-2" style="display:none; font-size:.85rem;"></div>
+                    </div>
 
                     <div class="resource-actions">
                         {% if resource.type == 'video' and resource.videoUrl %}
@@ -317,5 +336,53 @@ document.addEventListener('DOMContentLoaded', function() {
 
 {# ── Chatbot flottant Ressources ── #}
 {% include 'partials/_chatbot_widget.html.twig' %}
+
+<script>
+const originalTitle       = document.getElementById('resource-title').innerText;
+const originalDescription = document.getElementById('resource-description').innerText;
+let currentLang = 'fr';
+
+function translateResource(lang) {
+    if (lang === currentLang) return;
+
+    const spinner   = document.getElementById('translate-spinner');
+    const errBox    = document.getElementById('translate-error');
+    const btns      = document.querySelectorAll('.translate-btn');
+
+    errBox.style.display = 'none';
+    spinner.style.display = 'inline-flex';
+    btns.forEach(b => b.disabled = true);
+
+    fetch('{{ path('translate') }}', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            texts: { title: originalTitle, description: originalDescription },
+            target: lang
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.error) throw new Error(data.error);
+        document.getElementById('resource-title').innerText       = data.translations.title;
+        document.getElementById('resource-description').innerText = data.translations.description;
+        currentLang = lang;
+        // Highlight active button
+        btns.forEach(b => {
+            b.classList.toggle('btn-primary',         b.dataset.lang === lang);
+            b.classList.toggle('text-white',          b.dataset.lang === lang);
+            b.classList.toggle('btn-outline-secondary', b.dataset.lang !== lang);
+        });
+    })
+    .catch(err => {
+        errBox.textContent = err.message || 'Erreur de traduction.';
+        errBox.style.display = 'block';
+    })
+    .finally(() => {
+        spinner.style.display = 'none';
+        btns.forEach(b => b.disabled = false);
+    });
+}
+</script>
 
 {% endblock %}
