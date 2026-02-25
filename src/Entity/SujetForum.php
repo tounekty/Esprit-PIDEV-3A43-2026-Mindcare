@@ -106,9 +106,19 @@ class SujetForum
     #[ORM\OneToMany(mappedBy: 'sujet', targetEntity: MessageForum::class, cascade: ['persist', 'remove'])]
     private Collection $messages;
 
+    /**
+     * @var Collection<int, User>
+     */
+    #[ORM\ManyToMany(targetEntity: User::class)]
+    #[ORM\JoinTable(name: 'sujet_tagged_psychologue')]
+    #[ORM\JoinColumn(name: 'id_sujet', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'id_psychologue', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    private Collection $taggedPsychologues;
+
     public function __construct()
     {
         $this->messages = new ArrayCollection();
+        $this->taggedPsychologues = new ArrayCollection();
         $this->dateCreation = new \DateTimeImmutable();
     }
 
@@ -286,6 +296,30 @@ class SujetForum
                 $message->setSujet(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getTaggedPsychologues(): Collection
+    {
+        return $this->taggedPsychologues;
+    }
+
+    public function addTaggedPsychologue(User $psychologue): self
+    {
+        if (!$this->taggedPsychologues->contains($psychologue)) {
+            $this->taggedPsychologues->add($psychologue);
+        }
+
+        return $this;
+    }
+
+    public function removeTaggedPsychologue(User $psychologue): self
+    {
+        $this->taggedPsychologues->removeElement($psychologue);
 
         return $this;
     }
