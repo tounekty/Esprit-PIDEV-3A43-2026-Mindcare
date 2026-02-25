@@ -26,9 +26,10 @@ class CommentaireType extends AbstractType
             ])
             ->add('rating', ChoiceType::class, [
                 'label' => 'Votre note',
-                'required' => false,
+                'required' => true,
                 'expanded' => true,
                 'multiple' => false,
+                'placeholder' => false,
                 'choices' => [
                     '5' => 5,
                     '4' => 4,

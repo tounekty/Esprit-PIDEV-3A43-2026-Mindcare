@@ -9,6 +9,17 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('front/img/favicon.png') }}">
+    {% if ga4_measurement_id is not empty %}
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga4_measurement_id }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '{{ ga4_measurement_id|e('js') }}', {
+                'page_path': '{{ app.request.pathInfo|e('js') }}'
+            });
+        </script>
+    {% endif %}
 
     {% block stylesheets %}
         {% if app.request.attributes.get('_route') in ['app_login', 'app_register', 'app_forgot_password', 'app_verify_code', 'app_reset_password'] %}
