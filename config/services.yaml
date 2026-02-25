@@ -24,3 +24,9 @@ services:
             $recaptchaSecret: '%env(RECAPTCHA_SECRET_KEY)%'
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 10 }
+
+    App\Service\HuggingFaceForumAnalysisService:
+        arguments:
+            $apiToken: '%env(HUGGINGFACE_API_TOKEN)%'
+            $modelName: '%env(HUGGINGFACE_FORUM_MODEL)%'
+            $urgencyThreshold: '%env(float:HUGGINGFACE_URGENCY_THRESHOLD)%'

@@ -9,6 +9,7 @@ use App\Entity\User;
 use App\Repository\LikeMessageRepository;
 use App\Repository\MessageForumRepository;
 use App\Repository\SujetForumRepository;
+use App\Message\AnalyzeForumMessage;
 use App\Service\ForumReplyNotificationService;
 use App\Service\ForumTagNotificationService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -24,6 +25,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\UserRepository;
 
@@ -175,7 +177,7 @@ class FrontForumController extends AbstractController
     }
 
     #[Route('/forum/sujet/{id}', name: 'front_forum_show', methods: ['GET', 'POST'])]
-    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, LikeMessageRepository $likeMessageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ForumReplyNotificationService $notificationService): Response
+    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, LikeMessageRepository $likeMessageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ForumReplyNotificationService $notificationService, MessageBusInterface $messageBus): Response
     {
         $message = new MessageForum();
         $message->setSujet($sujet);
@@ -275,6 +277,9 @@ class FrontForumController extends AbstractController
                 $entityManager->persist($message);
                 $entityManager->flush();
                 $notificationService->notifyTopicOwnerOnReply($message);
+                if ($message->getId() !== null) {
+                    $messageBus->dispatch(new AnalyzeForumMessage($message->getId()));
+                }
 
                 return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
             }

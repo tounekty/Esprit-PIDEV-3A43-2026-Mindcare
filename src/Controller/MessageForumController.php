@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\MessageForum;
 use App\Entity\SujetForum;
+use App\Message\AnalyzeForumMessage;
 use App\Repository\MessageForumRepository;
 use App\Service\ForumReplyNotificationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,6 +17,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 class MessageForumController extends AbstractController
@@ -37,7 +39,7 @@ class MessageForumController extends AbstractController
     }
 
     #[Route('/forum/messages/new', name: 'message_forum_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ForumReplyNotificationService $notificationService): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ForumReplyNotificationService $notificationService, MessageBusInterface $messageBus): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -76,6 +78,9 @@ class MessageForumController extends AbstractController
             $entityManager->persist($message);
             $entityManager->flush();
             $notificationService->notifyTopicOwnerOnReply($message);
+            if ($message->getId() !== null) {
+                $messageBus->dispatch(new AnalyzeForumMessage($message->getId()));
+            }
 
             return $this->redirectToRoute('message_forum_index');
         }
