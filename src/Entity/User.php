@@ -54,6 +54,13 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
  #[ORM\Column(type: 'datetime', nullable: true)]
 private ?\DateTimeInterface $resetCodeExpiresAt = null;
 
+    // ------------------- FACE ID -------------------
+    #[ORM\Column(type: 'boolean')]
+    private bool $faceIdEnabled = false;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $faceIdSubject = null;
+
     // ------------------- Getters & Setters -------------------
 
     public function getId(): ?int { return $this->id; }
@@ -93,6 +100,13 @@ private ?\DateTimeInterface $resetCodeExpiresAt = null;
 
     public function getResetCodeExpiresAt(): ?\DateTimeInterface { return $this->resetCodeExpiresAt; }
     public function setResetCodeExpiresAt(?\DateTimeInterface $expiresAt): self { $this->resetCodeExpiresAt = $expiresAt; return $this; }
+
+    // ------------------- Face ID -------------------
+    public function isFaceIdEnabled(): bool { return $this->faceIdEnabled; }
+    public function setFaceIdEnabled(bool $enabled): self { $this->faceIdEnabled = $enabled; return $this; }
+
+    public function getFaceIdSubject(): ?string { return $this->faceIdSubject; }
+    public function setFaceIdSubject(?string $subject): self { $this->faceIdSubject = $subject; return $this; }
 
     // ------------------- Symfony Security -------------------
     public function getRoles(): array {

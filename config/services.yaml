@@ -31,3 +31,9 @@ services:
             $zoomClientId: '%env(ZOOM_CLIENT_ID)%'
             $zoomClientSecret: '%env(ZOOM_CLIENT_SECRET)%'
             $zoomAccountId: '%env(ZOOM_ACCOUNT_ID)%'
+
+    App\Service\CompreFaceClient:
+        arguments:
+            $baseUrl: '%env(COMPREFACE_BASE_URL)%'
+            $apiKey: '%env(COMPREFACE_API_KEY)%'
+            $minSimilarity: '%env(float:COMPREFACE_MIN_SIMILARITY)%'
