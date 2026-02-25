@@ -29,6 +29,8 @@ use App\Repository\UserRepository;
 
 class FrontForumController extends AbstractController
 {
+    private const MAX_REPLY_DEPTH = 3;
+
     #[Route('/forum/messages/{id}/like', name: 'front_forum_message_like', methods: ['POST'])]
     public function toggleMessageLike(MessageForum $message, Request $request, EntityManagerInterface $entityManager, LikeMessageRepository $likeRepository): Response
     {
@@ -187,7 +189,7 @@ class FrontForumController extends AbstractController
 
         $query = trim((string) $request->query->get('q', ''));
         $messages = $paginator->paginate(
-            $messageRepository->createSujetSearchQueryBuilder($sujet, $query !== '' ? $query : null),
+            $messageRepository->createSujetRootSearchQueryBuilder($sujet, $query !== '' ? $query : null),
             max(1, (int) $request->query->get('page', 1)),
             5
         );
@@ -196,6 +198,24 @@ class FrontForumController extends AbstractController
         foreach ($messages as $messageItem) {
             if ($messageItem instanceof MessageForum && $messageItem->getId() !== null) {
                 $messageIds[] = $messageItem->getId();
+            }
+        }
+
+        $topicChildren = $messageRepository->findChildrenForTopic($sujet);
+        $childrenByParent = [];
+        foreach ($topicChildren as $childMessage) {
+            if (!$childMessage instanceof MessageForum) {
+                continue;
+            }
+
+            $parent = $childMessage->getParentMessage();
+            if (!$parent instanceof MessageForum || $parent->getId() === null) {
+                continue;
+            }
+
+            $childrenByParent[$parent->getId()][] = $childMessage;
+            if ($childMessage->getId() !== null) {
+                $messageIds[] = $childMessage->getId();
             }
         }
 
@@ -229,6 +249,28 @@ class FrontForumController extends AbstractController
 
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
+                $parentId = (int) $request->request->get('parent_id', 0);
+                if ($parentId > 0) {
+                    $parentMessage = $messageRepository->findOneBy([
+                        'id' => $parentId,
+                        'sujet' => $sujet,
+                    ]);
+
+                    if (!$parentMessage instanceof MessageForum) {
+                        $this->addFlash('error', 'Le message parent est introuvable.');
+
+                        return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
+                    }
+
+                    if ($this->computeReplyDepth($parentMessage) >= self::MAX_REPLY_DEPTH) {
+                        $this->addFlash('error', 'Profondeur maximale des réponses atteinte (3 niveaux).');
+
+                        return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
+                    }
+
+                    $message->setParentMessage($parentMessage);
+                }
+
                 $this->handleMessageUploads($form, $message);
                 $entityManager->persist($message);
                 $entityManager->flush();
@@ -245,7 +287,22 @@ class FrontForumController extends AbstractController
             'form' => $form ? $form->createView() : null,
             'likeCounts' => $likeCounts,
             'likedMessageIds' => $likedMessageIds,
+            'childrenByParent' => $childrenByParent,
+            'maxReplyDepth' => self::MAX_REPLY_DEPTH,
         ]);
+    }
+
+    private function computeReplyDepth(MessageForum $message): int
+    {
+        $depth = 1;
+        $parent = $message->getParentMessage();
+
+        while ($parent instanceof MessageForum) {
+            ++$depth;
+            $parent = $parent->getParentMessage();
+        }
+
+        return $depth;
     }
 
     private function handleSujetUploads($form, SujetForum $sujet): void

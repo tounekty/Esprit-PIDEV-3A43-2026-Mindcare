@@ -57,4 +57,35 @@ class MessageForumRepository extends ServiceEntityRepository
 
         return $qb->orderBy('m.dateMessage', 'DESC');
     }
+
+    public function createSujetRootSearchQueryBuilder(SujetForum $sujet, ?string $query): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('m')
+            ->andWhere('m.sujet = :sujet')
+            ->andWhere('m.parentMessage IS NULL')
+            ->setParameter('sujet', $sujet);
+
+        if ($query !== null && $query !== '') {
+            $qb->andWhere('LOWER(m.contenu) LIKE :query')
+                ->setParameter('query', '%' . strtolower($query) . '%');
+        }
+
+        return $qb->orderBy('m.dateMessage', 'DESC');
+    }
+
+    /**
+     * @return MessageForum[]
+     */
+    public function findChildrenForTopic(SujetForum $sujet): array
+    {
+        return $this->createQueryBuilder('m')
+            ->leftJoin('m.parentMessage', 'p')
+            ->addSelect('p')
+            ->andWhere('m.sujet = :sujet')
+            ->andWhere('m.parentMessage IS NOT NULL')
+            ->setParameter('sujet', $sujet)
+            ->orderBy('m.dateMessage', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
 }
