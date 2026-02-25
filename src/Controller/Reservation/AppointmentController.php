@@ -9,8 +9,11 @@ use App\Form\StudentAppointmentType;
 use App\Repository\UserRepository;
 use App\Repository\AppointmentRepository;
 use App\Repository\UserRepository as RepoUserRepository;
+use App\Service\ZoomApiService;
+use App\Service\OllamaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -24,6 +27,7 @@ class AppointmentController extends AbstractController
 
 
     #[Route('/api/psychologue/{id}/availability', name: 'api_psychologue_availability', methods: ['GET'])]
+    #[IsGranted('PUBLIC_ACCESS')]
     public function apiAvailability(int $id, UserRepository $userRepository, AppointmentRepository $appointmentRepository): JsonResponse
     {
         try {
@@ -50,6 +54,125 @@ class AppointmentController extends AbstractController
             }
 
             return new JsonResponse($busy);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get AI-suggested optimal appointment times based on psychologist's patterns
+     */
+    #[Route('/api/psychologue/{id}/ai-suggest-times', name: 'api_psychologue_ai_suggest_times', methods: ['GET'])]
+    #[IsGranted('PUBLIC_ACCESS')]
+    public function aiSuggestTimes(int $id, UserRepository $userRepository, AppointmentRepository $appointmentRepository, OllamaService $ollamaService): JsonResponse
+    {
+        try {
+            $psy = $userRepository->find($id);
+            if (!$psy) {
+                return new JsonResponse(['error' => 'Psychologue introuvable'], 404);
+            }
+
+            // Get this psychologist's appointments
+            $appointments = $appointmentRepository->findBy(
+                ['psychologue' => $psy],
+                ['date' => 'DESC'],
+                20 // Last 20 appointments
+            );
+
+            if (empty($appointments)) {
+                return new JsonResponse([
+                    'suggestions' => 'Aucune donnée disponible. Le psychologue n\'a pas encore d\'historique d\'appointments.',
+                ]);
+            }
+
+            // Format appointments for AI analysis
+            $appointmentData = [];
+            foreach ($appointments as $appointment) {
+                if ($appointment->getStatus() === 'accepted' || $appointment->getStatus() === 'completed') {
+                    $appointmentData[] = [
+                        'date' => $appointment->getDate(),
+                        'status' => $appointment->getStatus()
+                    ];
+                }
+            }
+
+            if (empty($appointmentData)) {
+                return new JsonResponse([
+                    'suggestions' => 'Pas assez de données pour générer des suggestions. Essayez à nouveau après quelques rendez-vous complétés.',
+                ]);
+            }
+
+            // Get AI suggestions based on patterns
+            $psySchedule = "Disponibilité: Lundi-Vendredi, 9h-18h (à adapter selon vos préférences réelles)";
+            $suggestions = $ollamaService->suggestAppointmentTimes($appointmentData, $psySchedule);
+
+            return new JsonResponse([
+                'suggestions' => $suggestions,
+                'psychologue' => $psy->getFirstName() . ' ' . $psy->getLastName(),
+                'analyzed_count' => count($appointmentData)
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse(['error' => 'Erreur AI: ' . $e->getMessage()], 503);
+        }
+    }
+
+    /**
+     * Analyze appointment patterns for a psychologist
+     */
+    #[Route('/api/psychologue/{id}/ai-patterns', name: 'api_psychologue_ai_patterns', methods: ['GET'], priority: 10)]
+    #[IsGranted('PUBLIC_ACCESS')]
+    public function aiPatterns(int $id, UserRepository $userRepository, AppointmentRepository $appointmentRepository): JsonResponse
+    {
+        try {
+            $psy = $userRepository->find($id);
+            if (!$psy) {
+                return new JsonResponse(['error' => 'Psychologue introuvable'], 404);
+            }
+
+            $appointments = $appointmentRepository->findBy(
+                ['psychologue' => $psy],
+                ['date' => 'DESC'],
+                50
+            );
+
+            if (empty($appointments)) {
+                return new JsonResponse(['error' => 'Aucun rendez-vous trouvé']);
+            }
+
+            // Analyze patterns by day and time
+            $patterns = [
+                'by_day' => [],
+                'by_hour' => [],
+                'total' => count($appointments)
+            ];
+
+            foreach ($appointments as $appointment) {
+                if ($appointment->getDate()) {
+                    $day = $appointment->getDate()->format('l'); // Day name
+                    $hour = $appointment->getDate()->format('H'); // Hour
+
+                    $patterns['by_day'][$day] = ($patterns['by_day'][$day] ?? 0) + 1;
+                    $patterns['by_hour'][$hour] = ($patterns['by_hour'][$hour] ?? 0) + 1;
+                }
+            }
+
+            // Find most preferred day and time
+            $mostDay = array_key_first((array) $patterns['by_day']) ?: 'Unknown';
+            $mostHour = array_key_first(array_reverse((array) $patterns['by_hour'])) ?: 'Unknown';
+
+            if (!empty($patterns['by_day'])) {
+                $mostDay = array_keys($patterns['by_day'], max($patterns['by_day']))[0];
+            }
+            if (!empty($patterns['by_hour'])) {
+                $mostHour = array_keys($patterns['by_hour'], max($patterns['by_hour']))[0];
+            }
+
+            return new JsonResponse([
+                'patterns' => $patterns,
+                'most_preferred_day' => $mostDay,
+                'most_preferred_hour' => $mostHour . ':00',
+                'recommendation' => "Ce psychologue a tendance à programmer les rendez-vous le {$mostDay} autour de {$mostHour}h."
+            ]);
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], 500);
         }
@@ -88,6 +211,19 @@ class AppointmentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Check if student already has an appointment with this psychologue this week
+            if ($appointmentRepository->hasAppointmentThisWeekWithPsychologue(
+                $user,
+                $psy,
+                $appointment->getDate()
+            )) {
+                $this->addFlash('error', 'Vous avez deja un rendez-vous avec ce psychologue cette semaine. Maximum 1 par semaine.');
+                return $this->render('reservation/new.html.twig', [
+                    'form' => $form->createView(),
+                    'psychologue' => $psy,
+                ]);
+            }
+
             // Check if the selected time is already booked for this psychologist
             $selectedDate = $appointment->getDate();
             if ($selectedDate) {
@@ -105,7 +241,7 @@ class AppointmentController extends AbstractController
 
                     // Check if selected time overlaps with existing appointment
                     if ($selectedDate >= $existingStart && $selectedDate < $existingEnd) {
-                        $form->get('date')->addError(new \Symfony\Component\Form\FormError(
+                        $form->get('date')->addError(new FormError(
                             'Ce créneau n\'est pas disponible. Veuillez choisir une autre date.'
                         ));
                         break;
@@ -148,8 +284,13 @@ class AppointmentController extends AbstractController
 
 
     #[Route('/reservation/{id}/accept', name: 'reservation_accept')]
-    public function accept(int $id, AppointmentRepository $appointmentRepository, EntityManagerInterface $em, MailerInterface $mailer): Response
-    {
+    public function accept(
+        int $id,
+        AppointmentRepository $appointmentRepository,
+        EntityManagerInterface $em,
+        MailerInterface $mailer,
+        ZoomApiService $zoomService
+    ): Response {
         $appointment = $appointmentRepository->find($id);
         if (!$appointment) {
             throw $this->createNotFoundException('Rendez-vous introuvable');
@@ -161,18 +302,75 @@ class AppointmentController extends AbstractController
         }
 
         $appointment->setStatus('accepted');
+
+        // Create Zoom meeting if appointment is online
+        $zoomLink = null;
+        if ($appointment->getLocation() === 'online') {
+            try {
+                $psychologue = $appointment->getPsychologue();
+                $topic = 'Rendez-vous avec ' . $psychologue->getFirstName() . ' ' . $psychologue->getLastName();
+                $description = $appointment->getDescription();
+
+                $meetingData = $zoomService->createMeeting(
+                    'me',
+                    $topic,
+                    $appointment->getDate(),
+                    60,
+                    $description
+                );
+
+                if ($meetingData['join_url']) {
+                    $appointment->setZoomMeetingId($meetingData['id']);
+                    $appointment->setZoomJoinUrl($meetingData['join_url']);
+                    $appointment->setZoomCreatedAt(new \DateTime());
+                    $zoomLink = $meetingData['join_url'];
+                }
+            } catch (\Exception $e) {
+                // Zoom meeting creation failed, but appointment acceptance continues
+                // Email will be sent without Zoom link
+            }
+        }
+
         $em->flush();
 
         // Notify student by email
         $student = $appointment->getEtudiant();
         if ($student && $student->getEmail()) {
+            $emailContent = '<p>Bonjour ' . $student->getFirstName() . ',</p>
+                        <p>Votre rendez-vous prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . ' avec <strong>' . $appointment->getPsychologue()->getFirstName() . ' ' . $appointment->getPsychologue()->getLastName() . '</strong> a été accepté.</p>';
+
+            if ($zoomLink) {
+                $emailContent .= '<p><strong>Lien de réunion Zoom :</strong> <a href="' . $zoomLink . '">' . $zoomLink . '</a></p>';
+            }
+
+            $emailContent .= '<p>Cordialement,<br>L\'équipe MindCare</p>';
+
             $email = (new Email())
                 ->from('noreply@mindcare.com')
                 ->to($student->getEmail())
                 ->subject('Votre rendez-vous a été accepté')
-                ->html('<p>Bonjour ' . $student->getFirstName() . ',</p>
-                        <p>Votre rendez-vous prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . ' avec <strong>' . $appointment->getPsychologue()->getFirstName() . ' ' . $appointment->getPsychologue()->getLastName() . '</strong> a été accepté.</p>
-                        <p>Cordialement,<br>L\'équipe MindCare</p>');
+                ->html($emailContent);
+
+            $mailer->send($email);
+        }
+
+        // ALWAYS notify psychologist by email
+        $psychologue = $appointment->getPsychologue();
+        if ($psychologue && $psychologue->getEmail()) {
+            $emailContent = '<p>Bonjour ' . $psychologue->getFirstName() . ',</p>
+                        <p>Vous avez accepté le rendez-vous avec <strong>' . $student->getFirstName() . ' ' . $student->getLastName() . '</strong> prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . '.</p>';
+
+            if ($zoomLink) {
+                $emailContent .= '<p><strong>Lien de réunion Zoom :</strong> <a href="' . $zoomLink . '">' . $zoomLink . '</a></p>';
+            }
+
+            $emailContent .= '<p>Cordialement,<br>L\'équipe MindCare</p>';
+
+            $email = (new Email())
+                ->from('noreply@mindcare.com')
+                ->to($psychologue->getEmail())
+                ->subject('Rendez-vous accepté')
+                ->html($emailContent);
 
             $mailer->send($email);
         }
@@ -299,7 +497,7 @@ class AppointmentController extends AbstractController
                     $existingEnd = (clone $existingStart)->modify('+1 hour');
 
                     if ($selectedDate >= $existingStart && $selectedDate < $existingEnd) {
-                        $form->get('date')->addError(new \Symfony\Component\Form\FormError(
+                        $form->get('date')->addError(new FormError(
                             'Ce créneau n\'est pas disponible. Veuillez choisir une autre date.'
                         ));
                         break;

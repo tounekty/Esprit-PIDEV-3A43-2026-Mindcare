@@ -159,6 +159,48 @@
                         </div>
                     </div>
                     
+                    <!-- AI Clinical Insights (On-Demand) -->
+                    {% if canGenerateAI %}
+                        <div class="card shadow-sm border-0 mb-4 border-start border-4 border-info">
+                            <div class="card-header bg-gradient bg-info bg-opacity-10 border-bottom-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title fw-bold text-info mb-0">
+                                        <i class="fa fa-brain me-2"></i>Analyse IA - Observations Cliniques
+                                    </h5>
+                                    <small class="text-muted">Intelligence artificielle</small>
+                                </div>
+                                <button id="generateAiBtn" class="btn btn-info btn-sm" onclick="generateAI()">
+                                    <i class="fa fa-magic me-1"></i>Générer les Insights
+                                </button>
+                            </div>
+                            <div class="card-body px-4" id="aiInsightsContainer">
+                                <div class="alert alert-light border-info text-center py-4" id="aiPlaceholder">
+                                    <i class="fa fa-robot fa-2x text-info mb-2"></i>
+                                    <p class="mb-0">Cliquez sur "Générer les Insights" pour obtenir une analyse IA</p>
+                                </div>
+                                <div id="aiLoading" class="text-center py-4" style="display:none;">
+                                    <div class="spinner-border text-info" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2 text-muted">Génération en cours... (peut prendre 10-30s)</p>
+                                </div>
+                                <div id="aiContent" style="display:none;">
+                                    <div class="alert alert-light border-info">
+                                        <p class="mb-0" style="white-space: pre-wrap;" id="aiText"></p>
+                                    </div>
+                                    <div class="text-muted small">
+                                        <i class="fa fa-info-circle me-1"></i>
+                                        Ces observations sont générées par IA et doivent être validées par un professionnel.
+                                    </div>
+                                </div>
+                                <div id="aiError" class="alert alert-danger" style="display:none;">
+                                    <i class="fa fa-exclamation-triangle me-2"></i>
+                                    <span id="aiErrorText"></span>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    
                     <div class="text-muted small text-end">
                         {% if patientFile.createdAt %}
                             Initialisé le : {{ patientFile.createdAt|date('d/m/Y H:i') }} | 
@@ -171,4 +213,51 @@
             </div>
         {{ form_end(form) }}
     </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        function generateAI() {
+            const btn = document.getElementById('generateAiBtn');
+            const placeholder = document.getElementById('aiPlaceholder');
+            const loading = document.getElementById('aiLoading');
+            const content = document.getElementById('aiContent');
+            const error = document.getElementById('aiError');
+            
+            // Hide everything and show loading
+            btn.disabled = true;
+            placeholder.style.display = 'none';
+            content.style.display = 'none';
+            error.style.display = 'none';
+            loading.style.display = 'block';
+            
+            // Make AJAX request
+            fetch('{{ path('admin_patient_file_ai_insights', {id: student.id}) }}', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loading.style.display = 'none';
+                
+                if (data.insights) {
+                    document.getElementById('aiText').textContent = data.insights;
+                    content.style.display = 'block';
+                } else if (data.error) {
+                    document.getElementById('aiErrorText').textContent = data.error;
+                    error.style.display = 'block';
+                    btn.disabled = false;
+                }
+            })
+            .catch(err => {
+                loading.style.display = 'none';
+                document.getElementById('aiErrorText').textContent = 'Erreur de connexion: ' + err.message;
+                error.style.display = 'block';
+                btn.disabled = false;
+            });
+        }
+    </script>
 {% endblock %}

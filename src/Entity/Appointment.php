@@ -3,10 +3,13 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
+use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
 #[ORM\Entity(repositoryClass: "App\Repository\AppointmentRepository")]
 #[ORM\Table(name: 'appointment')]
+#[Vich\Uploadable]
 class Appointment
 {
     #[ORM\Id]
@@ -41,6 +44,24 @@ class Appointment
     #[ORM\ManyToOne(targetEntity: PatientFile::class, inversedBy: 'appointments')]
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?PatientFile $patientFile = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $zoomMeetingId = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $zoomJoinUrl = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $zoomCreatedAt = null;
+
+    #[Vich\UploadableField(mapping: 'appointment_reports', fileNameProperty: 'reportName')]
+    private ?File $reportFile = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $reportName = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $reportUpdatedAt = null;
 
     // Getters and setters
     public function getId(): ?int
@@ -123,5 +144,76 @@ class Appointment
     {
         $this->patientFile = $patientFile;
         return $this;
+    }
+
+    public function getZoomMeetingId(): ?string
+    {
+        return $this->zoomMeetingId;
+    }
+
+    public function setZoomMeetingId(?string $zoomMeetingId): self
+    {
+        $this->zoomMeetingId = $zoomMeetingId;
+        return $this;
+    }
+
+    public function getZoomJoinUrl(): ?string
+    {
+        return $this->zoomJoinUrl;
+    }
+
+    public function setZoomJoinUrl(?string $zoomJoinUrl): self
+    {
+        $this->zoomJoinUrl = $zoomJoinUrl;
+        return $this;
+    }
+
+    public function getZoomCreatedAt(): ?\DateTimeInterface
+    {
+        return $this->zoomCreatedAt;
+    }
+
+    public function setZoomCreatedAt(?\DateTimeInterface $zoomCreatedAt): self
+    {
+        $this->zoomCreatedAt = $zoomCreatedAt;
+        return $this;
+    }
+
+    public function setReportFile(?File $reportFile = null): self
+    {
+        $this->reportFile = $reportFile;
+
+        if ($reportFile !== null) {
+            $this->reportUpdatedAt = new \DateTime();
+        }
+
+        return $this;
+    }
+
+    public function getReportFile(): ?File
+    {
+        return $this->reportFile;
+    }
+
+    public function setReportName(?string $reportName): self
+    {
+        $this->reportName = $reportName;
+        return $this;
+    }
+
+    public function getReportName(): ?string
+    {
+        return $this->reportName;
+    }
+
+    public function setReportUpdatedAt(?\DateTimeInterface $reportUpdatedAt): self
+    {
+        $this->reportUpdatedAt = $reportUpdatedAt;
+        return $this;
+    }
+
+    public function getReportUpdatedAt(): ?\DateTimeInterface
+    {
+        return $this->reportUpdatedAt;
     }
 }

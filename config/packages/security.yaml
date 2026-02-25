@@ -53,6 +53,9 @@ security:
         # 🔐 API ENDPOINTS
         # Public access for availability (students need this for booking, only shows busy slots)
         - { path: ^/api/psychologue/\d+/availability$, roles: PUBLIC_ACCESS }
+        # Public access for AI suggestions (used in booking form)
+        - { path: ^/api/psychologue/\d+/ai-suggest-times$, roles: PUBLIC_ACCESS }
+        - { path: ^/api/psychologue/\d+/ai-patterns$, roles: PUBLIC_ACCESS }
         # Other psychologue API endpoints require psychologue role
         - { path: ^/api/psychologue, roles: ROLE_PSYCHOLOGUE }
 

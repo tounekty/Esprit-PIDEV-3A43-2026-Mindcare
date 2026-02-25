@@ -62,6 +62,54 @@
                 </div>
                 <div class="card-body p-4">
                     
+                    <!-- Flash Messages from Controller -->
+                    {% for type, messages in app.flashes %}
+                        {% if type == 'error' %}
+                            {% for message in messages %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <h5 class="alert-heading fw-bold mb-2">
+                                        <i class="fa fa-exclamation-circle me-2"></i>Attention
+                                    </h5>
+                                    <p class="mb-0">{{ message }}</p>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% elseif type == 'warning' %}
+                            {% for message in messages %}
+                                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                    <h5 class="alert-heading fw-bold mb-2">
+                                        <i class="fa fa-exclamation-triangle me-2"></i>Avertissement
+                                    </h5>
+                                    <p class="mb-0">{{ message }}</p>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% elseif type == 'success' %}
+                            {% for message in messages %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <h5 class="alert-heading fw-bold mb-2">
+                                        <i class="fa fa-check-circle me-2"></i>Succes
+                                    </h5>
+                                    <p class="mb-0">{{ message }}</p>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Form-level Error Messages -->
+                    {% if form.vars.errors|length > 0 %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <h5 class="alert-heading fw-bold mb-3">
+                                <i class="fa fa-exclamation-circle me-2"></i>Erreur
+                            </h5>
+                            {% for error in form.vars.errors %}
+                                <div class="mb-2">{{ error.message }}</div>
+                            {% endfor %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+
                     <!-- Availability Legend -->
                     <div class="availability-legend">
                         <div class="legend-item">
@@ -75,6 +123,42 @@
                         <div class="legend-item">
                             <div class="legend-color" style="background: #fff; border: 1px solid #ddd;"></div>
                             <span>Disponible (cliquez pour sélectionner)</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Suggestions Card -->
+                    <div class="card border-info mb-4">
+                        <div class="card-header bg-info bg-opacity-10 border-info">
+                            <h5 class="card-title mb-0">
+                                <i class="fa fa-magic me-2" style="color: #0dcaf0;"></i>
+                                <strong>Suggestions IA</strong> - Créneaux optimaux recommandés
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <button type="button" id="loadAISuggestions" class="btn btn-info btn-sm mb-3">
+                                <i class="fa fa-brain me-2"></i>Charger les suggestions IA
+                            </button>
+                            <div id="aiSuggestionsContainer" style="display: none;">
+                                <div id="aiLoading" class="text-center py-3" style="display: none;">
+                                    <div class="spinner-border spinner-border-sm text-info me-2" role="status">
+                                        <span class="visually-hidden">Chargement...</span>
+                                    </div>
+                                    <span class="text-muted">Analyse des patterns de rendez-vous...</span>
+                                </div>
+                                <div id="aiContent" style="display: none;">
+                                    <div class="alert alert-info border-info">
+                                        <p class="mb-0" style="white-space: pre-wrap;" id="aiSuggestionsText"></p>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">
+                                        <i class="fa fa-info-circle me-1"></i>
+                                        Les suggestions sont basées sur l'analyse des rendez-vous confirmés de ce psychologue.
+                                    </small>
+                                </div>
+                                <div id="aiError" class="alert alert-warning" style="display: none;">
+                                    <i class="fa fa-exclamation-triangle me-2"></i>
+                                    <span id="aiErrorText"></span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -311,6 +395,47 @@
                     return false;
                 }
                 console.log('Submitting with date:', hiddenDateInput.value); // Debug log
+            });
+
+            // AI Suggestions Handler
+            document.getElementById('loadAISuggestions')?.addEventListener('click', function() {
+                const btn = this;
+                const container = document.getElementById('aiSuggestionsContainer');
+                const loading = document.getElementById('aiLoading');
+                const content = document.getElementById('aiContent');
+                const error = document.getElementById('aiError');
+                const psyId = {{ psychologue.id }};
+
+                btn.disabled = true;
+                container.style.display = 'block';
+                loading.style.display = 'block';
+                content.style.display = 'none';
+                error.style.display = 'none';
+
+                fetch(`/api/psychologue/${psyId}/ai-suggest-times`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (data.suggestions) {
+                        document.getElementById('aiSuggestionsText').textContent = data.suggestions;
+                        content.style.display = 'block';
+                    } else if (data.error) {
+                        document.getElementById('aiErrorText').textContent = data.error;
+                        error.style.display = 'block';
+                        btn.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    loading.style.display = 'none';
+                    document.getElementById('aiErrorText').textContent = 'Erreur: ' + err.message;
+                    error.style.display = 'block';
+                    btn.disabled = false;
+                });
             });
         });
     </script>

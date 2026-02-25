@@ -365,3 +365,8 @@
         });
     </script>
 {% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="assets/js/dashboard-init.min.js"></script>
+{% endblock %}
