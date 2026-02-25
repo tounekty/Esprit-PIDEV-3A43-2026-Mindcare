@@ -10,9 +10,11 @@ use App\Repository\LikeMessageRepository;
 use App\Repository\MessageForumRepository;
 use App\Repository\SujetForumRepository;
 use App\Service\ForumReplyNotificationService;
+use App\Service\ForumTagNotificationService;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -23,6 +25,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Repository\UserRepository;
 
 class FrontForumController extends AbstractController
 {
@@ -94,7 +97,7 @@ class FrontForumController extends AbstractController
     }
 
     #[Route('/forum/new', name: 'front_forum_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ForumTagNotificationService $tagNotificationService): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -131,6 +134,22 @@ class FrontForumController extends AbstractController
                 'label' => 'Catégorie',
                 'required' => false,
             ])
+            ->add('taggedPsychologues', EntityType::class, [
+                'class' => User::class,
+                'label' => 'Taguer des psychologues',
+                'required' => false,
+                'multiple' => true,
+                'choice_label' => static function (User $psychologue): string {
+                    return trim((string) $psychologue->getFirstName() . ' ' . (string) $psychologue->getLastName());
+                },
+                'query_builder' => static function (UserRepository $userRepository) {
+                    return $userRepository->createQueryBuilder('u')
+                        ->andWhere('u.role = :role')
+                        ->setParameter('role', 'psychologue')
+                        ->orderBy('u.firstName', 'ASC')
+                        ->addOrderBy('u.lastName', 'ASC');
+                },
+            ])
             ->add('attachmentFile', FileType::class, [
                 'label' => 'Pièce jointe',
                 'mapped' => false,
@@ -143,6 +162,7 @@ class FrontForumController extends AbstractController
             $this->handleSujetUploads($form, $sujet);
             $entityManager->persist($sujet);
             $entityManager->flush();
+            $tagNotificationService->notifyTaggedPsychologuesOnTopicCreation($sujet);
 
             return $this->redirectToRoute('front_forum_index');
         }

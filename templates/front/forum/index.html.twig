@@ -247,6 +247,14 @@
                                 <p class="topic-description">
                                     {{ sujet.description|length > 120 ? sujet.description|slice(0, 120) ~ '...' : sujet.description }}
                                 </p>
+                                {% if sujet.taggedPsychologues|length > 0 %}
+                                    <p class="topic-description" style="margin-bottom: 14px; color: #5a5a5a; font-size: 13px;">
+                                        <strong>Psychologues tagués :</strong>
+                                        {% for psychologue in sujet.taggedPsychologues %}
+                                            {{ psychologue.firstName }} {{ psychologue.lastName }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </p>
+                                {% endif %}
                                 <div class="topic-meta">
                                     <div class="topic-date">
                                         <i class="ti-calendar"></i>

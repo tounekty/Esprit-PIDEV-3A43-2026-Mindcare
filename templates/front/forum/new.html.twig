@@ -53,6 +53,11 @@
                                 {{ form_errors(form.category) }}
                             </div>
                             <div class="mb-3">
+                                {{ form_label(form.taggedPsychologues) }}
+                                {{ form_widget(form.taggedPsychologues) }}
+                                {{ form_errors(form.taggedPsychologues) }}
+                            </div>
+                            <div class="mb-3">
                                 {{ form_label(form.attachmentFile) }}
                                 {{ form_widget(form.attachmentFile) }}
                                 {{ form_errors(form.attachmentFile) }}

@@ -180,6 +180,14 @@
                             {{ sujet.status }}
                         </div>
                         {% endif %}
+                        {% if sujet.taggedPsychologues|length > 0 %}
+                        <div class="topic-meta-item">
+                            <i class="ti-user"></i>
+                            {% for psychologue in sujet.taggedPsychologues %}
+                                Dr {{ psychologue.firstName }} {{ psychologue.lastName }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>

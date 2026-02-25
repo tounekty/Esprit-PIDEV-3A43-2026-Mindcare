@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header { text-align: center; color: #333; }
+        .header h1 { margin: 0 0 10px 0; color: #6f42c1; }
+        .content { padding: 20px 0; line-height: 1.6; color: #555; }
+        .button {
+            display: inline-block;
+            background-color: #6f42c1;
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 18px 0;
+        }
+        .preview {
+            background-color: #f8f8f8;
+            border-left: 4px solid #6f42c1;
+            padding: 12px;
+            border-radius: 4px;
+            color: #333;
+            margin: 14px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>🏷️ Vous avez été tagué(e)</h1>
+        <p>Un utilisateur vous a mentionné dans un sujet du forum MindCare</p>
+    </div>
+
+    <div class="content">
+        <p>Bonjour {{ psychologueName is not empty ? psychologueName : 'Psychologue' }},</p>
+
+        <p>Vous avez été tagué(e) dans le sujet :</p>
+        <p><strong>{{ topicTitle }}</strong></p>
+
+        <p><strong>Auteur du sujet :</strong> {{ authorName }}</p>
+
+        {% if topicExcerpt is not empty %}
+            <div class="preview">
+                {{ topicExcerpt }}
+            </div>
+        {% endif %}
+
+        <center>
+            <a href="{{ topicUrl }}" class="button">Voir le sujet</a>
+        </center>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 MindCare</p>
+    </div>
+</div>
+</body>
+</html>
