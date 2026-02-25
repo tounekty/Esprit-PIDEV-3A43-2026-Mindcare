@@ -9,6 +9,7 @@ use App\Form\FullPatientFileType;
 use App\Repository\PatientFileRepository;
 use App\Repository\UserRepository;
 use App\Repository\AppointmentRepository;
+use App\Service\OllamaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -86,7 +87,8 @@ class PatientFileController extends AbstractController
         Request $request, 
         UserRepository $userRepository, 
         AppointmentRepository $appointmentRepository,
-        EntityManagerInterface $em
+        EntityManagerInterface $em,
+        OllamaService $ollamaService
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_PSYCHOLOGUE');
         
@@ -127,12 +129,16 @@ class PatientFileController extends AbstractController
             return $this->redirectToRoute('admin_patient_file_show', ['id' => $id]);
         }
 
+        // AI insights are loaded on-demand via AJAX (see template)
+        $canGenerateAI = $patientFile->getId() && ($patientFile->getAntecedentsPersonnels() || $patientFile->getNotesGenerales());
+
         return $this->render('patient_file/show.html.twig', [
             'form' => $form->createView(),
             'student' => $student,
             'patientFile' => $patientFile,
             'isAdmin' => $isAdmin,
-            'isNew' => $isNew
+            'isNew' => $isNew,
+            'canGenerateAI' => $canGenerateAI
         ]);
     }
 
@@ -157,5 +163,53 @@ class PatientFileController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_patient_file_index');
+    }
+
+    /**
+     * AI: Generate clinical insights on-demand
+     */
+    #[Route('/admin/dossier/ai/insights/{id}', name: 'admin_patient_file_ai_insights', methods: ['GET'])]
+    public function aiInsights(int $id, UserRepository $userRepository, OllamaService $ollamaService): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_PSYCHOLOGUE');
+        
+        $student = $userRepository->find($id);
+        if (!$student || !$student->getPatientFile()) {
+            return $this->json(['error' => 'Patient file not found'], 404);
+        }
+
+        $patientFile = $student->getPatientFile();
+        
+        try {
+            $history = $patientFile->getAntecedentsPersonnels() ?? 'None';
+            $notes = $patientFile->getNotesGenerales() ?? 'None';
+            $insights = $ollamaService->generateClinicalInsights($history, $notes);
+            
+            if (empty($insights)) {
+                return $this->json(['error' => 'AI returned empty response'], 500);
+            }
+            
+            return $this->json(['insights' => $insights]);
+        } catch (\Exception $e) {
+            return $this->json(['error' => 'AI service unavailable: ' . $e->getMessage()], 503);
+        }
+    }
+
+    /**
+     * AI: Generate session summary from notes
+     */
+    #[Route('/admin/dossier/ai/summarize', name: 'admin_patient_file_ai_summarize', methods: ['POST'])]
+    public function aiSummarize(Request $request, OllamaService $ollamaService): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_PSYCHOLOGUE');
+        
+        $notes = $request->request->get('notes', '');
+        if (empty($notes)) {
+            return $this->json(['error' => 'Notes are required'], 400);
+        }
+
+        $summary = $ollamaService->summarizeSessionNotes($notes);
+        
+        return $this->json(['summary' => $summary]);
     }
 }

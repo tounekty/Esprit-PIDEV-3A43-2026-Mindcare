@@ -162,7 +162,7 @@
                     </div>
                 {% endif %}
                 
-                {% if is_granted('ROLE_ADMIN') and not is_granted('ROLE_PSYCHOLOGUE') %}
+                {% if is_granted('ROLE_ADMIN') %}
                     <div class="mb-3">
                         <a href="{{ path('admin_rdv_new') }}" class="btn btn-primary btn-sm">Créer un rendez-vous</a>
                     </div>

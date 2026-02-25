@@ -177,6 +177,38 @@ class AppointmentRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
+    /**
+     * Check if student already has an appointment with this psychologue in the same week
+     */
+    public function hasAppointmentThisWeekWithPsychologue($student, $psychologue, $appointmentDate, $excludeAppointmentId = null): bool
+    {
+        // Get Monday and Sunday of the week
+        $weekStart = (clone $appointmentDate)->modify('Monday this week')->setTime(0, 0, 0);
+        $weekEnd = (clone $appointmentDate)->modify('Sunday this week')->setTime(23, 59, 59);
+
+        $qb = $this->createQueryBuilder('a')
+            ->select('COUNT(a.id)')
+            ->andWhere('a.etudiant = :student')
+            ->andWhere('a.psychologue = :psychologue')
+            ->andWhere('a.date >= :weekStart')
+            ->andWhere('a.date <= :weekEnd')
+            ->andWhere('a.status NOT IN (:cancelled, :refused)')
+            ->setParameter('student', $student)
+            ->setParameter('psychologue', $psychologue)
+            ->setParameter('weekStart', $weekStart)
+            ->setParameter('weekEnd', $weekEnd)
+            ->setParameter('cancelled', 'cancelled')
+            ->setParameter('refused', 'refused');
+
+        // Exclude the current appointment if editing
+        if ($excludeAppointmentId) {
+            $qb->andWhere('a.id != :excludeId')
+               ->setParameter('excludeId', $excludeAppointmentId);
+        }
+
+        $count = (int) $qb->getQuery()->getSingleScalarResult();
+        return $count > 0;
+    }
 
 //    /**
 //     * @return Reservation[] Returns an array of Reservation objects

@@ -24,3 +24,10 @@ services:
             $recaptchaSecret: '%env(RECAPTCHA_SECRET_KEY)%'
         tags:
             - { name: kernel.event_listener, event: kernel.request, method: onKernelRequest, priority: 10 }
+    App\Service\ZoomApiService:
+        arguments:
+            $httpClient: '@http_client'
+            $logger: '@logger'
+            $zoomClientId: '%env(ZOOM_CLIENT_ID)%'
+            $zoomClientSecret: '%env(ZOOM_CLIENT_SECRET)%'
+            $zoomAccountId: '%env(ZOOM_ACCOUNT_ID)%'

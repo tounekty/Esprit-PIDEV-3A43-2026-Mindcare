@@ -4,9 +4,12 @@ namespace App\Controller\Admin;
 
 use App\Entity\Appointment;
 use App\Entity\User;
+use App\Form\AppointmentReportType;
 use App\Form\AppointmentType;
 use App\Repository\AppointmentRepository;
 use App\Repository\UserRepository;
+use App\Service\ZoomApiService;
+use App\Service\OllamaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -115,7 +118,7 @@ class AppointmentController extends AbstractController
     }
 
     #[Route('/admin/rdv/new', name: 'admin_rdv_new', methods: ['GET','POST'])]
-    public function new(Request $request, EntityManagerInterface $em): Response
+    public function new(Request $request, EntityManagerInterface $em, AppointmentRepository $appointmentRepository): Response
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -124,6 +127,18 @@ class AppointmentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Check if student already has an appointment with this psychologue this week
+            if ($appointmentRepository->hasAppointmentThisWeekWithPsychologue(
+                $appointment->getEtudiant(),
+                $appointment->getPsychologue(),
+                $appointment->getDate()
+            )) {
+                $this->addFlash('error', 'Cet etudiant a deja un rendez-vous avec ce psychologue cette semaine.');
+                return $this->render('admin/rdv/new.html.twig', [
+                    'form' => $form->createView(),
+                ]);
+            }
+
             $em->persist($appointment);
             $em->flush();
 
@@ -157,9 +172,66 @@ class AppointmentController extends AbstractController
             $this->denyAccessUnlessGranted('ROLE_ADMIN');
         }
 
+        $reportForm = null;
+        $canUploadReport = false;
+
+        // Show report upload form for psychologists on completed appointments
+        if ($this->isGranted('ROLE_PSYCHOLOGUE') && !$this->isGranted('ROLE_ADMIN')) {
+            if ($appointment->getPsychologue()->getId() === $user->getId() 
+                && in_array($appointment->getStatus(), ['completed', 'archived'])) {
+                $canUploadReport = true;
+                $reportForm = $this->createForm(AppointmentReportType::class, $appointment);
+            }
+        }
+
         return $this->render('admin/rdv/show.html.twig', [
             'appointment' => $appointment,
+            'reportForm' => $reportForm ? $reportForm->createView() : null,
+            'canUploadReport' => $canUploadReport,
         ]);
+    }
+
+    #[Route('/admin/rdv/{id}/report', name: 'admin_rdv_report_upload', methods: ['POST'])]
+    public function uploadReport(Request $request, Appointment $appointment, EntityManagerInterface $em): Response
+    {
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
+
+        // Only psychologists (not admins) can upload
+        if (!$this->isGranted('ROLE_PSYCHOLOGUE') || $this->isGranted('ROLE_ADMIN')) {
+            throw $this->createAccessDeniedException();
+        }
+
+        // Only for their own appointments
+        if ($appointment->getPsychologue()->getId() !== $user->getId()) {
+            throw $this->createAccessDeniedException();
+        }
+
+        // Only after completion
+        if (!in_array($appointment->getStatus(), ['completed', 'archived'])) {
+            $this->addFlash('error', 'Le compte rendu peut etre ajoute uniquement apres un rendez-vous termine.');
+            return $this->redirectToRoute('admin_rdv_show', ['id' => $appointment->getId()]);
+        }
+
+        $form = $this->createForm(AppointmentReportType::class, $appointment);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted()) {
+            if ($form->isValid() && $form->get('reportFile')->getData() !== null) {
+                $em->flush();
+                $this->addFlash('success', 'Le compte rendu a ete televerse avec succes.');
+            } else {
+                $errors = [];
+                foreach ($form->getErrors(true) as $error) {
+                    $errors[] = $error->getMessage();
+                }
+                $this->addFlash('error', 'Erreur: ' . implode(', ', $errors ?: ['Veuillez selectionner un fichier.']));
+            }
+        }
+
+        return $this->redirectToRoute('admin_rdv_show', ['id' => $appointment->getId()]);
     }
 
     #[Route('/admin/rdv/pending', name: 'admin_rdv_pending')]
@@ -204,8 +276,12 @@ class AppointmentController extends AbstractController
     }
 
     #[Route('/admin/rdv/{id}/accept', name: 'admin_rdv_accept', methods: ['POST'])]
-    public function accept(Appointment $appointment, EntityManagerInterface $em, MailerInterface $mailer): Response
-    {
+    public function accept(
+        Appointment $appointment,
+        EntityManagerInterface $em,
+        MailerInterface $mailer,
+        ZoomApiService $zoomService
+    ): Response {
         $user = $this->getUser();
         // Allow if current psychologist OR if admin
         if (!$user instanceof User || ($appointment->getPsychologue()->getId() !== $user->getId() && !$this->isGranted('ROLE_ADMIN'))) {
@@ -213,18 +289,82 @@ class AppointmentController extends AbstractController
         }
 
         $appointment->setStatus('accepted');
+
+        // Create Zoom meeting if appointment is online
+        $zoomLink = null;
+        if ($appointment->getLocation() === 'online') {
+            try {
+                $psychologue = $appointment->getPsychologue();
+                $topic = 'Rendez-vous avec ' . $psychologue->getFirstName() . ' ' . $psychologue->getLastName();
+                $description = $appointment->getDescription();
+
+                $meetingData = $zoomService->createMeeting(
+                    'me',
+                    $topic,
+                    $appointment->getDate(),
+                    60,
+                    $description
+                );
+
+                if ($meetingData['join_url']) {
+                    $appointment->setZoomMeetingId($meetingData['id']);
+                    $appointment->setZoomJoinUrl($meetingData['join_url']);
+                    $appointment->setZoomCreatedAt(new \DateTime());
+                    $zoomLink = $meetingData['join_url'];
+                }
+            } catch (\Exception $e) {
+                // Zoom meeting creation failed, but appointment acceptance continues
+                // Email will be sent without Zoom link
+            }
+        }
+
         $em->flush();
 
         // Notify student by email
         $student = $appointment->getEtudiant();
         if ($student && $student->getEmail()) {
+            $emailContent = '<p>Bonjour ' . $student->getFirstName() . ',</p>
+                        <p>Votre rendez-vous prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . ' avec <strong>' . $appointment->getPsychologue()->getFirstName() . ' ' . $appointment->getPsychologue()->getLastName() . '</strong> a été accepté.</p>';
+
+            if ($zoomLink) {
+                $emailContent .= '<p><strong>Lien de réunion Zoom :</strong> <a href="' . $zoomLink . '">' . $zoomLink . '</a></p>';
+            }
+
+            $emailContent .= '<p>Cordialement,<br>L\'équipe MindCare</p>';
+
             $email = (new Email())
                 ->from('noreply@mindcare.com')
                 ->to($student->getEmail())
                 ->subject('Votre rendez-vous a été accepté')
-                ->html('<p>Bonjour ' . $student->getFirstName() . ',</p>
-                        <p>Votre rendez-vous prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . ' avec <strong>' . $appointment->getPsychologue()->getFirstName() . ' ' . $appointment->getPsychologue()->getLastName() . '</strong> a été accepté.</p>
-                        <p>Cordialement,<br>L\'équipe MindCare</p>');
+                ->html($emailContent);
+
+            $mailer->send($email);
+        }
+
+        // ALWAYS notify psychologist by email
+        $psychologue = $appointment->getPsychologue();
+        if ($psychologue && $psychologue->getEmail()) {
+            $emailContent = '<p>Bonjour ' . $psychologue->getFirstName() . ',</p>';
+            
+            if ($user->getId() === $psychologue->getId()) {
+                // Psychologist accepted their own appointment
+                $emailContent .= '<p>Vous avez accepté le rendez-vous avec <strong>' . $student->getFirstName() . ' ' . $student->getLastName() . '</strong> prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . '.</p>';
+            } else {
+                // Admin accepted on behalf of psychologist
+                $emailContent .= '<p>Un rendez-vous avec <strong>' . $student->getFirstName() . ' ' . $student->getLastName() . '</strong> prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . ' a été accepté par l\'administration.</p>';
+            }
+
+            if ($zoomLink) {
+                $emailContent .= '<p><strong>Lien de réunion Zoom :</strong> <a href="' . $zoomLink . '">' . $zoomLink . '</a></p>';
+            }
+
+            $emailContent .= '<p>Cordialement,<br>L\'équipe MindCare</p>';
+
+            $email = (new Email())
+                ->from('noreply@mindcare.com')
+                ->to($psychologue->getEmail())
+                ->subject('Rendez-vous accepté')
+                ->html($emailContent);
 
             $mailer->send($email);
         }
@@ -324,7 +464,8 @@ class AppointmentController extends AbstractController
     }
 
     #[Route('/admin/rdv/{id}/edit', name: 'admin_rdv_edit', methods: ['GET','POST'])]
-    public function edit(Request $request, Appointment $appointment, EntityManagerInterface $em, MailerInterface $mailer): Response
+    #[Route('/admin/rdv/{id}/edit', name: 'admin_rdv_edit', methods: ['GET','POST'])]
+    public function edit(Request $request, Appointment $appointment, EntityManagerInterface $em, MailerInterface $mailer, AppointmentRepository $appointmentRepository): Response
     {
         $user = $this->getUser();
         
@@ -343,6 +484,20 @@ class AppointmentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Check if student already has an appointment with this psychologue this week (excluding current)
+            if ($appointmentRepository->hasAppointmentThisWeekWithPsychologue(
+                $appointment->getEtudiant(),
+                $appointment->getPsychologue(),
+                $appointment->getDate(),
+                $appointment->getId()
+            )) {
+                $this->addFlash('error', 'Cet etudiant a deja un rendez-vous avec ce psychologue cette semaine.');
+                return $this->render('admin/rdv/edit.html.twig', [
+                    'form' => $form->createView(),
+                    'appointment' => $appointment,
+                ]);
+            }
+
             $appointment->setStatus('pending');
             $em->flush();
             
@@ -414,5 +569,34 @@ class AppointmentController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_rdv_index');
+    }
+
+    /**
+     * AI: Suggest optimal appointment times
+     */
+    #[Route('/admin/rdv/ai/suggest-times', name: 'admin_rdv_ai_suggest_times', methods: ['POST'])]
+    public function aiSuggestTimes(Request $request, AppointmentRepository $appointmentRepository, OllamaService $ollamaService): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_PSYCHOLOGUE');
+        
+        $psychologueId = $request->request->get('psychologue_id');
+        if (!$psychologueId) {
+            return $this->json(['error' => 'Psychologue ID is required'], 400);
+        }
+
+        $existingAppointments = $appointmentRepository->findBy(
+            ['psychologue' => $psychologueId, 'status' => 'accepted'],
+            ['date' => 'DESC'],
+            10
+        );
+
+        $appointmentsData = array_map(function($apt) {
+            return ['date' => $apt->getDate()];
+        }, $existingAppointments);
+
+        $schedule = "Available: Monday-Friday 9:00-17:00"; // Could be dynamic from psychologist profile
+        $suggestions = $ollamaService->suggestAppointmentTimes($appointmentsData, $schedule);
+        
+        return $this->json(['suggestions' => $suggestions]);
     }
 }
