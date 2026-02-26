@@ -5,7 +5,7 @@
             {% if sujet.isPinned %}<span class="badge bg-warning ms-1">📌</span>{% endif %}
         </td>
         <td>{{ sujet.description|slice(0, 50) }}...</td>
-        <td>{{ sujet.dateCreation|date('Y-m-d H:i') }}</td>
+        <td><span title="{{ sujet.dateCreation|date('Y-m-d H:i') }}">{{ sujet.dateCreation|ago(null, 'fr') }}</span></td>
         <td>
             {% if sujet.user %}
                 {{ sujet.user.firstName }} {{ sujet.user.lastName }}

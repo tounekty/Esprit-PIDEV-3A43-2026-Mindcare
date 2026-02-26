@@ -187,7 +187,7 @@
                     <div class="topic-meta">
                         <div class="topic-meta-item">
                             <i class="ti-calendar"></i>
-                            {{ sujet.dateCreation|date('d M Y, H:i') }}
+                            <span title="{{ sujet.dateCreation|date('d M Y H:i') }}">{{ sujet.dateCreation|ago(null, 'fr') }}</span>
                         </div>
                         <div class="topic-meta-item">
                             <i class="ti-user"></i>
