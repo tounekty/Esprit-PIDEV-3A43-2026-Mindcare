@@ -375,7 +375,6 @@ class AdminResourceController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Ressource creee avec succes !');
-
             return $this->redirectToRoute('admin_resources_index');
         }
 
@@ -395,7 +394,6 @@ class AdminResourceController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Ressource mise a jour avec succes !');
-
             return $this->redirectToRoute('admin_resources_index');
         }
 

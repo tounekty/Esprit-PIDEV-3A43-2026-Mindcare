@@ -15,6 +15,8 @@ class OpenAiModerationService
         private readonly HttpClientInterface $httpClient,
         private readonly LoggerInterface $logger,
         private readonly string $groqApiKey,
+        private readonly bool $localCommentFilterEnabled = true,
+        private readonly bool $localFilterAllowOnApiFailure = false,
     ) {
     }
 
@@ -33,6 +35,7 @@ class OpenAiModerationService
     public function moderate(string $text): array
     {
         $content = trim($text);
+        $localModeration = $this->moderateLocally($content);
 
         if ($content === '') {
             return [
@@ -48,6 +51,19 @@ class OpenAiModerationService
         }
 
         if (!$this->isEnabled()) {
+            if ($this->localCommentFilterEnabled) {
+                return [
+                    'enabled'      => true,
+                    'checked'      => true,
+                    'flagged'      => $localModeration['flagged'],
+                    'categories'   => $localModeration['categories'],
+                    'fallbackUsed' => true,
+                    'statusCode'   => null,
+                    'errorType'    => null,
+                    'errorMessage' => null,
+                ];
+            }
+
             return [
                 'enabled'      => false,
                 'checked'      => false,
@@ -104,6 +120,19 @@ class OpenAiModerationService
                     'response'    => $data,
                 ]);
 
+                if ($this->localCommentFilterEnabled && ($this->localFilterAllowOnApiFailure || $localModeration['flagged'])) {
+                    return [
+                        'enabled'      => true,
+                        'checked'      => true,
+                        'flagged'      => $localModeration['flagged'],
+                        'categories'   => $localModeration['categories'],
+                        'fallbackUsed' => true,
+                        'statusCode'   => $statusCode,
+                        'errorType'    => null,
+                        'errorMessage' => null,
+                    ];
+                }
+
                 return [
                     'enabled'      => true,
                     'checked'      => false,
@@ -123,6 +152,20 @@ class OpenAiModerationService
 
             if (!is_array($parsed)) {
                 $this->logger->warning('Groq moderation: could not parse JSON response.', ['raw' => $raw]);
+
+                if ($this->localCommentFilterEnabled && ($this->localFilterAllowOnApiFailure || $localModeration['flagged'])) {
+                    return [
+                        'enabled'      => true,
+                        'checked'      => true,
+                        'flagged'      => $localModeration['flagged'],
+                        'categories'   => $localModeration['categories'],
+                        'fallbackUsed' => true,
+                        'statusCode'   => 200,
+                        'errorType'    => null,
+                        'errorMessage' => null,
+                    ];
+                }
+
                 return [
                     'enabled'      => true,
                     'checked'      => false,
@@ -138,6 +181,11 @@ class OpenAiModerationService
             $flagged           = (bool) ($parsed['flagged'] ?? false);
             $flaggedCategories = array_values(array_filter((array) ($parsed['categories'] ?? []), fn($c) => is_string($c)));
 
+            if ($this->localCommentFilterEnabled && $localModeration['flagged']) {
+                $flagged = true;
+                $flaggedCategories = array_values(array_unique(array_merge($flaggedCategories, $localModeration['categories'])));
+            }
+
             return [
                 'enabled'      => true,
                 'checked'      => true,
@@ -151,6 +199,20 @@ class OpenAiModerationService
 
         } catch (\Throwable $exception) {
             $this->logger->error('Groq moderation call failed.', ['error' => $exception->getMessage()]);
+
+            if ($this->localCommentFilterEnabled && ($this->localFilterAllowOnApiFailure || $localModeration['flagged'])) {
+                return [
+                    'enabled'      => true,
+                    'checked'      => true,
+                    'flagged'      => $localModeration['flagged'],
+                    'categories'   => $localModeration['categories'],
+                    'fallbackUsed' => true,
+                    'statusCode'   => null,
+                    'errorType'    => null,
+                    'errorMessage' => null,
+                ];
+            }
+
             return [
                 'enabled'      => true,
                 'checked'      => false,
@@ -179,5 +241,62 @@ class OpenAiModerationService
             && $statusCode >= 500           => 'provider',
             default                         => 'api',
         };
+    }
+
+    /**
+     * @return array{flagged: bool, categories: string[]}
+     */
+    private function moderateLocally(string $content): array
+    {
+        if (!$this->localCommentFilterEnabled || $content === '') {
+            return [
+                'flagged' => false,
+                'categories' => [],
+            ];
+        }
+
+        $normalized = mb_strtolower($content);
+
+        $toxicityPatterns = [
+            '/\bnul(le)?\b/u',
+            '/\bidiot(e)?\b/u',
+            '/\bimb[eé]cile\b/u',
+            '/\bconnard(e)?\b/u',
+            '/\bmerde\b/u',
+            '/va\s+te\s+faire/u',
+            '/\bferme\s+ta\s+gueule\b/u',
+            '/\bstupide\b/u',
+        ];
+
+        $spamPatterns = [
+            '/https?:\/\//i',
+            '/\b(?:gagner\s+de\s+l\'argent|argent\s+facile|offre\s+incroyable|promo\s+exclusive|bitcoin|casino)\b/ui',
+            '/\b(?:cliquez\s+ici|click\s+here|dm\s+me|contact\s+me)\b/ui',
+            '/(.)\1{6,}/u',
+        ];
+
+        $categories = [];
+
+        foreach ($toxicityPatterns as $pattern) {
+            if (preg_match($pattern, $normalized) === 1) {
+                $categories[] = 'harassment';
+                $categories[] = 'bad_words';
+                break;
+            }
+        }
+
+        foreach ($spamPatterns as $pattern) {
+            if (preg_match($pattern, $normalized) === 1) {
+                $categories[] = 'spam';
+                break;
+            }
+        }
+
+        $categories = array_values(array_unique($categories));
+
+        return [
+            'flagged' => $categories !== [],
+            'categories' => $categories,
+        ];
     }
 }
