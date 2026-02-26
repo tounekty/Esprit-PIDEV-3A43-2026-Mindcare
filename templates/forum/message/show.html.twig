@@ -15,6 +15,9 @@
             {% else %}
                 -
             {% endif %}
+            {% if message.isAnonymous %}
+                <span class="badge bg-secondary ms-2">Anonyme</span>
+            {% endif %}
         </p>
         <form method="post" action="{{ path('message_forum_delete', {id: message.id}) }}" onsubmit="return confirm('Supprimer ce message ?');">
             <input type="hidden" name="_token" value="{{ csrf_token('delete_message_' ~ message.id) }}">

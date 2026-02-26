@@ -181,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const image = captureBase64();
 
         try {
-            const response = await fetch('{{ path('app_face_login') }}', {
+            const response = await fetch('/login/face', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ image, _token: csrfToken })

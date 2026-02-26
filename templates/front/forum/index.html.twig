@@ -247,10 +247,28 @@
                                 <p class="topic-description">
                                     {{ sujet.description|length > 120 ? sujet.description|slice(0, 120) ~ '...' : sujet.description }}
                                 </p>
+                                {% if sujet.taggedPsychologues|length > 0 %}
+                                    <p class="topic-description" style="margin-bottom: 14px; color: #5a5a5a; font-size: 13px;">
+                                        <strong>Psychologues tagués :</strong>
+                                        {% for psychologue in sujet.taggedPsychologues %}
+                                            {{ psychologue.firstName }} {{ psychologue.lastName }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </p>
+                                {% endif %}
                                 <div class="topic-meta">
                                     <div class="topic-date">
                                         <i class="ti-calendar"></i>
-                                        {{ sujet.dateCreation|date('d M Y') }}
+                                        <span title="{{ sujet.dateCreation|date('d M Y H:i') }}">{{ sujet.dateCreation|ago(null, 'fr') }}</span>
+                                    </div>
+                                    <div class="topic-date">
+                                        <i class="ti-user"></i>
+                                        {% if sujet.isAnonymous %}
+                                            Anonyme
+                                        {% elseif sujet.user %}
+                                            {{ sujet.user.firstName }} {{ sujet.user.lastName }}
+                                        {% else %}
+                                            Utilisateur
+                                        {% endif %}
                                     </div>
                                     <a href="{{ path('front_forum_show', {id: sujet.id}) }}" class="view-topic-btn">
                                         Voir le sujet
@@ -275,6 +293,9 @@
                     </div>
                 </div>
             {% endif %}
+        </div>
+        <div class="mt-4 d-flex justify-content-center">
+            {{ knp_pagination_render(sujets) }}
         </div>
     </div>
 {% endblock %}

@@ -85,6 +85,43 @@
             color: #888;
             font-size: 13px;
         }
+        .message-children {
+            margin-top: 14px;
+            margin-left: 24px;
+            padding-left: 16px;
+            border-left: 2px dashed #d7dcef;
+        }
+        .message-reply-btn {
+            border: 0;
+            background: transparent;
+            color: #667eea;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 0;
+            cursor: pointer;
+        }
+        .reply-target {
+            display: none;
+            margin-bottom: 16px;
+            padding: 10px 14px;
+            border-radius: 8px;
+            background: #eef2ff;
+            color: #384f9c;
+            font-size: 14px;
+        }
+        .reply-target.is-visible {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .reply-target button {
+            border: 0;
+            background: transparent;
+            color: #384f9c;
+            font-weight: 600;
+            cursor: pointer;
+        }
         .reply-form-card {
             background: white;
             border-radius: 15px;
@@ -150,7 +187,17 @@
                     <div class="topic-meta">
                         <div class="topic-meta-item">
                             <i class="ti-calendar"></i>
-                            {{ sujet.dateCreation|date('d M Y, H:i') }}
+                            <span title="{{ sujet.dateCreation|date('d M Y H:i') }}">{{ sujet.dateCreation|ago(null, 'fr') }}</span>
+                        </div>
+                        <div class="topic-meta-item">
+                            <i class="ti-user"></i>
+                            {% if sujet.isAnonymous %}
+                                Anonyme
+                            {% elseif sujet.user %}
+                                {{ sujet.user.firstName }} {{ sujet.user.lastName }}
+                            {% else %}
+                                Utilisateur
+                            {% endif %}
                         </div>
                         {% if sujet.category %}
                         <div class="topic-meta-item">
@@ -168,6 +215,14 @@
                         <div class="topic-meta-item">
                             <i class="ti-info"></i>
                             {{ sujet.status }}
+                        </div>
+                        {% endif %}
+                        {% if sujet.taggedPsychologues|length > 0 %}
+                        <div class="topic-meta-item">
+                            <i class="ti-user"></i>
+                            {% for psychologue in sujet.taggedPsychologues %}
+                                Dr {{ psychologue.firstName }} {{ psychologue.lastName }}{% if not loop.last %}, {% endif %}
+                            {% endfor %}
                         </div>
                         {% endif %}
                     </div>
@@ -200,7 +255,7 @@
                 <div style="margin-top: 60px;">
                     <h3 class="section-title">
                         <i class="ti-comments" style="margin-right: 10px;"></i>
-                        Réponses ({{ messages|length }})
+                        Réponses ({{ messages.getTotalItemCount }})
                     </h3>
 
                     <form method="get" action="{{ path('front_forum_show', {id: sujet.id}) }}" style="margin: 15px 0 25px; display: flex; gap: 10px;">
@@ -211,41 +266,18 @@
                     {% if messages|length > 0 %}
                         <div style="margin-top: 30px;">
                             {% for message in messages %}
-                                <div class="message-card">
-                                    <div class="message-header">
-                                        <div class="message-author">
-                                            <div class="message-avatar">
-                                                {% set initials = message.user ? (message.user.firstName|default('')|first ~ message.user.lastName|default('')|first)|upper : 'U' %}
-                                                {{ initials }}
-                                            </div>
-                                                <div>
-                                                    <div style="font-weight: 600; color: #333;">
-                                                        {% if message.user %}
-                                                            {{ message.user.firstName }} {{ message.user.lastName }}
-                                                        {% else %}
-                                                            Utilisateur
-                                                        {% endif %}
-                                                    </div>
-                                                <div class="message-date">
-                                                    <i class="ti-time"></i>
-                                                    {{ message.dateMessage|date('d M Y à H:i') }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="message-content">
-                                        {{ message.contenu }}
-                                    </div>
-                                    {% if message.attachmentPath %}
-                                        <div style="margin-top: 15px;">
-                                            <a href="{{ message.attachmentPath }}" download class="attachment-badge" style="font-size: 13px;">
-                                                <i class="ti-clip"></i>
-                                                Pièce jointe ({{ (message.attachmentSize / 1024)|round(2) }} KB)
-                                            </a>
-                                        </div>
-                                    {% endif %}
-                                </div>
+                                {% include 'front/forum/_message_tree.html.twig' with {
+                                    message: message,
+                                    depth: 1,
+                                    childrenByParent: childrenByParent,
+                                    likeCounts: likeCounts,
+                                    likedMessageIds: likedMessageIds,
+                                    maxReplyDepth: maxReplyDepth
+                                } only %}
                             {% endfor %}
+                        </div>
+                        <div class="mt-3 d-flex justify-content-center">
+                            {{ knp_pagination_render(messages) }}
                         </div>
                     {% else %}
                         <div class="no-messages">
@@ -262,11 +294,21 @@
                         Ajouter une réponse
                     </h3>
                     {% if form %}
-                    {{ form_start(form, {'attr': {'style': 'margin-top: 30px;', 'novalidate': 'novalidate'}}) }}
+                    {{ form_start(form, {'attr': {'id': 'forumReplyForm', 'style': 'margin-top: 30px;', 'novalidate': 'novalidate'}}) }}
+                        <div id="replyTarget" class="reply-target">
+                            <span id="replyTargetText"></span>
+                            <button type="button" id="clearReplyTarget">Annuler</button>
+                        </div>
+                        <input type="hidden" name="parent_id" id="parentMessageId" value="">
                         <div class="mb-4">
                             {{ form_label(form.contenu) }}
                             {{ form_widget(form.contenu, {'attr': {'rows': 6, 'placeholder': 'Ecrivez votre reponse ici...'}}) }}
                             {{ form_errors(form.contenu) }}
+                        </div>
+                        <div class="mb-4">
+                            {{ form_label(form.isAnonymous) }}
+                            {{ form_widget(form.isAnonymous) }}
+                            {{ form_errors(form.isAnonymous) }}
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -291,4 +333,109 @@
             </div>
         </div>
     </div>
+
+    <style>
+        .like-btn {
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #444;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .like-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .like-btn.liked {
+            border-color: #e74c3c;
+            color: #e74c3c;
+            background: #fff4f4;
+        }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const likeButtons = document.querySelectorAll('.js-like-btn');
+        const replyButtons = document.querySelectorAll('.js-reply-btn');
+        const parentInput = document.getElementById('parentMessageId');
+        const replyTarget = document.getElementById('replyTarget');
+        const replyTargetText = document.getElementById('replyTargetText');
+        const clearReplyTarget = document.getElementById('clearReplyTarget');
+
+        if (replyButtons.length && parentInput && replyTarget && replyTargetText) {
+            replyButtons.forEach((button) => {
+                button.addEventListener('click', function () {
+                    const messageId = button.dataset.messageId;
+                    const author = button.dataset.author || 'ce message';
+                    parentInput.value = messageId;
+                    replyTargetText.textContent = `Réponse à ${author}`;
+                    replyTarget.classList.add('is-visible');
+                    document.getElementById('forumReplyForm')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            });
+        }
+
+        if (clearReplyTarget && parentInput && replyTarget) {
+            clearReplyTarget.addEventListener('click', function () {
+                parentInput.value = '';
+                replyTarget.classList.remove('is-visible');
+            });
+        }
+
+        if (!likeButtons.length) {
+            return;
+        }
+
+        likeButtons.forEach((button) => {
+            button.addEventListener('click', async function () {
+                const url = button.dataset.url;
+                const token = button.dataset.token;
+                const messageId = button.dataset.messageId;
+                const countEl = document.querySelector(`.js-like-count[data-message-id="${messageId}"]`);
+
+                button.disabled = true;
+
+                try {
+                    const body = new URLSearchParams({ _token: token });
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+                        },
+                        body: body.toString()
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.error || 'Erreur de like.');
+                    }
+
+                    button.classList.toggle('liked', !!data.liked);
+                    button.querySelector('span').textContent = data.liked ? 'Aimé' : 'J’aime';
+                    if (countEl) {
+                        const count = Number(data.likesCount || 0);
+                        countEl.textContent = count;
+                        const textNode = countEl.parentElement;
+                        if (textNode) {
+                            textNode.lastChild.textContent = ` like${count > 1 ? 's' : ''}`;
+                        }
+                    }
+                } catch (error) {
+                    alert(error.message || 'Impossible de traiter le like.');
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        });
+    });
+    </script>
 {% endblock %}

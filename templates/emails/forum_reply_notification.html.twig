@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header { text-align: center; color: #333; }
+        .header h1 { margin: 0 0 10px 0; color: #3498db; }
+        .content { padding: 20px 0; line-height: 1.6; color: #555; }
+        .button {
+            display: inline-block;
+            background-color: #3498db;
+            color: #fff;
+            padding: 12px 30px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .preview {
+            background-color: #f8f8f8;
+            border-left: 4px solid #3498db;
+            padding: 12px;
+            border-radius: 4px;
+            color: #333;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>📩 Nouvelle réponse</h1>
+        <p>Quelqu’un a répondu à votre sujet sur MindCare</p>
+    </div>
+
+    <div class="content">
+        <p>Bonjour {{ ownerName is not empty ? ownerName : 'Utilisateur' }},</p>
+        <p>Le sujet <strong>{{ topicTitle }}</strong> a reçu une nouvelle réponse.</p>
+        <p><strong>Auteur de la réponse :</strong> {{ authorName }}</p>
+
+        <div class="preview">
+            {{ messagePreview }}
+        </div>
+
+        <center>
+            <a href="{{ topicUrl }}" class="button">Voir la discussion</a>
+        </center>
+
+        <p>Si vous ne souhaitez pas suivre cette discussion, ignorez cet email.</p>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2026 MindCare</p>
+    </div>
+</div>
+</body>
+</html>

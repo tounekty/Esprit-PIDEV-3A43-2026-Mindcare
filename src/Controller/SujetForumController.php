@@ -3,8 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\SujetForum;
+use App\Repository\SujetForumRepository;
+use App\Service\OpenAiModerationService;
 use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -18,39 +22,57 @@ use Symfony\Component\Routing\Annotation\Route;
 class SujetForumController extends AbstractController
 {
     #[Route('/forum/sujets', name: 'sujet_forum_index', methods: ['GET'])]
-    public function index(Request $request, EntityManagerInterface $em): Response
+    public function index(Request $request, EntityManagerInterface $em, SujetForumRepository $repository, PaginatorInterface $paginator): Response
     {
         $filters = $this->extractFilters($request);
-        $rows = $this->loadSujetRows($em, $filters);
+        $pagination = $paginator->paginate(
+            $repository->createFilteredQueryBuilder(
+                $filters['query'] !== '' ? $filters['query'] : null,
+                $filters['status'],
+                $filters['sort'],
+                $filters['direction']
+            ),
+            max(1, (int) $request->query->get('page', 1)),
+            5
+        );
         $stats = $this->buildSujetStats($em);
 
         return $this->render('forum/sujet/index.html.twig', [
-            'rows' => $rows,
+            'sujets' => $pagination,
             'stats' => $stats,
             'filters' => $filters,
-            'visible_count' => count($rows),
+            'visible_count' => count($pagination),
             'statusChoices' => SujetForum::getStatusChoices(),
         ]);
     }
 
     #[Route('/forum/sujets/ajax', name: 'sujet_forum_ajax', methods: ['GET'])]
-    public function ajax(Request $request, EntityManagerInterface $em): Response
+    public function ajax(Request $request, EntityManagerInterface $em, SujetForumRepository $repository, PaginatorInterface $paginator): Response
     {
         $filters = $this->extractFilters($request);
-        $rows = $this->loadSujetRows($em, $filters);
+        $pagination = $paginator->paginate(
+            $repository->createFilteredQueryBuilder(
+                $filters['query'] !== '' ? $filters['query'] : null,
+                $filters['status'],
+                $filters['sort'],
+                $filters['direction']
+            ),
+            max(1, (int) $request->query->get('page', 1)),
+            5
+        );
         $stats = $this->buildSujetStats($em);
 
         return $this->json([
             'rowsHtml' => $this->renderView('forum/sujet/_rows.html.twig', [
-                'rows' => $rows,
+                'sujets' => $pagination,
             ]),
             'stats' => $stats,
-            'visibleCount' => count($rows),
+            'visibleCount' => count($pagination),
         ]);
     }
 
     #[Route('/forum/sujets/new', name: 'sujet_forum_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, OpenAiModerationService $moderationService): Response
     {
        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -60,6 +82,15 @@ class SujetForumController extends AbstractController
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
+            ->add('isAnonymous', ChoiceType::class, [
+                'label' => 'Publication anonyme',
+                'choices' => [
+                    'Normal' => false,
+                    'Anonyme' => true,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+            ])
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
             ->add('status', ChoiceType::class, [
@@ -73,11 +104,36 @@ class SujetForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->handleSujetUploads($form, $sujet);
-            $entityManager->persist($sujet);
-            $entityManager->flush();
+            $moderation = $moderationService->moderate($sujet->getDescription() ?? '');
+            $errorType = $moderation['errorType'] ?? null;
+            $errorMessage = $moderation['errorMessage'] ?? null;
+            $detailSuffix = is_string($errorMessage) && $errorMessage !== '' ? ' Detail: ' . $errorMessage . '.' : '';
 
-            return $this->redirectToRoute('sujet_forum_index');
+            if (!$moderation['enabled']) {
+                $form->addError(new FormError('Moderation OpenAI non configuree. Ajoutez OPENAI_API_KEY dans .env.local.'));
+            } elseif (!$moderation['checked']) {
+                if ($errorType === 'rate_limit') {
+                    $form->addError(new FormError('OpenAI refuse la verification (429). Verifiez votre quota/facturation et les limites du projet sur platform.openai.com, puis reessayez.' . $detailSuffix));
+                } elseif ($errorType === 'auth') {
+                    $form->addError(new FormError('Cle OpenAI invalide ou sans droits. Verifiez OPENAI_API_KEY dans .env.local.' . $detailSuffix));
+                } elseif ($errorType === 'provider') {
+                    $form->addError(new FormError('Service OpenAI indisponible temporairement. Reessayez plus tard.' . $detailSuffix));
+                } else {
+                    $form->addError(new FormError('Impossible de verifier le commentaire avec OpenAI pour le moment. Reessayez plus tard.' . $detailSuffix));
+                }
+            } elseif ($moderation['flagged']) {
+                $categories = $moderation['categories'] ?? [];
+                $details = $categories !== [] ? ' Categories detectees: ' . implode(', ', $categories) . '.' : '';
+
+                $form->get('description')->addError(new FormError('Commentaire refuse: contenu toxique ou spam detecte.' . $details));
+                $this->addFlash('danger', 'Commentaire refuse: contenu toxique ou spam detecte.');
+            } else {
+                $this->handleSujetUploads($form, $sujet);
+                $entityManager->persist($sujet);
+                $entityManager->flush();
+
+                return $this->redirectToRoute('sujet_forum_index');
+            }
         }
 
         return $this->render('forum/sujet/new.html.twig', [
@@ -94,11 +150,20 @@ class SujetForumController extends AbstractController
     }
 
     #[Route('/forum/sujets/{id}/edit', name: 'sujet_forum_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, SujetForum $sujet, EntityManagerInterface $entityManager): Response
+    public function edit(Request $request, SujetForum $sujet, EntityManagerInterface $entityManager, OpenAiModerationService $moderationService): Response
     {
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
+            ->add('isAnonymous', ChoiceType::class, [
+                'label' => 'Publication anonyme',
+                'choices' => [
+                    'Normal' => false,
+                    'Anonyme' => true,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+            ])
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
             ->add('status', ChoiceType::class, [
@@ -112,10 +177,35 @@ class SujetForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $this->handleSujetUploads($form, $sujet);
-            $entityManager->flush();
+            $moderation = $moderationService->moderate($sujet->getDescription() ?? '');
+            $errorType = $moderation['errorType'] ?? null;
+            $errorMessage = $moderation['errorMessage'] ?? null;
+            $detailSuffix = is_string($errorMessage) && $errorMessage !== '' ? ' Detail: ' . $errorMessage . '.' : '';
 
-            return $this->redirectToRoute('sujet_forum_index');
+            if (!$moderation['enabled']) {
+                $form->addError(new FormError('Moderation OpenAI non configuree. Ajoutez OPENAI_API_KEY dans .env.local.'));
+            } elseif (!$moderation['checked']) {
+                if ($errorType === 'rate_limit') {
+                    $form->addError(new FormError('OpenAI refuse la verification (429). Verifiez votre quota/facturation et les limites du projet sur platform.openai.com, puis reessayez.' . $detailSuffix));
+                } elseif ($errorType === 'auth') {
+                    $form->addError(new FormError('Cle OpenAI invalide ou sans droits. Verifiez OPENAI_API_KEY dans .env.local.' . $detailSuffix));
+                } elseif ($errorType === 'provider') {
+                    $form->addError(new FormError('Service OpenAI indisponible temporairement. Reessayez plus tard.' . $detailSuffix));
+                } else {
+                    $form->addError(new FormError('Impossible de verifier le commentaire avec OpenAI pour le moment. Reessayez plus tard.' . $detailSuffix));
+                }
+            } elseif ($moderation['flagged']) {
+                $categories = $moderation['categories'] ?? [];
+                $details = $categories !== [] ? ' Categories detectees: ' . implode(', ', $categories) . '.' : '';
+
+                $form->get('description')->addError(new FormError('Commentaire refuse: contenu toxique ou spam detecte.' . $details));
+                $this->addFlash('danger', 'Commentaire refuse: contenu toxique ou spam detecte.');
+            } else {
+                $this->handleSujetUploads($form, $sujet);
+                $entityManager->flush();
+
+                return $this->redirectToRoute('sujet_forum_index');
+            }
         }
 
         return $this->render('forum/sujet/edit.html.twig', [
@@ -202,47 +292,6 @@ class SujetForumController extends AbstractController
             'sort' => $sort,
             'direction' => $direction,
         ];
-    }
-
-    private function loadSujetRows(EntityManagerInterface $em, array $filters): array
-    {
-        $qb = $em->createQueryBuilder()
-            ->select('s')
-            ->from(SujetForum::class, 's');
-
-        if ($filters['query'] !== '') {
-            $qb->andWhere('LOWER(s.titre) LIKE :q OR LOWER(s.description) LIKE :q')
-                ->setParameter('q', '%' . strtolower($filters['query']) . '%');
-        }
-
-        if ($filters['status'] !== 'all') {
-            $qb->andWhere('s.status = :status')
-                ->setParameter('status', $filters['status']);
-        }
-
-        $sortMap = [
-            'date' => 's.dateCreation',
-            'title' => 's.titre',
-            'status' => 's.status',
-        ];
-
-        $qb->orderBy($sortMap[$filters['sort']], $filters['direction'])
-            ->addOrderBy('s.id', 'DESC');
-
-        $sujets = $qb->getQuery()->getResult();
-        $rows = [];
-
-        foreach ($sujets as $sujet) {
-            if (!$sujet instanceof SujetForum) {
-                continue;
-            }
-
-            $rows[] = [
-                'sujet' => $sujet,
-            ];
-        }
-
-        return $rows;
     }
 
     private function buildSujetStats(EntityManagerInterface $em): array

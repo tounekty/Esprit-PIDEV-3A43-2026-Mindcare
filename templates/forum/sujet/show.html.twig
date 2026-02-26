@@ -12,12 +12,15 @@
             </div>
         {% endif %}
         <p>{{ sujet.description }}</p>
-        <p><strong>Date:</strong> {{ sujet.dateCreation|date('Y-m-d H:i') }}</p>
+        <p><strong>Date:</strong> <span title="{{ sujet.dateCreation|date('Y-m-d H:i') }}">{{ sujet.dateCreation|ago(null, 'fr') }}</span></p>
         <p><strong>User:</strong>
             {% if sujet.user %}
                 {{ sujet.user.firstName }} {{ sujet.user.lastName }}
             {% else %}
                 -
+            {% endif %}
+            {% if sujet.isAnonymous %}
+                <span class="badge bg-secondary ms-2">Anonyme</span>
             {% endif %}
         </p>
         {% if sujet.category %}
@@ -53,6 +56,9 @@
                             {{ message.user.firstName }} {{ message.user.lastName }}
                         {% else %}
                             -
+                        {% endif %}
+                        {% if message.isAnonymous %}
+                            <span class="badge bg-secondary ms-2">Anonyme</span>
                         {% endif %}
                     </div>
                     {% if message.attachmentPath %}
