@@ -24,3 +24,7 @@
 /assets/vendor/
 ###< symfony/asset-mapper ###
 config/ga4-service-account.json
+
+###> lexik/jwt-authentication-bundle ###
+/config/jwt/*.pem
+###< lexik/jwt-authentication-bundle ###
