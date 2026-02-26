@@ -17,6 +17,18 @@ security:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
 
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
+            json_login:
+                check_path: /api/login_check
+                username_path: email
+                password_path: password
+                success_handler: lexik_jwt_authentication.handler.authentication_success
+                failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            jwt: ~
+
         main:
             lazy: true
             provider: app_user_provider
@@ -49,6 +61,9 @@ security:
         - { path: ^/verify-email, roles: PUBLIC_ACCESS }
         - { path: ^/cron, roles: PUBLIC_ACCESS }  # Cron webhook endpoint
 
+        # 🔓 JWT LOGIN
+        - { path: ^/api/login_check, roles: PUBLIC_ACCESS }
+
         
 
 
@@ -62,6 +77,9 @@ security:
         - { path: ^/api/psychologue/\d+/ai-patterns$, roles: PUBLIC_ACCESS }
         # Other psychologue API endpoints require psychologue role
         - { path: ^/api/psychologue, roles: ROLE_PSYCHOLOGUE }
+
+        # 🔐 API (JWT)
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
         # 🔐 LOGGED USERS
         - { path: ^/redirect, roles: [ROLE_ETUDIANT, ROLE_PSYCHOLOGUE, ROLE_ADMIN] }
