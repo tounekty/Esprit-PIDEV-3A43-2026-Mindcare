@@ -4,6 +4,10 @@ namespace App\Controller\Admin;
 
 use App\Entity\EventReservation;
 use App\Repository\EventReservationRepository;
+<<<<<<< HEAD
+=======
+use App\Service\TwilioSmsService;
+>>>>>>> origin/sara
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -73,4 +77,64 @@ class EventReservationController extends AbstractController
 
         return $this->redirectToRoute('admin_event_reservations_index');
     }
+<<<<<<< HEAD
+=======
+
+    #[Route('/send-reminders', name: 'send_reminders', methods: ['POST'])]
+    public function sendReminders(Request $request, EventReservationRepository $reservationRepository, TwilioSmsService $smsService, EntityManagerInterface $em): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_PSYCHOLOGUE');
+
+        if (!$this->isCsrfTokenValid('send_sms_reminders', (string) $request->request->get('_token'))) {
+            $this->addFlash('error', 'Token CSRF invalide.');
+            return $this->redirectToRoute('admin_event_reservations_index');
+        }
+
+        $reservations = $reservationRepository->findUpcomingForSmsReminder(24);
+
+        if (empty($reservations)) {
+            $this->addFlash('info', 'Aucun rappel SMS a envoyer (pas de reservations confirmees pour les prochaines 24h).');
+            return $this->redirectToRoute('admin_event_reservations_index');
+        }
+
+        $sent = 0;
+        $failed = 0;
+
+        foreach ($reservations as $reservation) {
+            $event = $reservation->getEvent();
+            $phone = $reservation->getTelephone();
+
+            if (!$phone) {
+                $failed++;
+                continue;
+            }
+
+            $message = sprintf(
+                "Rappel MindCare: Votre evenement \"%s\" est prevu le %s a %s. Lieu: %s. A bientot!",
+                $event->getTitre(),
+                $event->getDateEvent()->format('d/m/Y'),
+                $event->getDateEvent()->format('H:i'),
+                $event->getLieu()
+            );
+
+            if ($smsService->sendSms($phone, $message)) {
+                $reservation->setSmsReminderSent(true);
+                $sent++;
+            } else {
+                $failed++;
+            }
+        }
+
+        $em->flush();
+
+        if ($sent > 0) {
+            $this->addFlash('success', "{$sent} rappel(s) SMS envoye(s) avec succes.");
+        }
+        if ($failed > 0) {
+            $this->addFlash('warning', "{$failed} rappel(s) SMS ont echoue.");
+        }
+
+        return $this->redirectToRoute('admin_event_reservations_index');
+    }
+>>>>>>> origin/sara
 }

@@ -1,20 +1,32 @@
+<<<<<<< HEAD
 {% for sujet in sujets %}
+=======
+{% for row in rows %}
+    {% set sujet = row.sujet %}
+>>>>>>> origin/sara
     <tr>
         <td>
             {{ sujet.titre }}
             {% if sujet.isPinned %}<span class="badge bg-warning ms-1">📌</span>{% endif %}
         </td>
         <td>{{ sujet.description|slice(0, 50) }}...</td>
+<<<<<<< HEAD
         <td><span title="{{ sujet.dateCreation|date('Y-m-d H:i') }}">{{ sujet.dateCreation|ago(null, 'fr') }}</span></td>
+=======
+        <td>{{ sujet.dateCreation|date('Y-m-d H:i') }}</td>
+>>>>>>> origin/sara
         <td>
             {% if sujet.user %}
                 {{ sujet.user.firstName }} {{ sujet.user.lastName }}
             {% else %}
                 -
             {% endif %}
+<<<<<<< HEAD
             {% if sujet.isAnonymous %}
                 <span class="badge bg-secondary ms-1">Anonyme</span>
             {% endif %}
+=======
+>>>>>>> origin/sara
         </td>
         <td>
             {% if sujet.imageUrl %}

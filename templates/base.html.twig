@@ -9,6 +9,7 @@
     <meta name="description" content="">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('front/img/favicon.png') }}">
+<<<<<<< HEAD
     {% if ga4_measurement_id is not empty %}
         <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga4_measurement_id }}"></script>
         <script>
@@ -22,6 +23,11 @@
     {% endif %}
 
     {% block stylesheets %}
+=======
+
+    {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+>>>>>>> origin/sara
         {% if app.request.attributes.get('_route') in ['app_login', 'app_register', 'app_forgot_password', 'app_verify_code', 'app_reset_password'] %}
             {# Login/signup specific CSS #}
             <link rel="stylesheet" href="{{ asset('front/css/bootstrap.min.css') }}">
@@ -105,6 +111,10 @@
     {% endfor %}
 
     {% block javascripts %}
+<<<<<<< HEAD
+=======
+            {{ encore_entry_script_tags('app') }}
+>>>>>>> origin/sara
         {% if app.request.attributes.get('_route') in ['app_login', 'app_register', 'app_forgot_password', 'app_verify_code', 'app_reset_password'] %}
             {# Login/signup JS #}
             <script src="{{ asset('front/js/vendor/modernizr-3.5.0.min.js') }}"></script>
@@ -159,4 +169,8 @@
     {% endblock %}
 
 </body>
+<<<<<<< HEAD
 </html>
+=======
+</html>
+>>>>>>> origin/sara

@@ -21,7 +21,18 @@
                 </div>
             </div>
             <div class="col-md-4">
+<<<<<<< HEAD
                 <form method="get" action="{{ path('admin_event_reservations_index') }}">
+=======
+                <div class="d-flex gap-2 justify-content-end">
+                    <form method="post" action="{{ path('admin_event_reservations_send_reminders') }}" style="display:inline-block;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('send_sms_reminders') }}">
+                        <button type="submit" class="btn btn-sm btn-info text-white" onclick="return confirm('Envoyer les rappels SMS pour les evenements dans les prochaines 24h ?')">
+                            <i class="fa fa-comment-dots"></i> Envoyer rappels SMS
+                        </button>
+                    </form>
+                    <form method="get" action="{{ path('admin_event_reservations_index') }}" class="flex-grow-1">
+>>>>>>> origin/sara
                     <input type="hidden" name="status" value="{{ currentStatus }}">
                     <input type="hidden" name="sort" value="{{ currentSort }}">
                     <input type="hidden" name="order" value="{{ currentOrder }}">
@@ -39,6 +50,10 @@
                         {% endif %}
                     </div>
                 </form>
+<<<<<<< HEAD
+=======
+                </div>
+>>>>>>> origin/sara
             </div>
         </div>
 

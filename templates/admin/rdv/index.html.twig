@@ -12,7 +12,11 @@
         <h1 class="mb-4">Gestion Rendez-vous</h1>
 
         <!-- Dashboard Statistics -->
+<<<<<<< HEAD
         <div class="row mb-3">
+=======
+        <div class="row mb-5">
+>>>>>>> origin/sara
             <div class="col-md-3">
                 <div class="card border-warning">
                     <div class="card-body">
@@ -49,6 +53,7 @@
                 </div>
             </div>
         </div>
+<<<<<<< HEAD
         
         <!-- Additional Statistics Row -->
         <div class="row mb-5">
@@ -85,6 +90,8 @@
                 </div>
             </div>
         </div>
+=======
+>>>>>>> origin/sara
 
         <!-- Calendar for Psychologues -->
         {% if isPsychologue %}
@@ -124,6 +131,7 @@
                                    class="btn btn-sm {{ currentStatus == 'cancelled' ? 'btn-secondary' : 'btn-outline-secondary' }}">
                                     Annulés
                                 </a>
+<<<<<<< HEAD
                                 <a href="{{ path('admin_rdv_index', {status: 'in_progress', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
                                    class="btn btn-sm {{ currentStatus == 'in_progress' ? 'btn-primary' : 'btn-outline-primary' }}">
                                     En cours
@@ -136,6 +144,8 @@
                                    class="btn btn-sm {{ currentStatus == 'absent' ? 'btn-warning' : 'btn-outline-warning' }}">
                                     Absents
                                 </a>
+=======
+>>>>>>> origin/sara
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -162,7 +172,11 @@
                     </div>
                 {% endif %}
                 
+<<<<<<< HEAD
                 {% if is_granted('ROLE_ADMIN') %}
+=======
+                {% if is_granted('ROLE_ADMIN') and not is_granted('ROLE_PSYCHOLOGUE') %}
+>>>>>>> origin/sara
                     <div class="mb-3">
                         <a href="{{ path('admin_rdv_new') }}" class="btn btn-primary btn-sm">Créer un rendez-vous</a>
                     </div>
@@ -233,6 +247,7 @@
                                                 <span class="badge bg-danger">Refusé</span>
                                             {% elseif appointment.getStatus() == 'cancelled' %}
                                                 <span class="badge bg-secondary">Annulé</span>
+<<<<<<< HEAD
                                             {% elseif appointment.getStatus() == 'in_progress' %}
                                                 <span class="badge bg-primary">En cours</span>
                                             {% elseif appointment.getStatus() == 'completed' %}
@@ -241,6 +256,8 @@
                                                 <span class="badge bg-warning">Absent</span>
                                             {% elseif appointment.getStatus() == 'archived' %}
                                                 <span class="badge bg-dark">Archivé</span>
+=======
+>>>>>>> origin/sara
                                             {% endif %}
                                         </td>
                                         <td>
@@ -262,6 +279,7 @@
                                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ appointment.getId()) }}">
                                                     <button class="btn btn-sm btn-danger">Supprimer</button>
                                                 </form>
+<<<<<<< HEAD
                                                 {# Add mark absent / undo absent buttons for psychologue #}
                                                 {% if appointment.getStatus() in ['in_progress', 'completed'] %}
                                                     <form method="post" action="{{ path('admin_rdv_mark_absent', {'id': appointment.getId()}) }}" style="display:inline-block;" onsubmit="return confirm('Marquer ce patient comme absent ?');">
@@ -276,6 +294,8 @@
                                                         </button>
                                                     </form>
                                                 {% endif %}
+=======
+>>>>>>> origin/sara
                                             {% endif %}
                                         </td>
                                     </tr>

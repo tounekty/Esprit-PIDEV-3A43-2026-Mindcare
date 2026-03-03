@@ -33,6 +33,18 @@ class EventReservationRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
+<<<<<<< HEAD
+=======
+    public function findByConfirmationToken(string $token): ?EventReservation
+    {
+        return $this->createQueryBuilder('r')
+            ->andWhere('r.confirmationToken = :token')
+            ->setParameter('token', $token)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+>>>>>>> origin/sara
     public function findLatestByUserAndEvent(User $user, Event $event): ?EventReservation
     {
         return $this->createQueryBuilder('r')
@@ -91,4 +103,51 @@ class EventReservationRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
+<<<<<<< HEAD
+=======
+
+    /**
+     * Get event dates reserved by a user (accepted or pending)
+     * @return string[] Array of date strings 'Y-m-d'
+     */
+    public function findReservedEventDatesByUser(User $user): array
+    {
+        $results = $this->createQueryBuilder('r')
+            ->select('DISTINCT e.dateEvent')
+            ->join('r.event', 'e')
+            ->where('r.user = :user')
+            ->andWhere('r.statut IN (:statuses)')
+            ->setParameter('user', $user)
+            ->setParameter('statuses', [
+                EventReservation::STATUS_PENDING,
+                EventReservation::STATUS_ACCEPTED,
+            ])
+            ->getQuery()
+            ->getScalarResult();
+
+        return array_map(fn($row) => (new \DateTime($row['dateEvent']))->format('Y-m-d'), $results);
+    }
+
+    /**
+     * Find accepted reservations where the event is within the next N hours and SMS not yet sent
+     * @return EventReservation[]
+     */
+    public function findUpcomingForSmsReminder(int $hoursAhead = 24): array
+    {
+        $now = new \DateTime();
+        $deadline = (clone $now)->modify("+{$hoursAhead} hours");
+
+        return $this->createQueryBuilder('r')
+            ->join('r.event', 'e')
+            ->where('r.statut = :status')
+            ->andWhere('e.dateEvent > :now')
+            ->andWhere('e.dateEvent <= :deadline')
+            ->andWhere('r.smsReminderSent = false')
+            ->setParameter('status', EventReservation::STATUS_ACCEPTED)
+            ->setParameter('now', $now)
+            ->setParameter('deadline', $deadline)
+            ->getQuery()
+            ->getResult();
+    }
+>>>>>>> origin/sara
 }

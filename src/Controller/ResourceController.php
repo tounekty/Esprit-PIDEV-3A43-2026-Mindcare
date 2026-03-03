@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+<<<<<<< HEAD
 use App\Entity\Commentaire;
 use App\Entity\Resource;
 use App\Entity\User;
@@ -12,10 +13,18 @@ use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
+=======
+use App\Entity\Resource;
+use App\Entity\Commentaire;
+use App\Form\CommentaireType;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+>>>>>>> origin/sara
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+<<<<<<< HEAD
 class ResourceController extends AbstractController
 {
     #[Route('/resources', name: 'resource_index', methods: ['GET'])]
@@ -60,11 +69,39 @@ class ResourceController extends AbstractController
             $commentaire->setUser($user);
             $commentaire->setAuthorName(trim(sprintf('%s %s', (string) $user->getFirstName(), (string) $user->getLastName())));
             $commentaire->setAuthorEmail((string) $user->getEmail());
+=======
+#[Route('/resources')]
+class ResourceController extends AbstractController
+{
+    #[Route('/', name: 'resource_index')]
+    public function index(EntityManagerInterface $em): Response
+    {
+        $resources = $em->getRepository(Resource::class)->findBy([], ['createdAt' => 'DESC']);
+        return $this->render('resource/index.html.twig', [
+            'resources' => $resources,
+        ]);
+    }
+
+    #[Route('/{id}', name: 'resource_show')]
+    public function show(Resource $resource, Request $request, EntityManagerInterface $em): Response
+    {
+        $commentForm = null;
+
+        if ($this->getUser()) {
+            $user = $this->getUser();
+
+            $commentaire = new Commentaire();
+            $commentaire->setAuthorName($user->getFirstName() . ' ' . $user->getLastName());
+            $commentaire->setAuthorEmail($user->getEmail() ?? '');
+            $commentaire->setResource($resource);
+            $commentaire->setUser($user);
+>>>>>>> origin/sara
 
             $form = $this->createForm(CommentaireType::class, $commentaire);
             $form->handleRequest($request);
 
             if ($form->isSubmitted() && $form->isValid()) {
+<<<<<<< HEAD
                 // Enforce author data from authenticated user (hidden fields are client-side).
                 $commentaire->setResource($resource);
                 $commentaire->setUser($user);
@@ -108,6 +145,16 @@ class ResourceController extends AbstractController
 
                     return $this->redirectToRoute('resource_show', ['id' => $resource->getId()]);
                 }
+=======
+                $commentaire->setCreatedAt(new \DateTimeImmutable());
+                $commentaire->setApproved(true); // now auto-approved
+
+                $em->persist($commentaire);
+                $em->flush();
+
+                $this->addFlash('success', 'Commentaire ajouté avec succès!');
+                return $this->redirectToRoute('resource_show', ['id' => $resource->getId()]);
+>>>>>>> origin/sara
             }
 
             $commentForm = $form->createView();
@@ -115,8 +162,13 @@ class ResourceController extends AbstractController
 
         return $this->render('resource/show.html.twig', [
             'resource' => $resource,
+<<<<<<< HEAD
             'all_resources' => $resourceRepository->findBy([], ['createdAt' => 'DESC']),
             'commentForm' => $commentForm,
+=======
+            'commentForm' => $commentForm,
+            'all_resources' => $em->getRepository(Resource::class)->findAll(),
+>>>>>>> origin/sara
         ]);
     }
 }

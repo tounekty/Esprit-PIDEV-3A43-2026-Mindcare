@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+<<<<<<< HEAD
 use App\Entity\LikeMessage;
 use App\Entity\MessageForum;
 use App\Entity\SujetForum;
@@ -21,12 +22,22 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+=======
+use App\Entity\MessageForum;
+use App\Entity\SujetForum;
+use App\Repository\MessageForumRepository;
+use App\Repository\SujetForumRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+>>>>>>> origin/sara
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+<<<<<<< HEAD
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\UserRepository;
@@ -81,6 +92,14 @@ class FrontForumController extends AbstractController
 
     #[Route('/forum', name: 'front_forum_index', methods: ['GET'])]
     public function index(Request $request, SujetForumRepository $repository, PaginatorInterface $paginator): Response
+=======
+use Symfony\Component\Routing\Annotation\Route;
+
+class FrontForumController extends AbstractController
+{
+    #[Route('/forum', name: 'front_forum_index', methods: ['GET'])]
+    public function index(Request $request, SujetForumRepository $repository): Response
+>>>>>>> origin/sara
     {
         $query = trim((string) $request->query->get('q', ''));
         $status = (string) $request->query->get('status', '');
@@ -88,6 +107,7 @@ class FrontForumController extends AbstractController
             $status = '';
         }
 
+<<<<<<< HEAD
         $pagination = $paginator->paginate(
             $repository->createSearchQueryBuilder($query !== '' ? $query : null, $status !== '' ? $status : null),
             max(1, (int) $request->query->get('page', 1)),
@@ -96,6 +116,10 @@ class FrontForumController extends AbstractController
 
         return $this->render('front/forum/index.html.twig', [
             'sujets' => $pagination,
+=======
+        return $this->render('front/forum/index.html.twig', [
+            'sujets' => $repository->findBySearch($query !== '' ? $query : null, $status !== '' ? $status : null),
+>>>>>>> origin/sara
             'q' => $query,
             'status' => $status,
             'statusChoices' => SujetForum::getStatusChoices(),
@@ -103,7 +127,11 @@ class FrontForumController extends AbstractController
     }
 
     #[Route('/forum/new', name: 'front_forum_new', methods: ['GET', 'POST'])]
+<<<<<<< HEAD
     public function new(Request $request, EntityManagerInterface $entityManager, ForumTagNotificationService $tagNotificationService, OpenAiModerationService $moderationService): Response
+=======
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+>>>>>>> origin/sara
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -118,6 +146,7 @@ class FrontForumController extends AbstractController
             ->add('description', TextareaType::class, [
                 'label' => 'Description',
             ])
+<<<<<<< HEAD
             ->add('isAnonymous', ChoiceType::class, [
                 'label' => 'Publication anonyme',
                 'choices' => [
@@ -127,6 +156,8 @@ class FrontForumController extends AbstractController
                 'expanded' => true,
                 'multiple' => false,
             ])
+=======
+>>>>>>> origin/sara
             ->add('imageFile', FileType::class, [
                 'label' => 'Image du sujet',
                 'mapped' => false,
@@ -140,6 +171,7 @@ class FrontForumController extends AbstractController
                 'label' => 'Catégorie',
                 'required' => false,
             ])
+<<<<<<< HEAD
             ->add('taggedPsychologues', EntityType::class, [
                 'class' => User::class,
                 'label' => 'Taguer des psychologues',
@@ -156,6 +188,8 @@ class FrontForumController extends AbstractController
                         ->addOrderBy('u.lastName', 'ASC');
                 },
             ])
+=======
+>>>>>>> origin/sara
             ->add('attachmentFile', FileType::class, [
                 'label' => 'Pièce jointe',
                 'mapped' => false,
@@ -165,6 +199,7 @@ class FrontForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+<<<<<<< HEAD
             $moderation = $moderationService->moderate($sujet->getDescription() ?? '');
 
             if ($moderation['checked'] && $moderation['flagged']) {
@@ -182,6 +217,13 @@ class FrontForumController extends AbstractController
 
                 return $this->redirectToRoute('front_forum_index');
             }
+=======
+            $this->handleSujetUploads($form, $sujet);
+            $entityManager->persist($sujet);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('front_forum_index');
+>>>>>>> origin/sara
         }
 
         return $this->render('front/forum/new.html.twig', [
@@ -190,7 +232,11 @@ class FrontForumController extends AbstractController
     }
 
     #[Route('/forum/sujet/{id}', name: 'front_forum_show', methods: ['GET', 'POST'])]
+<<<<<<< HEAD
     public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, LikeMessageRepository $likeMessageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ForumReplyNotificationService $notificationService, MessageBusInterface $messageBus, OpenAiModerationService $moderationService): Response
+=======
+    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, EntityManagerInterface $entityManager): Response
+>>>>>>> origin/sara
     {
         $message = new MessageForum();
         $message->setSujet($sujet);
@@ -203,6 +249,7 @@ class FrontForumController extends AbstractController
         }
 
         $query = trim((string) $request->query->get('q', ''));
+<<<<<<< HEAD
         $messages = $paginator->paginate(
             $messageRepository->createSujetRootSearchQueryBuilder($sujet, $query !== '' ? $query : null),
             max(1, (int) $request->query->get('page', 1)),
@@ -330,6 +377,30 @@ class FrontForumController extends AbstractController
 
                 return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
             }
+=======
+        $messages = $messageRepository->findBySujetAndSearch($sujet, $query !== '' ? $query : null);
+
+    $form = null;
+    if ($user) {
+        $form = $this->createFormBuilder($message)
+            ->add('contenu', TextareaType::class, [
+                'label' => 'Votre message',
+            ])
+            ->add('attachmentFile', FileType::class, [
+                'label' => 'Pièce jointe',
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $this->handleMessageUploads($form, $message);
+            $entityManager->persist($message);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
+>>>>>>> origin/sara
         }
 
         return $this->render('front/forum/show.html.twig', [
@@ -337,6 +408,7 @@ class FrontForumController extends AbstractController
             'messages' => $messages,
             'q' => $query,
             'form' => $form ? $form->createView() : null,
+<<<<<<< HEAD
             'likeCounts' => $likeCounts,
             'likedMessageIds' => $likedMessageIds,
             'childrenByParent' => $childrenByParent,
@@ -355,6 +427,10 @@ class FrontForumController extends AbstractController
         }
 
         return $depth;
+=======
+        ]);
+        }
+>>>>>>> origin/sara
     }
 
     private function handleSujetUploads($form, SujetForum $sujet): void
@@ -421,4 +497,8 @@ class FrontForumController extends AbstractController
             }
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/sara

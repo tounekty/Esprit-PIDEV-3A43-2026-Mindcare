@@ -19,10 +19,25 @@ class EventRepository extends ServiceEntityRepository
     /**
      * @return Event[]
      */
+<<<<<<< HEAD
     public function findBySearch(?string $query): array
     {
         $qb = $this->createQueryBuilder('e')
             ->orderBy('e.dateEvent', 'ASC');
+=======
+    public function findBySearch(?string $query, string $sortBy = 'date', ?string $category = null): array
+    {
+        $qb = $this->createQueryBuilder('e');
+
+        // Apply sorting
+        if ($sortBy === 'lieu') {
+            $qb->orderBy('e.lieu', 'ASC')
+               ->addOrderBy('e.dateEvent', 'ASC');
+        } else {
+            // Default: sort by date
+            $qb->orderBy('e.dateEvent', 'ASC');
+        }
+>>>>>>> origin/sara
 
         if ($query) {
             $qb->andWhere(
@@ -35,6 +50,14 @@ class EventRepository extends ServiceEntityRepository
             ->setParameter('q', '%' . strtolower($query) . '%');
         }
 
+<<<<<<< HEAD
+=======
+        if ($category) {
+            $qb->andWhere('e.categorie = :category')
+               ->setParameter('category', $category);
+        }
+
+>>>>>>> origin/sara
         return $qb->getQuery()->getResult();
     }
 }

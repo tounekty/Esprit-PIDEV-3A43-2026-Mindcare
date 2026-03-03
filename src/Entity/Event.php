@@ -39,6 +39,15 @@ class Event
     #[Assert\Positive(message: 'La capacite doit etre positive.')]
     private ?int $capacite = null;
 
+<<<<<<< HEAD
+=======
+    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    private ?string $categorie = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $image = null;
+
+>>>>>>> origin/sara
     
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
@@ -115,6 +124,31 @@ class Event
         return $this;
     }
 
+<<<<<<< HEAD
+=======
+    public function getCategorie(): ?string
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?string $categorie): self
+    {
+        $this->categorie = $categorie;
+        return $this;
+    }
+
+    public function getImage(): ?string
+    {
+        return $this->image;
+    }
+
+    public function setImage(?string $image): self
+    {
+        $this->image = $image;
+        return $this;
+    }
+
+>>>>>>> origin/sara
     
     public function getUser(): ?User
     {

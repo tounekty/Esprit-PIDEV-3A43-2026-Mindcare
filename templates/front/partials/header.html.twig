@@ -48,6 +48,9 @@
                                     <li><a href="{{ path('student_patient_file') }}">Mon dossier médical</a></li>
                                     <li><a href="{{ path('resource_index') }}">Ressources</a></li>
                                     <li><a href="{{ path('front_events_index') }}">Evenements</a></li>
+                                    {% if app.user %}
+                                        <li><a href="{{ path('front_my_reservations') }}">Mes réservations</a></li>
+                                    {% endif %}
                                     <li><a href="{{ path('front_forum_index') }}">Forum</a></li>
                                     <li><a href="{{ path('app_mood_index') }}">Mood</a></li>
                                 </ul>

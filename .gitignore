@@ -23,8 +23,18 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
+<<<<<<< HEAD
 config/ga4-service-account.json
 
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
+=======
+
+###> symfony/webpack-encore-bundle ###
+/node_modules/
+/public/build/
+npm-debug.log
+yarn-error.log
+###< symfony/webpack-encore-bundle ###
+>>>>>>> origin/sara

@@ -3,8 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\MessageForumRepository;
+<<<<<<< HEAD
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+=======
+>>>>>>> origin/sara
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -37,6 +40,7 @@ class MessageForum
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
+<<<<<<< HEAD
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'children')]
     #[ORM\JoinColumn(name: 'parent_message_id', referencedColumnName: 'id', nullable: true, onDelete: 'CASCADE')]
@@ -50,6 +54,8 @@ class MessageForum
 
     #[ORM\Column(name: 'is_anonymous', type: 'boolean')]
     private bool $isAnonymous = false;
+=======
+>>>>>>> origin/sara
     #[ORM\Column(name: 'attachment_path', type: 'string', length: 255, nullable: true)]
     private ?string $attachmentPath = null;
 
@@ -59,6 +65,7 @@ class MessageForum
     #[ORM\Column(name: 'attachment_size', type: 'integer', nullable: true)]
     private ?int $attachmentSize = null;
 
+<<<<<<< HEAD
     #[ORM\OneToOne(mappedBy: 'message', targetEntity: MessageForumAnalysis::class, cascade: ['persist', 'remove'])]
     private ?MessageForumAnalysis $analysis = null;
 
@@ -66,6 +73,11 @@ class MessageForum
     {
         $this->dateMessage = new \DateTimeImmutable();
         $this->children = new ArrayCollection();
+=======
+    public function __construct()
+    {
+        $this->dateMessage = new \DateTimeImmutable();
+>>>>>>> origin/sara
     }
 
     public function getId(): ?int
@@ -121,6 +133,7 @@ class MessageForum
         return $this;
     }
 
+<<<<<<< HEAD
     public function getParentMessage(): ?self
     {
         return $this->parentMessage;
@@ -174,6 +187,8 @@ class MessageForum
         return $this;
     }
 
+=======
+>>>>>>> origin/sara
     public function getAttachmentPath(): ?string
     {
         return $this->attachmentPath;
@@ -209,6 +224,7 @@ class MessageForum
 
         return $this;
     }
+<<<<<<< HEAD
 
     public function getAnalysis(): ?MessageForumAnalysis
     {
@@ -225,4 +241,6 @@ class MessageForum
 
         return $this;
     }
+=======
+>>>>>>> origin/sara
 }

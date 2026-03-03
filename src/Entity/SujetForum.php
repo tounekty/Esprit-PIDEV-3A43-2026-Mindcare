@@ -73,9 +73,12 @@ class SujetForum
 
     #[ORM\Column(name: 'is_pinned', type: 'boolean')]
     private bool $isPinned = false;
+<<<<<<< HEAD
     
     #[ORM\Column(name: 'is_anonymous', type: 'boolean')]
     private bool $isAnonymous = false;
+=======
+>>>>>>> origin/sara
 
     #[ORM\Column(type: 'string', length: 50, nullable: true)]
     #[Assert\Length(
@@ -106,6 +109,7 @@ class SujetForum
     #[ORM\OneToMany(mappedBy: 'sujet', targetEntity: MessageForum::class, cascade: ['persist', 'remove'])]
     private Collection $messages;
 
+<<<<<<< HEAD
     /**
      * @var Collection<int, User>
      */
@@ -119,6 +123,11 @@ class SujetForum
     {
         $this->messages = new ArrayCollection();
         $this->taggedPsychologues = new ArrayCollection();
+=======
+    public function __construct()
+    {
+        $this->messages = new ArrayCollection();
+>>>>>>> origin/sara
         $this->dateCreation = new \DateTimeImmutable();
     }
 
@@ -198,6 +207,7 @@ class SujetForum
 
         return $this;
     }
+<<<<<<< HEAD
     
     public function isAnonymous(): bool
     {
@@ -210,6 +220,8 @@ class SujetForum
         
         return $this;
     }
+=======
+>>>>>>> origin/sara
 
     public function getStatus(): ?string
     {
@@ -299,6 +311,7 @@ class SujetForum
 
         return $this;
     }
+<<<<<<< HEAD
 
     /**
      * @return Collection<int, User>
@@ -323,4 +336,6 @@ class SujetForum
 
         return $this;
     }
+=======
+>>>>>>> origin/sara
 }

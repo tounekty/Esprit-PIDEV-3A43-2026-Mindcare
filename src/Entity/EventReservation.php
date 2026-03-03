@@ -53,6 +53,15 @@ class EventReservation
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $commentaire = null;
 
+<<<<<<< HEAD
+=======
+    #[ORM\Column(type: 'string', length: 64, nullable: true)]
+    private ?string $confirmationToken = null;
+
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $smsReminderSent = false;
+
+>>>>>>> origin/sara
     public function getId(): ?int
     {
         return $this->id;
@@ -145,4 +154,31 @@ class EventReservation
         $this->commentaire = $commentaire;
         return $this;
     }
+<<<<<<< HEAD
 }
+=======
+
+    public function getConfirmationToken(): ?string
+    {
+        return $this->confirmationToken;
+    }
+
+    public function setConfirmationToken(?string $confirmationToken): self
+    {
+        $this->confirmationToken = $confirmationToken;
+        return $this;
+    }
+
+    public function isSmsReminderSent(): bool
+    {
+        return $this->smsReminderSent;
+    }
+
+    public function setSmsReminderSent(bool $smsReminderSent): self
+    {
+        $this->smsReminderSent = $smsReminderSent;
+        return $this;
+    }
+}
+
+>>>>>>> origin/sara

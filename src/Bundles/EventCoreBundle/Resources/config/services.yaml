@@ -1,0 +1,11 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  # Event Core Bundle Services
+  App\Bundles\EventCoreBundle\Service\EventService:
+    arguments:
+      - '@App\Repository\EventRepository'
+      - '@App\Repository\EventReservationRepository'
+      - '@doctrine.orm.entity_manager'

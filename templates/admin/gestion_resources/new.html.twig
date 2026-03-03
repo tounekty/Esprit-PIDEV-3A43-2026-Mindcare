@@ -34,6 +34,7 @@
         </div>
 
         <div class="mb-3" id="image-url-group">
+<<<<<<< HEAD
             <label class="form-label fw-semibold">Image de l'article</label>
 
             {# Mode selector #}
@@ -79,6 +80,12 @@
                 </div>
                 <div id="ai-error-msg" class="alert alert-danger mt-2 py-2" style="display:none"></div>
             </div>
+=======
+            {{ form_label(form.imageUrl) }}
+            {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control'}}) }}
+            <small class="text-muted">Obligatoire si type = Article</small>
+            {{ form_errors(form.imageUrl) }}
+>>>>>>> origin/sara
         </div>
 
         <div class="mb-3">
@@ -97,6 +104,7 @@
 </div>
 
 <style>
+<<<<<<< HEAD
 .form-actions .btn { min-width: 150px; }
 #panel-ai .input-group .btn { white-space: nowrap; }
 </style>
@@ -175,4 +183,10 @@
     });
 })();
 </script>
+=======
+.form-actions .btn {
+    min-width: 150px;
+}
+</style>
+>>>>>>> origin/sara
 {% endblock %}

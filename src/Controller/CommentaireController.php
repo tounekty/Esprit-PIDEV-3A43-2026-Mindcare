@@ -3,7 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\Commentaire;
+<<<<<<< HEAD
 use App\Entity\User;
+=======
+>>>>>>> origin/sara
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,13 +16,22 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/commentaire')]
 class CommentaireController extends AbstractController
 {
+<<<<<<< HEAD
     public function __construct(private readonly EntityManagerInterface $entityManager)
     {
+=======
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+>>>>>>> origin/sara
     }
 
     #[Route('/{id}/delete', name: 'commentaire_delete', methods: ['POST'])]
     public function delete(Request $request, Commentaire $commentaire): Response
     {
+<<<<<<< HEAD
         $resourceId = $commentaire->getResource()?->getId();
         $redirect = null !== $resourceId
             ? $this->redirectToRoute('resource_show', ['id' => $resourceId])
@@ -49,3 +61,16 @@ class CommentaireController extends AbstractController
     }
 }
 
+=======
+        $resourceId = $commentaire->getResource()->getId();
+
+        if ($this->isCsrfTokenValid('delete'.$commentaire->getId(), $request->request->get('_token'))) {
+            $this->entityManager->remove($commentaire);
+            $this->entityManager->flush();
+            $this->addFlash('success', 'Commentaire supprimé avec succès!');
+        }
+
+        return $this->redirectToRoute('resource_show', ['id' => $resourceId]);
+    }
+}
+>>>>>>> origin/sara

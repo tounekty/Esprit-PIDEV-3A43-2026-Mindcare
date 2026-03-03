@@ -19,4 +19,10 @@ return [
     Symfony\UX\Chartjs\ChartjsBundle::class => ['all' => true],
     Vich\UploaderBundle\VichUploaderBundle::class => ['all' => true],
     Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle::class => ['all' => true],
+    App\Bundles\EventCoreBundle\EventCoreBundle::class => ['all' => true],
+    App\Bundles\EventUIBundle\EventUIBundle::class => ['all' => true],
+    App\Bundles\EventAPIBundle\EventAPIBundle::class => ['all' => true],
+    App\Bundles\EventNotificationBundle\EventNotificationBundle::class => ['all' => true],
+    CalendarBundle\CalendarBundle::class => ['all' => true],
+    Symfony\WebpackEncoreBundle\WebpackEncoreBundle::class => ['all' => true],
 ];

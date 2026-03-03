@@ -70,8 +70,12 @@ class Resource
         max: 500,
         maxMessage: 'Le lien image ne doit pas depasser {{ limit }} caracteres.'
     )]
+<<<<<<< HEAD
     #[Assert\Regex(
         pattern: '/^(https?:\/\/|\/uploads\/).+/',
+=======
+    #[Assert\Url(
+>>>>>>> origin/sara
         message: 'Le lien image doit etre une URL complete (ex: https://exemple.com/image.jpg).'
     )]
     private ?string $imageUrl = null;

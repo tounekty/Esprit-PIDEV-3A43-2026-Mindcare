@@ -9,11 +9,16 @@ use App\Form\StudentAppointmentType;
 use App\Repository\UserRepository;
 use App\Repository\AppointmentRepository;
 use App\Repository\UserRepository as RepoUserRepository;
+<<<<<<< HEAD
 use App\Service\ZoomApiService;
 use App\Service\OllamaService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
+=======
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+>>>>>>> origin/sara
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -27,7 +32,10 @@ class AppointmentController extends AbstractController
 
 
     #[Route('/api/psychologue/{id}/availability', name: 'api_psychologue_availability', methods: ['GET'])]
+<<<<<<< HEAD
     #[IsGranted('PUBLIC_ACCESS')]
+=======
+>>>>>>> origin/sara
     public function apiAvailability(int $id, UserRepository $userRepository, AppointmentRepository $appointmentRepository): JsonResponse
     {
         try {
@@ -59,6 +67,7 @@ class AppointmentController extends AbstractController
         }
     }
 
+<<<<<<< HEAD
     /**
      * Get AI-suggested optimal appointment times based on psychologist's patterns
      */
@@ -178,6 +187,8 @@ class AppointmentController extends AbstractController
         }
     }
 
+=======
+>>>>>>> origin/sara
     #[Route('/reservation/new/{psyId}', name: 'reservation_new')]
     public function new(
         int $psyId,
@@ -211,6 +222,7 @@ class AppointmentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+<<<<<<< HEAD
             // Check if student already has an appointment with this psychologue this week
             if ($appointmentRepository->hasAppointmentThisWeekWithPsychologue(
                 $user,
@@ -224,6 +236,8 @@ class AppointmentController extends AbstractController
                 ]);
             }
 
+=======
+>>>>>>> origin/sara
             // Check if the selected time is already booked for this psychologist
             $selectedDate = $appointment->getDate();
             if ($selectedDate) {
@@ -241,7 +255,11 @@ class AppointmentController extends AbstractController
 
                     // Check if selected time overlaps with existing appointment
                     if ($selectedDate >= $existingStart && $selectedDate < $existingEnd) {
+<<<<<<< HEAD
                         $form->get('date')->addError(new FormError(
+=======
+                        $form->get('date')->addError(new \Symfony\Component\Form\FormError(
+>>>>>>> origin/sara
                             'Ce créneau n\'est pas disponible. Veuillez choisir une autre date.'
                         ));
                         break;
@@ -284,6 +302,7 @@ class AppointmentController extends AbstractController
 
 
     #[Route('/reservation/{id}/accept', name: 'reservation_accept')]
+<<<<<<< HEAD
     public function accept(
         int $id,
         AppointmentRepository $appointmentRepository,
@@ -291,6 +310,10 @@ class AppointmentController extends AbstractController
         MailerInterface $mailer,
         ZoomApiService $zoomService
     ): Response {
+=======
+    public function accept(int $id, AppointmentRepository $appointmentRepository, EntityManagerInterface $em, MailerInterface $mailer): Response
+    {
+>>>>>>> origin/sara
         $appointment = $appointmentRepository->find($id);
         if (!$appointment) {
             throw $this->createNotFoundException('Rendez-vous introuvable');
@@ -302,6 +325,7 @@ class AppointmentController extends AbstractController
         }
 
         $appointment->setStatus('accepted');
+<<<<<<< HEAD
 
         // Create Zoom meeting if appointment is online
         $zoomLink = null;
@@ -331,11 +355,14 @@ class AppointmentController extends AbstractController
             }
         }
 
+=======
+>>>>>>> origin/sara
         $em->flush();
 
         // Notify student by email
         $student = $appointment->getEtudiant();
         if ($student && $student->getEmail()) {
+<<<<<<< HEAD
             $emailContent = '<p>Bonjour ' . $student->getFirstName() . ',</p>
                         <p>Votre rendez-vous prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . ' avec <strong>' . $appointment->getPsychologue()->getFirstName() . ' ' . $appointment->getPsychologue()->getLastName() . '</strong> a été accepté.</p>';
 
@@ -345,10 +372,13 @@ class AppointmentController extends AbstractController
 
             $emailContent .= '<p>Cordialement,<br>L\'équipe MindCare</p>';
 
+=======
+>>>>>>> origin/sara
             $email = (new Email())
                 ->from('noreply@mindcare.com')
                 ->to($student->getEmail())
                 ->subject('Votre rendez-vous a été accepté')
+<<<<<<< HEAD
                 ->html($emailContent);
 
             $mailer->send($email);
@@ -371,6 +401,11 @@ class AppointmentController extends AbstractController
                 ->to($psychologue->getEmail())
                 ->subject('Rendez-vous accepté')
                 ->html($emailContent);
+=======
+                ->html('<p>Bonjour ' . $student->getFirstName() . ',</p>
+                        <p>Votre rendez-vous prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . ' avec <strong>' . $appointment->getPsychologue()->getFirstName() . ' ' . $appointment->getPsychologue()->getLastName() . '</strong> a été accepté.</p>
+                        <p>Cordialement,<br>L\'équipe MindCare</p>');
+>>>>>>> origin/sara
 
             $mailer->send($email);
         }
@@ -497,7 +532,11 @@ class AppointmentController extends AbstractController
                     $existingEnd = (clone $existingStart)->modify('+1 hour');
 
                     if ($selectedDate >= $existingStart && $selectedDate < $existingEnd) {
+<<<<<<< HEAD
                         $form->get('date')->addError(new FormError(
+=======
+                        $form->get('date')->addError(new \Symfony\Component\Form\FormError(
+>>>>>>> origin/sara
                             'Ce créneau n\'est pas disponible. Veuillez choisir une autre date.'
                         ));
                         break;

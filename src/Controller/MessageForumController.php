@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\MessageForum;
 use App\Entity\SujetForum;
+<<<<<<< HEAD
 use App\Message\AnalyzeForumMessage;
 use App\Repository\MessageForumRepository;
 use App\Service\ForumReplyNotificationService;
@@ -14,17 +15,27 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+=======
+use App\Repository\MessageForumRepository;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+>>>>>>> origin/sara
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+<<<<<<< HEAD
 use Symfony\Component\Messenger\MessageBusInterface;
+=======
+>>>>>>> origin/sara
 use Symfony\Component\Routing\Annotation\Route;
 
 class MessageForumController extends AbstractController
 {
     #[Route('/forum/messages', name: 'message_forum_index', methods: ['GET'])]
+<<<<<<< HEAD
     public function index(Request $request, MessageForumRepository $repository, PaginatorInterface $paginator): Response
     {
         $query = trim((string) $request->query->get('q', ''));
@@ -36,12 +47,24 @@ class MessageForumController extends AbstractController
 
         return $this->render('forum/message/index.html.twig', [
             'messages' => $pagination,
+=======
+    public function index(Request $request, MessageForumRepository $repository): Response
+    {
+        $query = trim((string) $request->query->get('q', ''));
+
+        return $this->render('forum/message/index.html.twig', [
+            'messages' => $repository->findBySearch($query !== '' ? $query : null),
+>>>>>>> origin/sara
             'q' => $query,
         ]);
     }
 
     #[Route('/forum/messages/new', name: 'message_forum_new', methods: ['GET', 'POST'])]
+<<<<<<< HEAD
     public function new(Request $request, EntityManagerInterface $entityManager, ForumReplyNotificationService $notificationService, MessageBusInterface $messageBus, OpenAiModerationService $moderationService): Response
+=======
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
+>>>>>>> origin/sara
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -62,6 +85,7 @@ class MessageForumController extends AbstractController
                 'placeholder' => 'Choisir un sujet',
             ])
             ->add('contenu', TextareaType::class)
+<<<<<<< HEAD
             ->add('isAnonymous', ChoiceType::class, [
                 'label' => 'Publication anonyme',
                 'choices' => [
@@ -71,11 +95,14 @@ class MessageForumController extends AbstractController
                 'expanded' => true,
                 'multiple' => false,
             ])
+=======
+>>>>>>> origin/sara
             ->add('attachmentFile', FileType::class, ['mapped' => false, 'required' => false])
             ->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+<<<<<<< HEAD
             $moderation = $moderationService->moderate($message->getContenu() ?? '');
             $errorType = $moderation['errorType'] ?? null;
             $errorMessage = $moderation['errorMessage'] ?? null;
@@ -110,6 +137,13 @@ class MessageForumController extends AbstractController
 
                 return $this->redirectToRoute('message_forum_index');
             }
+=======
+            $this->handleMessageUploads($form, $message);
+            $entityManager->persist($message);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('message_forum_index');
+>>>>>>> origin/sara
         }
 
         return $this->render('forum/message/new.html.twig', [
@@ -126,7 +160,11 @@ class MessageForumController extends AbstractController
     }
 
     #[Route('/forum/messages/{id}/edit', name: 'message_forum_edit', methods: ['GET', 'POST'])]
+<<<<<<< HEAD
     public function edit(Request $request, MessageForum $message, EntityManagerInterface $entityManager, OpenAiModerationService $moderationService): Response
+=======
+    public function edit(Request $request, MessageForum $message, EntityManagerInterface $entityManager): Response
+>>>>>>> origin/sara
     {
         $form = $this->createFormBuilder($message)
             ->add('sujet', EntityType::class, [
@@ -135,6 +173,7 @@ class MessageForumController extends AbstractController
                 'placeholder' => 'Choisir un sujet',
             ])
             ->add('contenu', TextareaType::class)
+<<<<<<< HEAD
             ->add('isAnonymous', ChoiceType::class, [
                 'label' => 'Publication anonyme',
                 'choices' => [
@@ -144,11 +183,14 @@ class MessageForumController extends AbstractController
                 'expanded' => true,
                 'multiple' => false,
             ])
+=======
+>>>>>>> origin/sara
             ->add('attachmentFile', FileType::class, ['mapped' => false, 'required' => false])
             ->getForm();
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+<<<<<<< HEAD
             $moderation = $moderationService->moderate($message->getContenu() ?? '');
             $errorType = $moderation['errorType'] ?? null;
             $errorMessage = $moderation['errorMessage'] ?? null;
@@ -178,6 +220,12 @@ class MessageForumController extends AbstractController
 
                 return $this->redirectToRoute('message_forum_index');
             }
+=======
+            $this->handleMessageUploads($form, $message);
+            $entityManager->flush();
+
+            return $this->redirectToRoute('message_forum_index');
+>>>>>>> origin/sara
         }
 
         return $this->render('forum/message/edit.html.twig', [

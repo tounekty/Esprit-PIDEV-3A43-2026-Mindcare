@@ -5,7 +5,10 @@ namespace App\Repository;
 use App\Entity\MessageForum;
 use App\Entity\SujetForum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+<<<<<<< HEAD
 use Doctrine\ORM\QueryBuilder;
+=======
+>>>>>>> origin/sara
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -20,13 +23,25 @@ class MessageForumRepository extends ServiceEntityRepository
 
     public function findBySearch(?string $query): array
     {
+<<<<<<< HEAD
         return $this->createSearchQueryBuilder($query)
+=======
+        $qb = $this->createQueryBuilder('m');
+
+        if ($query !== null && $query !== '') {
+            $qb->andWhere('LOWER(m.contenu) LIKE :query')
+                ->setParameter('query', '%' . strtolower($query) . '%');
+        }
+
+        return $qb->orderBy('m.dateMessage', 'DESC')
+>>>>>>> origin/sara
             ->getQuery()
             ->getResult();
     }
 
     public function findBySujetAndSearch(SujetForum $sujet, ?string $query): array
     {
+<<<<<<< HEAD
         return $this->createSujetSearchQueryBuilder($sujet, $query)
             ->getQuery()
             ->getResult();
@@ -48,6 +63,8 @@ class MessageForumRepository extends ServiceEntityRepository
 
     public function createSujetSearchQueryBuilder(SujetForum $sujet, ?string $query): QueryBuilder
     {
+=======
+>>>>>>> origin/sara
         $qb = $this->createQueryBuilder('m')
             ->andWhere('m.sujet = :sujet')
             ->setParameter('sujet', $sujet);
@@ -57,6 +74,7 @@ class MessageForumRepository extends ServiceEntityRepository
                 ->setParameter('query', '%' . strtolower($query) . '%');
         }
 
+<<<<<<< HEAD
         return $qb->orderBy('m.dateMessage', 'DESC');
     }
 
@@ -87,6 +105,9 @@ class MessageForumRepository extends ServiceEntityRepository
             ->andWhere('m.parentMessage IS NOT NULL')
             ->setParameter('sujet', $sujet)
             ->orderBy('m.dateMessage', 'ASC')
+=======
+        return $qb->orderBy('m.dateMessage', 'DESC')
+>>>>>>> origin/sara
             ->getQuery()
             ->getResult();
     }

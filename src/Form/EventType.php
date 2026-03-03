@@ -8,6 +8,11 @@ use Symfony\Component\Form\Extension\Core\Type\DateTimeType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+<<<<<<< HEAD
+=======
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+>>>>>>> origin/sara
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -45,6 +50,26 @@ class EventType extends AbstractType
                     new Assert\NotNull(['message' => 'La capacite est obligatoire.']),
                     new Assert\Positive(['message' => 'La capacite doit etre positive.']),
                 ],
+<<<<<<< HEAD
+=======
+            ])
+            ->add('categorie', ChoiceType::class, [
+                'label' => 'Catégorie',
+                'placeholder' => 'Sélectionnez une catégorie',
+                'choices' => [
+                    'Sport' => 'sport',
+                    'Bien-être' => 'wellness',
+                    'Atelier' => 'workshop',
+                ],
+                'required' => false,
+                'attr' => ['class' => 'form-control'],
+            ])
+            ->add('image', FileType::class, [
+                'label' => 'Photo de l\'événement',
+                'required' => false,
+                'attr' => ['class' => 'form-control', 'accept' => 'image/jpeg,image/png,image/webp'],
+                'mapped' => false,
+>>>>>>> origin/sara
             ]);
     }
 

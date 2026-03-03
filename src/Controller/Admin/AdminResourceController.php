@@ -5,7 +5,10 @@ namespace App\Controller\Admin;
 use App\Entity\Commentaire;
 use App\Entity\Resource;
 use App\Form\ResourceType;
+<<<<<<< HEAD
 use App\Service\GoogleAnalyticsResourceMetricsService;
+=======
+>>>>>>> origin/sara
 use Dompdf\Dompdf;
 use Dompdf\Options;
 use Doctrine\ORM\EntityManagerInterface;
@@ -14,9 +17,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+<<<<<<< HEAD
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 use Symfony\UX\Chartjs\Builder\ChartBuilderInterface;
 use Symfony\UX\Chartjs\Model\Chart;
+=======
+>>>>>>> origin/sara
 
 #[Route('/admin/ressources', name: 'admin_resources_')]
 class AdminResourceController extends AbstractController
@@ -52,6 +58,7 @@ class AdminResourceController extends AbstractController
         ]);
     }
 
+<<<<<<< HEAD
     #[Route('/stats', name: 'stats', methods: ['GET'])]
     public function stats(
         EntityManagerInterface $em,
@@ -234,6 +241,8 @@ class AdminResourceController extends AbstractController
         ]);
     }
 
+=======
+>>>>>>> origin/sara
     #[Route('/export/pdf', name: 'export_pdf', methods: ['GET'])]
     public function exportPdf(Request $request, EntityManagerInterface $em): Response
     {
@@ -269,6 +278,7 @@ class AdminResourceController extends AbstractController
         );
     }
 
+<<<<<<< HEAD
     #[Route('/generate-image', name: 'generate_image', methods: ['POST'])]
     public function generateImage(Request $request, HttpClientInterface $httpClient, string $groqApiKey, string $hfApiToken): JsonResponse
     {
@@ -360,6 +370,8 @@ class AdminResourceController extends AbstractController
     }
 
 
+=======
+>>>>>>> origin/sara
     #[Route('/new', name: 'new')]
     public function new(Request $request, EntityManagerInterface $em): Response
     {
