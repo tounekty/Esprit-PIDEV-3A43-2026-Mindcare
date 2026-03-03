@@ -93,6 +93,7 @@
             "assets:install %PUBLIC_DIR%": "symfony-cmd",
             "importmap:install": "symfony-cmd"
         },
+        "phpstan": "php vendor/bin/phpstan analyse --configuration=phpstan.neon --memory-limit=1G",
         "post-install-cmd": [
             "@auto-scripts"
         ],
@@ -110,6 +111,8 @@
         }
     },
     "require-dev": {
+        "ahmed-bhs/doctrine-doctor": "v0.1.0-alpha.3",
+        "phpstan/phpstan": "2.1",
         "phpunit/phpunit": "^9.5",
         "symfony/browser-kit": "6.4.*",
         "symfony/css-selector": "6.4.*",

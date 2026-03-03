@@ -4,6 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
     <style>
         /* Page Header */
         .page-header {
@@ -126,7 +127,7 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{{ path('app_journal_emotionnel_index') }}" class="text-decoration-none">Mes Entrées</a></li>
-            <li class="breadcrumb-item"><a href="{{ path('app_journal_show', {'id': journal_emotionnel.id}) }}" class="text-decoration-none">Entrée #{{ journal_emotionnel.id }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_journal_emotionnel_show', {'id': journal_emotionnel.id}) }}" class="text-decoration-none">Entrée #{{ journal_emotionnel.id }}</a></li>
             <li class="breadcrumb-item active">Modifier</li>
         </ol>
     </nav>
@@ -140,7 +141,7 @@
                 </h1>
                 <p class="mb-0 opacity-75">Créée le {{ journal_emotionnel.dateecriture|date('d/m/Y à H:i') }}</p>
             </div>
-            <a href="{{ path('app_journal_show', {'id': journal_emotionnel.id}) }}" class="btn btn-outline-light">
+            <a href="{{ path('app_journal_emotionnel_show', {'id': journal_emotionnel.id}) }}" class="btn btn-outline-light">
                 <i class="fas fa-eye me-1"></i> Voir
             </a>
         </div>
@@ -157,6 +158,12 @@
                 </div>
                 <div class="card-modern-body">
                     {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    
+                    <!-- Initialize Mood Map for JavaScript -->
+                    <script>
+                        // Initialize the mood map from server (maps mood name to mood ID)
+                        window.moodMap = {{ mood_map|json_encode|raw }};
+                    </script>
                     
                     <label class="form-label fw-bold mb-3">
                         <i class="fas fa-edit me-2" style="color: #7FBFFF;"></i>Votre Texte
@@ -231,6 +238,9 @@
                                 {% elseif journal_emotionnel.mood.humeur == 'triste' %} 😢
                                 {% elseif journal_emotionnel.mood.humeur == 'colere' %} 😠
                                 {% elseif journal_emotionnel.mood.humeur == 'stresse' %} 😰
+                                {% elseif journal_emotionnel.mood.humeur == 'calme' %} 😌
+                                {% elseif journal_emotionnel.mood.humeur == 'fatigue' %} 😴
+                                {% elseif journal_emotionnel.mood.humeur == 'excite' %} 😃
                                 {% elseif journal_emotionnel.mood.humeur == 'neutre' %} 😐
                                 {% else %} 😊
                                 {% endif %}
@@ -241,6 +251,9 @@
                                     {% elseif journal_emotionnel.mood.humeur == 'triste' %} Triste
                                     {% elseif journal_emotionnel.mood.humeur == 'colere' %} En colère
                                     {% elseif journal_emotionnel.mood.humeur == 'stresse' %} Stressé(e)
+                                    {% elseif journal_emotionnel.mood.humeur == 'calme' %} Calme
+                                    {% elseif journal_emotionnel.mood.humeur == 'fatigue' %} Fatigué(e)
+                                    {% elseif journal_emotionnel.mood.humeur == 'excite' %} Excité(e)
                                     {% elseif journal_emotionnel.mood.humeur == 'neutre' %} Neutre
                                     {% else %} {{ journal_emotionnel.mood.humeur|capitalize }}
                                     {% endif %}
@@ -258,11 +271,7 @@
                     <label class="form-label fw-bold mt-4 mb-3">
                         <i class="fas fa-sync me-2" style="color: #7FBFFF;"></i>Changer d'Humeur
                     </label>
-                    {{ form_widget(form.mood, {
-                        'attr': {
-                            'class': 'form-select form-select-lg'
-                        }
-                    }) }}
+                    {{ form_widget(form.mood) }}
                 </div>
             </div>
             {% else %}
@@ -276,11 +285,7 @@
                         Aucune humeur n'est associée à cette entrée pour le moment.
                     </p>
                     <label class="form-label fw-bold mb-2">Associer une Humeur</label>
-                    {{ form_widget(form.mood, {
-                        'attr': {
-                            'class': 'form-select form-select-lg'
-                        }
-                    }) }}
+                    {{ form_widget(form.mood) }}
                 </div>
             </div>
             {% endif %}
@@ -292,7 +297,7 @@
                 </div>
                 <div class="card-modern-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ path('app_journal_show', {'id': journal_emotionnel.id}) }}" class="btn btn-outline-primary">
+                        <a href="{{ path('app_journal_emotionnel_show', {'id': journal_emotionnel.id}) }}" class="btn btn-outline-primary">
                             <i class="fas fa-eye me-1"></i> Aperçu
                         </a>
                         <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-outline-secondary">
@@ -360,3 +365,5 @@
     });
 </script>
 {% endblock %}
+
+

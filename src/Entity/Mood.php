@@ -50,6 +50,12 @@ private Collection $journals;
     #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
+    private ?string $aiAnalysis = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $pdfPath = null;
+
 
     public function getId(): ?int
     {
@@ -124,6 +130,28 @@ private Collection $journals;
             }
         }
 
+        return $this;
+    }
+
+    public function getAiAnalysis(): ?string
+    {
+        return $this->aiAnalysis;
+    }
+
+    public function setAiAnalysis(?string $aiAnalysis): static
+    {
+        $this->aiAnalysis = $aiAnalysis;
+        return $this;
+    }
+
+    public function getPdfPath(): ?string
+    {
+        return $this->pdfPath;
+    }
+
+    public function setPdfPath(?string $pdfPath): static
+    {
+        $this->pdfPath = $pdfPath;
         return $this;
     }
 

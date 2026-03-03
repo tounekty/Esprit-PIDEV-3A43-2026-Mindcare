@@ -68,3 +68,7 @@ services:
             $twilioAccountSid: '%env(TWILIO_ACCOUNT_SID)%'
             $twilioAuthToken: '%env(TWILIO_AUTH_TOKEN)%'
             $twilioFromNumber: '%env(TWILIO_FROM_NUMBER)%'
+
+    App\MessageHandler\GenerateMoodPdfMessageHandler:
+        arguments:
+            $projectDir: '%kernel.project_dir%'

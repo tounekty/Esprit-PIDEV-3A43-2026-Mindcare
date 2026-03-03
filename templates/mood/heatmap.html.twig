@@ -1,0 +1,576 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Carte Thermique Émotionnelle | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header Hero */
+        .header-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3.5rem 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .header-text h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-text p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 0.8rem 1.8rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-btn:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Navigation */
+        .heatmap-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(10px);
+        }
+
+        .heatmap-nav h2 {
+            font-size: 1.8rem;
+            color: #1a365d;
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.2);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        /* Heatmap Container */
+        .heatmap-container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+            transition: all 0.3s;
+        }
+
+        .calendar-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .day-header {
+            text-align: center;
+            font-weight: 700;
+            color: #667eea;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border-radius: 12px;
+            font-size: 1.1rem;
+        }
+
+        .day-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            padding: 1rem;
+            min-height: 100px;
+            position: relative;
+            border: 2px solid transparent;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+        }
+
+        .day-cell:hover {
+            transform: scale(1.08);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .day-cell.empty {
+            background: linear-gradient(135deg, #f0f0f0, #e8e8e8);
+            cursor: default;
+        }
+
+        .day-cell.empty:hover {
+            transform: none;
+            box-shadow: none;
+        }
+
+        .day-number {
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 0.25rem;
+            opacity: 0.9;
+        }
+
+        .mood-emoji {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .intensity-indicator {
+            font-size: 0.8rem;
+            opacity: 0.85;
+            font-weight: 600;
+        }
+
+        /* Intensity levels */
+        .intensity-1 { opacity: 0.35; }
+        .intensity-2 { opacity: 0.5; }
+        .intensity-3 { opacity: 0.7; }
+        .intensity-4 { opacity: 0.85; }
+        .intensity-5 { opacity: 1; }
+
+        /* Statistics */
+        .stats-top {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            text-align: center;
+        }
+
+        .stat-card h4 {
+            color: #1a365d;
+            margin: 0 0 0.5rem 0;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        /* Legend */
+        .legend {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .legend h3 {
+            color: #1a365d;
+            margin-top: 0;
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .legend-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+
+        .legend-item:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .legend-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend-text {
+            font-size: 1rem;
+            color: #4a5568;
+            font-weight: 600;
+        }
+
+        .legend-note {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            color: #4a5568;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Animations */
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .heatmap-container,
+        .legend {
+            animation: slideUp 0.6s ease-out forwards;
+        }
+
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .calendar-grid {
+                gap: 0.5rem;
+            }
+
+            .day-cell {
+                min-height: 80px;
+                padding: 0.75rem;
+            }
+
+            .day-number {
+                font-size: 1rem;
+            }
+
+            .mood-emoji {
+                font-size: 1.5rem;
+            }
+
+            .header-hero {
+                padding: 2rem 1.5rem;
+            }
+
+            .header-text h1 {
+                font-size: 2rem;
+            }
+
+            .heatmap-nav {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .nav-btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .legend-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .legend-note {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="page-container">
+    <!-- Header -->
+    <div class="header-hero">
+        <div class="header-content">
+            <div class="header-text">
+                <h1>🔥 Carte Thermique Émotionnelle</h1>
+                <p>Visualisez votre bien-être émotionnel au fil du temps</p>
+            </div>
+            <a href="{{ path('app_mood_index') }}" class="back-btn">
+                <i class="fas fa-arrow-left"></i> Retour aux Humeurs
+            </a>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="heatmap-nav">
+        <h2>📅 {{ ['Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin', 'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'][month - 1] }} {{ year }}</h2>
+        <div class="nav-buttons">
+            <a href="?year={{ prevYear }}&month={{ prevMonth }}" class="nav-btn">
+                <i class="fas fa-chevron-left"></i> Mois Précédent
+            </a>
+            <a href="?year={{ nextYear }}&month={{ nextMonth }}" class="nav-btn">
+                Mois Suivant <i class="fas fa-chevron-right"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    {% set dayCount = heatmapData|filter(v => v is not null)|length %}
+    {% set dominantMood = 'neutre' %}
+    {% set moodCounts = {} %}
+    {% for data in heatmapData|filter(v => v is not null) %}
+        {% set humeur = data.humeur %}
+        {% set moodCounts = moodCounts|merge({(humeur): (moodCounts[humeur] ?? 0) + 1}) %}
+    {% endfor %}
+    {% if moodCounts|length > 0 %}
+        {% set dominantMood = moodCounts|keys|first %}
+        {% for humeur, count in moodCounts %}
+            {% if count > moodCounts[dominantMood] %}
+                {% set dominantMood = humeur %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+    <div class="stats-top">
+        <div class="stat-card">
+            <h4>📊 Jours Enregistrés</h4>
+            <div class="stat-value">{{ dayCount }}/{{ daysInMonth }}</div>
+        </div>
+        <div class="stat-card">
+            <h4>👑 Émotion Dominante</h4>
+            <div class="stat-value">
+                {% if dominantMood == 'heureux' %}😊
+                {% elseif dominantMood == 'triste' %}😢
+                {% elseif dominantMood == 'colere' %}😠
+                {% elseif dominantMood == 'stresse' %}😰
+                {% elseif dominantMood == 'calme' %}🧘
+                {% elseif dominantMood == 'fatigue' %}😴
+                {% elseif dominantMood == 'excite' %}🎉
+                {% else %}💭
+                {% endif %}
+            </div>
+        </div>
+        <div class="stat-card">
+            <h4>📈 Couverture</h4>
+            <div class="stat-value">{{ ((dayCount / daysInMonth) * 100)|round }}%</div>
+        </div>
+    </div>
+
+    <!-- Heatmap Calendar -->
+    <div class="heatmap-container">
+        <div class="calendar-title">
+            <i class="fas fa-calendar-alt"></i>
+            Calendrier Émotionnel
+        </div>
+        
+        <div class="calendar-grid">
+            <!-- Day headers -->
+            <div class="day-header">Lun</div>
+            <div class="day-header">Mar</div>
+            <div class="day-header">Mer</div>
+            <div class="day-header">Jeu</div>
+            <div class="day-header">Ven</div>
+            <div class="day-header">Sam</div>
+            <div class="day-header">Dim</div>
+
+            <!-- Calendar cells -->
+            {% for day in 1..daysInMonth %}
+                {% set dayDate = '%04d-%02d-%02d'|format(year, month, day) %}
+                {% set dayData = heatmapData[dayDate] %}
+                
+                {% if dayData is not null %}
+                    {% set emotion = dayData.humeur %}
+                    {% set intensity = dayData.intensite %}
+                    {% set color = emotionColors[emotion] ?? '#95a5a6' %}
+                    
+                    <a href="{{ path('app_mood_show', {id: dayData.id}) }}" class="day-cell intensity-{{ intensity }}" style="background-color: {{ color }};">
+                        <div class="day-number">{{ day }}</div>
+                        <div class="mood-emoji">
+                            {% if emotion == 'heureux' %}😊
+                            {% elseif emotion == 'triste' %}😢
+                            {% elseif emotion == 'colere' %}😠
+                            {% elseif emotion == 'stresse' %}😰
+                            {% elseif emotion == 'calme' %}🧘
+                            {% elseif emotion == 'fatigue' %}😴
+                            {% elseif emotion == 'excite' %}🎉
+                            {% else %}💭
+                            {% endif %}
+                        </div>
+                        <div class="intensity-indicator">{{ intensity }}/5</div>
+                    </a>
+                {% else %}
+                    <div class="day-cell empty"></div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Legend -->
+    <div class="legend">
+        <h3>📊 Légende des Émotions</h3>
+        <div class="legend-grid">
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, {{ emotionColors.heureux }} 0%, {{ emotionColors.heureux }}dd 100%);"></div>
+                <span class="legend-text">😊 Heureux</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, {{ emotionColors.triste }} 0%, {{ emotionColors.triste }}dd 100%);"></div>
+                <span class="legend-text">😢 Triste</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, {{ emotionColors.colere }} 0%, {{ emotionColors.colere }}dd 100%);"></div>
+                <span class="legend-text">😠 Colère</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, {{ emotionColors.stresse }} 0%, {{ emotionColors.stresse }}dd 100%);"></div>
+                <span class="legend-text">😰 Stressé</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, {{ emotionColors.calme }} 0%, {{ emotionColors.calme }}dd 100%);"></div>
+                <span class="legend-text">🧘 Calme</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, {{ emotionColors.fatigue }} 0%, {{ emotionColors.fatigue }}dd 100%);"></div>
+                <span class="legend-text">😴 Fatigue</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, {{ emotionColors.excite }} 0%, {{ emotionColors.excite }}dd 100%);"></div>
+                <span class="legend-text">🎉 Excité</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, {{ emotionColors.neutre }} 0%, {{ emotionColors.neutre }}dd 100%);"></div>
+                <span class="legend-text">💭 Neutre</span>
+            </div>
+        </div>
+        
+        <div class="legend-note">
+            <strong>💡 Comment lire la carte :</strong><br>
+            • Cliquez sur un jour pour voir les détails de cette humeur<br>
+            • L'opacité représente l'intensité (faible → forte)<br>
+            • Les couleurs correspondent à différentes émotions<br>
+            • Utilisez les flèches pour naviguer entre les mois
+        </div>
+    </div>
+</div>
+{% endblock %}
+

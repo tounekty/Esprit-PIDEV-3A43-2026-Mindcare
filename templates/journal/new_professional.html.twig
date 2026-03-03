@@ -1,0 +1,453 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Entrée Journal | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+    <style>
+        body {
+            background: #f8fafc;
+        }
+
+        .page-wrapper {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header Section */
+        .header-section {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(127, 191, 255, 0.2);
+        }
+
+        .header-section h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-section p {
+            font-size: 1rem;
+            opacity: 0.95;
+            margin: 0;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.1) 0%, rgba(168, 216, 255, 0.1) 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #E2F0FF;
+        }
+
+        .form-card-header h2 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin: 0;
+        }
+
+        .form-card-body {
+            padding: 2rem;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-label i {
+            color: #7FBFFF;
+            font-size: 1.1rem;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #E2F0FF !important;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #7FBFFF !important;
+            box-shadow: 0 0 0 3px rgba(127, 191, 255, 0.1) !important;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 200px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            background: #f8fafc;
+            border: 1px solid #E2F0FF;
+            border-radius: 10px;
+            padding: 1.25rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-item:hover {
+            background: #f0f7ff;
+            border-color: #7FBFFF;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #7FBFFF;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        /* Quick Buttons */
+        .quick-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-btn {
+            background: white;
+            border: 1px solid #D4E8FF;
+            color: #7FBFFF;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: #f0f7ff;
+            border-color: #7FBFFF;
+            transform: translateY(-1px);
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2.5rem;
+            padding-top: 2rem;
+            border-top: 1px solid #E2F0FF;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: #1a365d;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #7FBFFF;
+            border: 2px solid #D4E8FF;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #f0f7ff;
+            border-color: #7FBFFF;
+        }
+
+        /* Breadcrumb */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+            margin-bottom: 1rem;
+        }
+
+        .breadcrumb-item.active {
+            color: #718096;
+        }
+
+        .breadcrumb-item a {
+            color: #7FBFFF;
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* Errors */
+        .alert {
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-danger {
+            background: #FEF2F2;
+            color: #7F1D1D;
+        }
+
+        .alert-danger .alert-heading {
+            color: #991B1B;
+        }
+
+        .alert ul {
+            padding-left: 1.5rem;
+        }
+
+        .alert li {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Helper text */
+        .form-text {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 0.5rem;
+            display: block;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="page-wrapper">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_journal_emotionnel_index') }}"><i class="fas fa-book me-1"></i>Journal</a></li>
+            <li class="breadcrumb-item active">Nouvelle Entrée</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="header-section">
+        <h1><i class="fas fa-pen-fancy me-2"></i>Nouvelle Entrée</h1>
+        <p>Exprimez vos pensées et émotions du moment</p>
+    </div>
+
+    <!-- Form -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <h2><i class="fas fa-edit me-2"></i>Rédiger une Entrée</h2>
+        </div>
+        <div class="form-card-body">
+            {{ form_start(form, {'attr': {'id': 'journalForm', 'novalidate': 'novalidate'}}) }}
+            
+            <!-- Errors -->
+            {% if form.vars.errors|length > 0 %}
+                <div class="alert alert-danger">
+                    <h5 class="alert-heading"><i class="fas fa-exclamation-circle me-2"></i>Erreurs de validation</h5>
+                    <ul class="mb-0">
+                        {% for error in form.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+
+            <!-- Content Field -->
+            <div class="form-group">
+                <label class="form-label" for="journal_contenu">
+                    <i class="fas fa-feather"></i>Votre Réflexion
+                </label>
+                {{ form_widget(form.contenu, {
+                    'attr': {
+                        'class': 'form-control',
+                        'placeholder': 'Écrivez vos pensées, émotions, réflexions...',
+                        'id': 'journal_contenu',
+                        'oninput': 'updateStats()'
+                    }
+                }) }}
+                {% if form.contenu.vars.errors %}
+                    <div class="text-danger small mt-2">
+                        {% for error in form.contenu.vars.errors %}
+                            {{ error.message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <span class="form-text"><i class="fas fa-lock me-1"></i>Votre journal est privé et confidentiel</span>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="wordCount">0</div>
+                    <div class="stat-label">Mots</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="charCount">0</div>
+                    <div class="stat-label">Caractères</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="readingTime">0</div>
+                    <div class="stat-label">Min. Lecture</div>
+                </div>
+            </div>
+
+            <!-- Date Field -->
+            <div class="form-group">
+                <label class="form-label" for="journal_dateecriture">
+                    <i class="fas fa-calendar-alt"></i>Date et Heure
+                </label>
+                {{ form_widget(form.dateecriture, {
+                    'attr': {
+                        'class': 'form-control',
+                        'id': 'journal_dateecriture'
+                    }
+                }) }}
+                <div class="quick-buttons">
+                    <button type="button" class="quick-btn" onclick="setDate('now')">
+                        <i class="fas fa-clock me-1"></i> Maintenant
+                    </button>
+                    <button type="button" class="quick-btn" onclick="setDate('today')">
+                        <i class="fas fa-calendar-check me-1"></i> Aujourd'hui
+                    </button>
+                    <button type="button" class="quick-btn" onclick="setDate('yesterday')">
+                        <i class="fas fa-calendar-minus me-1"></i> Hier
+                    </button>
+                </div>
+                {% if form.dateecriture.vars.errors %}
+                    <div class="text-danger small mt-2">
+                        {% for error in form.dateecriture.vars.errors %}
+                            {{ error.message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Mood Field -->
+            <div class="form-group">
+                <label class="form-label">
+                    <i class="fas fa-smile"></i>Humeur Associée
+                </label>
+                <span class="form-text">Choisissez l'humeur qui reflète le mieux votre état émotionnel</span>
+                {{ form_widget(form.mood) }}
+                {% if form.mood.vars.errors %}
+                    <div class="text-danger small mt-2">
+                        {% for error in form.mood.vars.errors %}
+                            {{ error.message }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-times me-1"></i> Annuler
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i> Enregistrer l'Entrée
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script>
+    function setDate(type) {
+        const input = document.getElementById('journal_dateecriture');
+        if (!input) return;
+        
+        const now = new Date();
+        let date = new Date();
+        
+        if (type === 'yesterday') {
+            date.setDate(now.getDate() - 1);
+        }
+        
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        input.value = `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    
+    function updateStats() {
+        const textarea = document.getElementById('journal_contenu');
+        if (!textarea) return;
+        
+        const text = textarea.value;
+        const chars = text.length;
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const minutes = Math.ceil(words / 200) || 0;
+        
+        document.getElementById('wordCount').textContent = words;
+        document.getElementById('charCount').textContent = chars;
+        document.getElementById('readingTime').textContent = minutes;
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        const textarea = document.getElementById('journal_contenu');
+        if (textarea) {
+            updateStats();
+            textarea.addEventListener('input', updateStats);
+        }
+        setDate('now');
+    });
+</script>
+{% endblock %}
+

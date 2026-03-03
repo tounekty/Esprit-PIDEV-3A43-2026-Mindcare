@@ -10,7 +10,7 @@ framework:
                     max_retries: 3
                     multiplier: 2
             failed: 'doctrine://default?queue_name=failed'
-            # sync: 'sync://'
+            sync: 'sync://'
 
         default_bus: messenger.bus.default
 
@@ -23,5 +23,10 @@ framework:
             Symfony\Component\Notifier\Message\ChatMessage: async
             Symfony\Component\Notifier\Message\SmsMessage: async
 
-            # Route your messages to the transports
-            # 'App\Message\YourMessage': async
+            # PDF generation in sync mode for development
+            App\Message\AnalyzeAIMoodMessage: sync
+            App\Message\GenerateMoodPdfMessage: sync
+            
+            # Async messages for journal processing
+            App\Message\GenerateJournalPdfMessage: sync
+

@@ -22,7 +22,6 @@
     {% endif %}
 
     {% block stylesheets %}
-            {{ encore_entry_link_tags('app') }}
         {% if app.request.attributes.get('_route') in ['app_login', 'app_register', 'app_forgot_password', 'app_verify_code', 'app_reset_password'] %}
             {# Login/signup specific CSS #}
             <link rel="stylesheet" href="{{ asset('front/css/bootstrap.min.css') }}">

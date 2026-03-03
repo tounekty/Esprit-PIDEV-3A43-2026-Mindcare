@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Journal Émotionnel - PDF</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            background: #f5f5f5;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 30px;
+            background: white;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .content-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 5px;
+        }
+
+        .section-title {
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .entry-content {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.8;
+            margin: 10px 0;
+        }
+
+        .mood-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            margin: 5px 5px 5px 0;
+            font-weight: 500;
+        }
+
+        .date {
+            color: #999;
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .footer {
+            border-top: 1px solid #ddd;
+            text-align: center;
+            padding-top: 20px;
+            margin-top: 40px;
+            font-size: 12px;
+            color: #999;
+        }
+
+        .mood-info {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .mood-item {
+            text-align: center;
+            flex: 1;
+        }
+
+        .mood-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .mood-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Journal Émotionnel</h1>
+            <p>Rapport personnel</p>
+        </div>
+
+        {% if journal.mood %}
+        <div class="content-section">
+            <div class="section-title">Contexte Émotionnel</div>
+            <div class="mood-info">
+                <div class="mood-item">
+                    <div class="mood-label">Humeur</div>
+                    <div class="mood-value">{{ journal.mood.humeur }}</div>
+                </div>
+                <div class="mood-item">
+                    <div class="mood-label">Intensité</div>
+                    <div class="mood-value">{{ journal.mood.intensite }}/10</div>
+                </div>
+                <div class="mood-item">
+                    <div class="mood-label">Date d'enregistrement</div>
+                    <div class="mood-value">{{ journal.mood.datemood|date('d/m/Y') }}</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="content-section">
+            <div class="section-title">Contenu du Journal</div>
+            <div class="entry-content">
+                {{ journal.contenu|nl2br }}
+            </div>
+            <div class="date">
+                Écrit le <strong>{{ journal.dateecriture|date('d/m/Y à H:i') }}</strong>
+            </div>
+        </div>
+
+        {% if mood_analysis %}
+            <div class="content-section">
+                <div class="section-title">Analyse IA</div>
+                
+                {% if mood_analysis.sentiment %}
+                <div style="margin: 10px 0;">
+                    <strong>Sentiment:</strong> {{ mood_analysis.sentiment }}
+                </div>
+                {% endif %}
+
+                {% if mood_analysis.keywords %}
+                <div style="margin: 10px 0;">
+                    <strong>Mots-clés:</strong><br>
+                    {% for keyword in mood_analysis.keywords %}
+                        <span class="mood-badge">{{ keyword }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if mood_analysis.suggestions %}
+                <div style="margin: 10px 0;">
+                    <strong>Suggestions:</strong>
+                    <ol style="margin-left: 20px;">
+                        {% for suggestion in mood_analysis.suggestions %}
+                            <li style="margin: 5px 0;">{{ suggestion }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+                {% endif %}
+
+                {% if mood_analysis.wellness_tip %}
+                <div style="margin: 10px 0; padding: 10px; background: #e8f4f8; border-radius: 5px;">
+                    <strong>💡 Conseil Bien-être:</strong> {{ mood_analysis.wellness_tip }}
+                </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="footer">
+            <p>Document généré le {{ 'now'|date('d/m/Y à H:i') }}</p>
+        </div>
+    </div>
+</body>
+</html>

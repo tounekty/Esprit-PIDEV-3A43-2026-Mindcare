@@ -1,0 +1,104 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Statistiques{% endblock %}
+
+{% block body %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Mes statistiques</h2>
+        <a href="{{ path('app_dashboard') }}" class="btn btn-outline-primary">Retour au dashboard</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Points</h6>
+                    <h3 class="mb-0">{{ user_stats.points }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Entrées</h6>
+                    <h3 class="mb-0">{{ user_stats.totalEntries }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Série actuelle</h6>
+                    <h3 class="mb-0">{{ user_stats.consecutiveDays }} jours</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Templates actifs</h6>
+                    <h3 class="mb-0">{{ templates|length }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if next_badge is not null %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="mb-2">Prochain objectif</h5>
+                <p class="mb-2">Progression vers le prochain badge : {{ next_badge_progress }}%</p>
+                <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ next_badge_progress }}">
+                    <div class="progress-bar" style="width: {{ next_badge_progress }}%;"></div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Badges débloqués</h5>
+                    {% if user_badges is empty %}
+                        <p class="text-muted mb-0">Aucun badge débloqué pour le moment.</p>
+                    {% else %}
+                        <ul class="list-group list-group-flush">
+                            {% for key, badge in user_badges %}
+                                <li class="list-group-item px-0">
+                                    <strong>{{ badge.icon }} {{ badge.name }}</strong><br>
+                                    <small class="text-muted">{{ badge.description }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="mb-3">Tous les badges</h5>
+                    <ul class="list-group list-group-flush">
+                        {% for key, badge in all_badges %}
+                            <li class="list-group-item px-0 d-flex justify-content-between align-items-start">
+                                <div>
+                                    <strong>{{ badge.icon }} {{ badge.name }}</strong><br>
+                                    <small class="text-muted">{{ badge.description }}</small>
+                                </div>
+                                {% if user_badges[key] is defined %}
+                                    <span class="badge bg-success">Débloqué</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Verrouillé</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
