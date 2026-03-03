@@ -18,6 +18,13 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class AuthController extends AbstractController
 {
+    // ---------------- ROOT REDIRECT ----------------
+    #[Route('/', name: 'app_root')]
+    public function index(): Response
+    {
+        return $this->redirectToRoute('app_login');
+    }
+
     // ---------------- LOGIN ----------------
     #[Route('/login', name: 'app_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response

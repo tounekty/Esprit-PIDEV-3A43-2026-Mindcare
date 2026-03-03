@@ -1,11 +1,8 @@
 twig:
     file_name_pattern: '*.twig'
     form_themes: ['bootstrap_5_layout.html.twig']
-<<<<<<< HEAD
     globals:
         ga4_measurement_id: '%env(string:GA4_MEASUREMENT_ID)%'
-=======
->>>>>>> origin/sara
 
 when@test:
     twig:

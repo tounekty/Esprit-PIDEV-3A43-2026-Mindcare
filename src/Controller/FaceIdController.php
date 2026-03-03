@@ -47,7 +47,7 @@ class FaceIdController extends AbstractController
         try {
             $client->addFaceExample($subject, $base64);
         } catch (\Throwable $e) {
-            return new JsonResponse(['error' => 'Face enrollment failed.'], Response::HTTP_BAD_REQUEST);
+            return new JsonResponse(['error' => 'Face enrollment failed: ' . $e->getMessage()], Response::HTTP_BAD_REQUEST);
         }
 
         $user->setFaceIdSubject($subject);

@@ -27,11 +27,7 @@ class CompreFaceClient
     {
         $path = '/api/v1/recognition/faces?subject=' . rawurlencode($subject);
 
-        return $this->requestJson('POST', $path, [
-            'json' => [
-                'file' => $base64Image,
-            ],
-        ]);
+        return $this->requestMultipart('POST', $path, $base64Image);
     }
 
     public function deleteFacesBySubject(string $subject): void
@@ -45,11 +41,7 @@ class CompreFaceClient
     {
         $path = '/api/v1/recognition/recognize?prediction_count=1&det_prob_threshold=0.7';
 
-        return $this->requestJson('POST', $path, [
-            'json' => [
-                'file' => $base64Image,
-            ],
-        ]);
+        return $this->requestMultipart('POST', $path, $base64Image);
     }
 
     public function extractBestMatch(array $response): ?array
@@ -70,6 +62,40 @@ class CompreFaceClient
     public function getMinSimilarity(): float
     {
         return $this->minSimilarity;
+    }
+
+    private function requestMultipart(string $method, string $path, string $base64Image): array
+    {
+        $binaryImage = base64_decode($base64Image, true);
+        if ($binaryImage === false) {
+            throw new \RuntimeException('Invalid base64 image data.');
+        }
+
+        $boundary = '----FormBoundary' . bin2hex(random_bytes(8));
+        $body = "--{$boundary}\r\n"
+            . "Content-Disposition: form-data; name=\"file\"; filename=\"face.jpg\"\r\n"
+            . "Content-Type: image/jpeg\r\n\r\n"
+            . $binaryImage . "\r\n"
+            . "--{$boundary}--\r\n";
+
+        $options = [
+            'headers' => [
+                'Content-Type' => 'multipart/form-data; boundary=' . $boundary,
+                'x-api-key' => $this->apiKey,
+            ],
+            'body' => $body,
+        ];
+
+        $response = $this->httpClient->request($method, $this->baseUrl . $path, $options);
+        $status = $response->getStatusCode();
+        $data = $response->toArray(false);
+
+        if ($status >= 400) {
+            $message = $data['message'] ?? 'CompreFace request failed.';
+            throw new \RuntimeException($message);
+        }
+
+        return $data;
     }
 
     private function requestJson(string $method, string $path, array $options = []): array

@@ -51,6 +51,7 @@ security:
 
     access_control:
         # 🔓 PUBLIC (MUST BE FIRST)
+        - { path: ^/$, roles: PUBLIC_ACCESS }
         - { path: ^/login, roles: PUBLIC_ACCESS }
         - { path: ^/login/face, roles: PUBLIC_ACCESS }
         - { path: ^/register, roles: PUBLIC_ACCESS }
