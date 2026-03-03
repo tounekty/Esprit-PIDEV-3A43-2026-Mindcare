@@ -347,6 +347,7 @@
         },
         "files": [
             "./config/packages/workflow.yaml"]
+    },
     "symfony/webpack-encore-bundle": {
         "version": "2.4",
         "recipe": {

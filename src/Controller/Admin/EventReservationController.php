@@ -4,10 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\EventReservation;
 use App\Repository\EventReservationRepository;
-<<<<<<< HEAD
-=======
 use App\Service\TwilioSmsService;
->>>>>>> origin/sara
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -77,8 +74,6 @@ class EventReservationController extends AbstractController
 
         return $this->redirectToRoute('admin_event_reservations_index');
     }
-<<<<<<< HEAD
-=======
 
     #[Route('/send-reminders', name: 'send_reminders', methods: ['POST'])]
     public function sendReminders(Request $request, EventReservationRepository $reservationRepository, TwilioSmsService $smsService, EntityManagerInterface $em): Response
@@ -136,5 +131,4 @@ class EventReservationController extends AbstractController
 
         return $this->redirectToRoute('admin_event_reservations_index');
     }
->>>>>>> origin/sara
 }

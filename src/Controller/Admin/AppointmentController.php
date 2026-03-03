@@ -4,18 +4,12 @@ namespace App\Controller\Admin;
 
 use App\Entity\Appointment;
 use App\Entity\User;
-<<<<<<< HEAD
 use App\Form\AppointmentReportType;
 use App\Form\AppointmentType;
 use App\Repository\AppointmentRepository;
 use App\Repository\UserRepository;
 use App\Service\ZoomApiService;
 use App\Service\OllamaService;
-=======
-use App\Form\AppointmentType;
-use App\Repository\AppointmentRepository;
-use App\Repository\UserRepository;
->>>>>>> origin/sara
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -58,13 +52,10 @@ class AppointmentController extends AbstractController
             $acceptedCount = $appointmentRepository->countByPsychologueAndStatus($user, 'accepted');
             $refusedCount = $appointmentRepository->countByPsychologueAndStatus($user, 'refused');
             $cancelledCount = $appointmentRepository->countByPsychologueAndStatus($user, 'cancelled');
-<<<<<<< HEAD
             $inProgressCount = $appointmentRepository->countByPsychologueAndStatus($user, 'in_progress');
             $completedCount = $appointmentRepository->countByPsychologueAndStatus($user, 'completed');
             $archivedCount = $appointmentRepository->countByPsychologueAndStatus($user, 'archived');
             $absentCount = $appointmentRepository->countByPsychologueAndStatus($user, 'absent');
-=======
->>>>>>> origin/sara
             
             // Get accepted appointments for calendar
             $acceptedAppointments = $appointmentRepository->findBy(['psychologue' => $user, 'status' => 'accepted'], ['date' => 'ASC']);
@@ -75,13 +66,10 @@ class AppointmentController extends AbstractController
                 'acceptedCount' => $acceptedCount,
                 'refusedCount' => $refusedCount,
                 'cancelledCount' => $cancelledCount,
-<<<<<<< HEAD
                 'inProgressCount' => $inProgressCount,
                 'completedCount' => $completedCount,
                 'archivedCount' => $archivedCount,
                 'absentCount' => $absentCount,
-=======
->>>>>>> origin/sara
                 'acceptedAppointments' => $acceptedAppointments,
                 'isPsychologue' => true,
                 'currentStatus' => $statusFilter,
@@ -105,13 +93,10 @@ class AppointmentController extends AbstractController
             $acceptedCount = count($appointmentRepository->findBy(['status' => 'accepted']));
             $refusedCount = count($appointmentRepository->findBy(['status' => 'refused']));
             $cancelledCount = count($appointmentRepository->findBy(['status' => 'cancelled']));
-<<<<<<< HEAD
             $inProgressCount = count($appointmentRepository->findBy(['status' => 'in_progress']));
             $completedCount = count($appointmentRepository->findBy(['status' => 'completed']));
             $archivedCount = count($appointmentRepository->findBy(['status' => 'archived']));
             $absentCount = count($appointmentRepository->findBy(['status' => 'absent']));
-=======
->>>>>>> origin/sara
             
             return $this->render('admin/rdv/index.html.twig', [
                 'appointments' => $appointments,
@@ -119,13 +104,10 @@ class AppointmentController extends AbstractController
                 'acceptedCount' => $acceptedCount,
                 'refusedCount' => $refusedCount,
                 'cancelledCount' => $cancelledCount,
-<<<<<<< HEAD
                 'inProgressCount' => $inProgressCount,
                 'completedCount' => $completedCount,
                 'archivedCount' => $archivedCount,
                 'absentCount' => $absentCount,
-=======
->>>>>>> origin/sara
                 'isPsychologue' => false,
                 'currentStatus' => $statusFilter,
                 'currentSearch' => $searchQuery,
@@ -136,11 +118,7 @@ class AppointmentController extends AbstractController
     }
 
     #[Route('/admin/rdv/new', name: 'admin_rdv_new', methods: ['GET','POST'])]
-<<<<<<< HEAD
     public function new(Request $request, EntityManagerInterface $em, AppointmentRepository $appointmentRepository): Response
-=======
-    public function new(Request $request, EntityManagerInterface $em): Response
->>>>>>> origin/sara
     {
         $this->denyAccessUnlessGranted('ROLE_ADMIN');
 
@@ -149,7 +127,6 @@ class AppointmentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-<<<<<<< HEAD
             // Check if student already has an appointment with this psychologue this week
             if ($appointmentRepository->hasAppointmentThisWeekWithPsychologue(
                 $appointment->getEtudiant(),
@@ -162,8 +139,6 @@ class AppointmentController extends AbstractController
                 ]);
             }
 
-=======
->>>>>>> origin/sara
             $em->persist($appointment);
             $em->flush();
 
@@ -197,7 +172,6 @@ class AppointmentController extends AbstractController
             $this->denyAccessUnlessGranted('ROLE_ADMIN');
         }
 
-<<<<<<< HEAD
         $reportForm = null;
         $canUploadReport = false;
 
@@ -260,13 +234,6 @@ class AppointmentController extends AbstractController
         return $this->redirectToRoute('admin_rdv_show', ['id' => $appointment->getId()]);
     }
 
-=======
-        return $this->render('admin/rdv/show.html.twig', [
-            'appointment' => $appointment,
-        ]);
-    }
-
->>>>>>> origin/sara
     #[Route('/admin/rdv/pending', name: 'admin_rdv_pending')]
     public function pending(Request $request, AppointmentRepository $appointmentRepository): Response
     {
@@ -309,17 +276,12 @@ class AppointmentController extends AbstractController
     }
 
     #[Route('/admin/rdv/{id}/accept', name: 'admin_rdv_accept', methods: ['POST'])]
-<<<<<<< HEAD
     public function accept(
         Appointment $appointment,
         EntityManagerInterface $em,
         MailerInterface $mailer,
         ZoomApiService $zoomService
     ): Response {
-=======
-    public function accept(Appointment $appointment, EntityManagerInterface $em, MailerInterface $mailer): Response
-    {
->>>>>>> origin/sara
         $user = $this->getUser();
         // Allow if current psychologist OR if admin
         if (!$user instanceof User || ($appointment->getPsychologue()->getId() !== $user->getId() && !$this->isGranted('ROLE_ADMIN'))) {
@@ -327,7 +289,6 @@ class AppointmentController extends AbstractController
         }
 
         $appointment->setStatus('accepted');
-<<<<<<< HEAD
 
         // Create Zoom meeting if appointment is online
         $zoomLink = null;
@@ -357,14 +318,11 @@ class AppointmentController extends AbstractController
             }
         }
 
-=======
->>>>>>> origin/sara
         $em->flush();
 
         // Notify student by email
         $student = $appointment->getEtudiant();
         if ($student && $student->getEmail()) {
-<<<<<<< HEAD
             $emailContent = '<p>Bonjour ' . $student->getFirstName() . ',</p>
                         <p>Votre rendez-vous prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . ' avec <strong>' . $appointment->getPsychologue()->getFirstName() . ' ' . $appointment->getPsychologue()->getLastName() . '</strong> a été accepté.</p>';
 
@@ -374,13 +332,10 @@ class AppointmentController extends AbstractController
 
             $emailContent .= '<p>Cordialement,<br>L\'équipe MindCare</p>';
 
-=======
->>>>>>> origin/sara
             $email = (new Email())
                 ->from('noreply@mindcare.com')
                 ->to($student->getEmail())
                 ->subject('Votre rendez-vous a été accepté')
-<<<<<<< HEAD
                 ->html($emailContent);
 
             $mailer->send($email);
@@ -410,11 +365,6 @@ class AppointmentController extends AbstractController
                 ->to($psychologue->getEmail())
                 ->subject('Rendez-vous accepté')
                 ->html($emailContent);
-=======
-                ->html('<p>Bonjour ' . $student->getFirstName() . ',</p>
-                        <p>Votre rendez-vous prévu le ' . $appointment->getDate()->format('d/m/Y H:i') . ' avec <strong>' . $appointment->getPsychologue()->getFirstName() . ' ' . $appointment->getPsychologue()->getLastName() . '</strong> a été accepté.</p>
-                        <p>Cordialement,<br>L\'équipe MindCare</p>');
->>>>>>> origin/sara
 
             $mailer->send($email);
         }
@@ -452,7 +402,6 @@ class AppointmentController extends AbstractController
         return $this->redirectToRoute('admin_rdv_pending');
     }
 
-<<<<<<< HEAD
     #[Route('/admin/rdv/{id}/mark-absent', name: 'admin_rdv_mark_absent', methods: ['POST'])]
     public function markAbsent(Appointment $appointment, EntityManagerInterface $em, MailerInterface $mailer): Response
     {
@@ -517,10 +466,6 @@ class AppointmentController extends AbstractController
     #[Route('/admin/rdv/{id}/edit', name: 'admin_rdv_edit', methods: ['GET','POST'])]
     #[Route('/admin/rdv/{id}/edit', name: 'admin_rdv_edit', methods: ['GET','POST'])]
     public function edit(Request $request, Appointment $appointment, EntityManagerInterface $em, MailerInterface $mailer, AppointmentRepository $appointmentRepository): Response
-=======
-    #[Route('/admin/rdv/{id}/edit', name: 'admin_rdv_edit', methods: ['GET','POST'])]
-    public function edit(Request $request, Appointment $appointment, EntityManagerInterface $em, MailerInterface $mailer): Response
->>>>>>> origin/sara
     {
         $user = $this->getUser();
         
@@ -539,7 +484,6 @@ class AppointmentController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-<<<<<<< HEAD
             // Check if student already has an appointment with this psychologue this week (excluding current)
             if ($appointmentRepository->hasAppointmentThisWeekWithPsychologue(
                 $appointment->getEtudiant(),
@@ -554,8 +498,6 @@ class AppointmentController extends AbstractController
                 ]);
             }
 
-=======
->>>>>>> origin/sara
             $appointment->setStatus('pending');
             $em->flush();
             
@@ -628,7 +570,6 @@ class AppointmentController extends AbstractController
 
         return $this->redirectToRoute('admin_rdv_index');
     }
-<<<<<<< HEAD
 
     /**
      * AI: Suggest optimal appointment times
@@ -658,6 +599,4 @@ class AppointmentController extends AbstractController
         
         return $this->json(['suggestions' => $suggestions]);
     }
-=======
->>>>>>> origin/sara
 }
