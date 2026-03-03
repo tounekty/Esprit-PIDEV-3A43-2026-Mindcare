@@ -428,7 +428,7 @@
                 </div>
                 <div class="form-card-body">
                     <!-- Error Messages -->
-                    {% if form.vars.errors %}
+                    {% if form.vars.errors|length > 0 %}
                         <div class="alert alert-danger">
                             <h4 class="alert-heading">
                                 <i class="fas fa-exclamation-circle me-2"></i>Erreurs à corriger
@@ -441,12 +441,6 @@
                         </div>
                     {% endif %}
 
-                    {% if form_debug is defined and form_debug %}
-                        <div class="alert alert-warning mt-3">
-                            <strong>DEBUG form_debug:</strong>
-                            <pre style="white-space: pre-wrap; font-size: 0.85rem;">{{ form_debug|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
-                        </div>
-                    {% endif %}
                     <!-- Content Field -->
                     <div class="form-group">
                         <label class="form-label" for="journal_contenu">
@@ -460,7 +454,7 @@
                                 'oninput': 'updateStats()'
                             }
                         }) }}
-                        {% if form.contenu.vars.errors %}
+                        {% if form.contenu.vars.errors|length > 0 %}
                             <div class="text-danger small" style="margin-top: 0.75rem;">
                                 {% for error in form.contenu.vars.errors %}
                                     <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
@@ -555,7 +549,7 @@
                                         <i class="fas fa-clock"></i> Maintenant
                                     </button>
                                 </div>
-                                {% if form.dateecriture.vars.errors %}
+                                {% if form.dateecriture.vars.errors|length > 0 %}
                                     <div class="text-danger small" style="margin-top: 0.75rem;">
                                         {% for error in form.dateecriture.vars.errors %}
                                             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -617,7 +611,7 @@
                                     </button>
                                 </div>
 
-                                {% if form.mood.vars.errors %}
+                                {% if form.mood.vars.errors|length > 0 %}
                                     <div class="text-danger small" style="margin-top: 0.75rem;">
                                         {% for error in form.mood.vars.errors %}
                                             <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
