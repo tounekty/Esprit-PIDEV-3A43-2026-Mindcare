@@ -1,0 +1,13 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  # Event API Bundle Controllers
+  App\Bundles\EventAPIBundle\Controller\:
+    resource: '../../Controller'
+    tags: ['controller.service_arguments']
+
+  App\Bundles\EventAPIBundle\:
+    resource: '../../{Service,Controller}'
+    exclude: '../../{Entity,Repository,Tests}'

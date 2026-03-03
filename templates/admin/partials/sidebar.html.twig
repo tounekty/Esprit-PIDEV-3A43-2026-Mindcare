@@ -1,0 +1,151 @@
+<nav class="nxl-navigation">
+    <div class="navbar-wrapper">
+        <div class="m-header">
+            <a href="{{ path('app_admin') }}" class="b-brand">
+                <img src="assets/images/logo-full.png" alt="" class="logo logo-lg">
+                <img src="assets/images/logo-abbr.png" alt="" class="logo logo-sm">
+            </a>
+        </div>
+        <div class="navbar-content">
+            <ul class="nxl-navbar">
+                <li class="nxl-item nxl-caption">
+                    <label>Navigation</label>
+                </li>
+
+                {# 👨‍⚕️ PSYCHOLOGUE MENU - What psychologues can see #}
+                {% if is_granted('ROLE_PSYCHOLOGUE') %}
+                    <!-- Dossiers Étudiants (Patient Files) -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'admin_patient_file_' %}active{% endif %}">
+                        <a href="{{ path('admin_patient_file_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">📋 Dossiers Étudiants</span>
+                        </a>
+                    </li>
+
+                    <!-- Gestion Rendez-vous (Appointments) -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'admin_rdv_' %}active{% endif %}">
+                        <a href="{{ path('admin_rdv_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">📅 Gestion Rendez-vous</span>
+                        </a>
+                    </li>
+
+                    <!-- Gestion Mood -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'app_mood_' %}active{% endif %}">
+                        <a href="{{ path('admin_moods') }}" class="nxl-link">
+                            <span class="nxl-mtext">😊 Gestion Mood</span>
+                        </a>
+                    </li>
+
+                    <!-- Gestion Journal Émotionnel -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'app_journal_emotionnel_' %}active{% endif %}">
+                        <a href="{{ path('admin_journals') }}" class="nxl-link">
+                            <span class="nxl-mtext">📔 Gestion Journal Émotionnel</span>
+                        </a>
+                    </li>
+
+                    <!-- Separator -->
+                    <li class="nxl-item nxl-caption mt-3">
+                        <label>───────────</label>
+                    </li>
+                {% endif %}
+
+                {# 👑 ADMIN MENU - Only admins can see these #}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <!-- Gestion Users -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'admin_users_' %}active{% endif %}">
+                        <a href="{{ path('admin_users_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">👥 Gestion User</span>
+                        </a>
+                    </li>
+
+                    <!-- Gestion Ressources -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'admin_resources_' %}active{% endif %}">
+                        <a href="{{ path('admin_resources_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">📚 Gestion Ressources</span>
+                        </a>
+                    </li>
+
+                    <!-- Gestion Commentaires -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'admin_comments_' %}active{% endif %}">
+                        <a href="{{ path('admin_comments_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">💬 Gestion Commentaires</span>
+                        </a>
+                    </li>
+
+                    <!-- Gestion Events -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'admin_events_' %}active{% endif %}">
+                        <a href="{{ path('admin_events_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">📆 Gestion Events</span>
+                        </a>
+                    </li>
+
+                    <!-- Gestion Réservations -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'admin_event_reservations_' %}active{% endif %}">
+                        <a href="{{ path('admin_event_reservations_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">✅ Gestion Réservations</span>
+                        </a>
+                    </li>
+
+                    <!-- Forum Sujets -->
+                    <li class="nxl-item">
+                        <a href="{{ path('sujet_forum_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">🗣️ Gestion Forum - Sujets</span>
+                        </a>
+                    </li>
+
+                    <!-- Forum Messages -->
+                    <li class="nxl-item">
+                        <a href="{{ path('message_forum_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">💭 Gestion Forum - Messages</span>
+                        </a>
+                    </li>
+
+                    <!-- Dossiers Étudiants (Admins also see this) -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'admin_patient_file_' %}active{% endif %}">
+                        <a href="{{ path('admin_patient_file_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">📋 Dossiers Étudiants</span>
+                        </a>
+                    </li>
+
+                    <!-- Gestion Rendez-vous (Admins also see this) -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'admin_rdv_' %}active{% endif %}">
+                        <a href="{{ path('admin_rdv_index') }}" class="nxl-link">
+                            <span class="nxl-mtext">📅 Gestion Rendez-vous</span>
+                        </a>
+                    </li>
+
+                    <!-- Gestion Mood (Admins also see this) -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'app_mood_' %}active{% endif %}">
+                        <a href="{{ path('admin_moods') }}" class="nxl-link">
+                            <span class="nxl-mtext">😊 Gestion Mood</span>
+                        </a>
+                    </li>
+
+                    <!-- Gestion Journal Émotionnel (Admins also see this) -->
+                    <li class="nxl-item {% if app.request.get('_route') starts with 'app_journal_emotionnel_' %}active{% endif %}">
+                        <a href="{{ path('admin_journals') }}" class="nxl-link">
+                            <span class="nxl-mtext">📔 Gestion Journal Émotionnel</span>
+                        </a>
+                    </li>
+
+                    <!-- Separator -->
+                    <li class="nxl-item nxl-caption mt-3">
+                        <label>───────────</label>
+                    </li>
+                {% endif %}
+
+                {# 🌐 FRONT LINKS - Everyone can see these #}
+                <li class="nxl-item">
+                    <a href="{{ path('front_forum_index') }}" class="nxl-link">
+                        <span class="nxl-mtext">🌍 Forum (Front)</span>
+                    </a>
+                </li>
+
+                <li class="nxl-item">
+                    <a href="{{ path('app_home') }}" class="nxl-link">
+                        <span class="nxl-mtext">🏠 Front Office</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>

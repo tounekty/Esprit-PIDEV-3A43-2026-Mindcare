@@ -1,0 +1,44 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="wrapper" style="padding: 30px;">
+    <div class="title-text" style="width: 100%; margin-bottom: 20px;">
+        <div class="title" style="width: 100%; font-size: 28px;">Forgot Password?</div>
+    </div>
+    
+    <div class="form-container">
+        <div style="margin-bottom: 25px; text-align: center; color: #666; font-size: 14px;">
+            Enter your email and we'll send you a 6-digit code
+        </div>
+        
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+        
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-danger">{{ message }}</div>
+        {% endfor %}
+        
+        <form method="post" action="{{ path('app_forgot_password') }}">
+            <div class="field">
+                <input type="email" name="email" placeholder="Email Address" required autofocus>
+            </div>
+            
+            <div class="field">
+                <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+            </div>
+            
+            <div class="field btn">
+                <div class="btn-layer"></div>
+                <input type="submit" value="Send Reset Code">
+            </div>
+            
+            <div class="back-link" style="margin-top: 20px;">
+                <a href="{{ path('app_login') }}">← Back to Login</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+{% endblock %}

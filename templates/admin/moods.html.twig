@@ -1,0 +1,169 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Gestion Mood - Admin{% endblock %}
+{% block page_title %}📊 Gestion des Humeurs{% endblock %}
+
+{% block breadcrumb %}
+    <ul class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_admin') }}">Dashboard</a></li>
+        <li class="breadcrumb-item">Humeurs</li>
+    </ul>
+{% endblock %}
+
+{% block body %}
+<style>
+    .mood-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .mood-heureux { background-color: #C6F6D5; color: #22543D; }
+    .mood-triste { background-color: #FED7D7; color: #742A2A; }
+    .mood-colere { background-color: #FEEBC8; color: #7C2D12; }
+    .mood-stresse { background-color: #E6FFFA; color: #234E52; }
+    .mood-neutre { background-color: #DBEAFE; color: #1e3a8a; }
+
+    .intensity-bar {
+        background: linear-gradient(90deg, #7FBFFF 0%, #A8D8FF 100%);
+        height: 8px;
+        border-radius: 4px;
+        width: 100%;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #F0F7FF;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+</style>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total d'humeurs</h6>
+                    <h3 class="mb-0">{{ moods|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Moyenne d'intensité</h6>
+                    <h3 class="mb-0">
+                        {% set total = 0 %}
+                        {% for mood in moods %}
+                            {% set total = total + mood.intensite %}
+                        {% endfor %}
+                        {{ moods|length > 0 ? (total / moods|length)|number_format(1) : 0 }}/5
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Dernière mise à jour</h6>
+                    <h3 class="mb-0">
+                        {% if moods|length > 0 %}
+                            {{ moods[0].datemood|date('d/m') }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des humeurs -->
+    <div class="card">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Liste des Humeurs
+            </h5>
+            <a href="{{ path('app_mood_new') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i> Ajouter
+            </a>
+        </div>
+        <div class="card-body">
+            {% if moods|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Émoji</th>
+                                <th>Humeur</th>
+                                <th>Intensité</th>
+                                <th>Date</th>
+                                <th>Journal Lié</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mood in moods %}
+                                <tr>
+                                    <td><span class="badge bg-light text-dark">#{{ mood.id }}</span></td>
+                                    <td style="font-size: 1.5rem;">
+                                        {% if mood.humeur == 'heureux' %} 😊
+                                        {% elseif mood.humeur == 'triste' %} 😢
+                                        {% elseif mood.humeur == 'colere' %} 😠
+                                        {% elseif mood.humeur == 'stresse' %} 😰
+                                        {% else %} 😐
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="mood-badge mood-{{ mood.humeur }}">
+                                            {{ mood.humeur|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div style="width: 80px; margin-bottom: 4px;">
+                                            <div class="intensity-bar" style="width: {{ mood.intensite * 20 }}%;"></div>
+                                        </div>
+                                        <small class="text-muted">{{ mood.intensite }}/5</small>
+                                    </td>
+                                    <td>
+                                        <small>{{ mood.datemood|date('d/m/Y H:i') }}</small>
+                                    </td>
+                                    <td>
+                                        {% if mood.journals|length > 0 %}
+                                            <span class="badge bg-info">{{ mood.journals|length }}</span>
+                                        {% else %}
+                                            <span class="text-muted">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('app_mood_show', {'id': mood.id}) }}" class="btn btn-outline-primary btn-sm" title="Voir">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Aucune humeur enregistrée pour le moment.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
