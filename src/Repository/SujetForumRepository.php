@@ -4,10 +4,7 @@ namespace App\Repository;
 
 use App\Entity\SujetForum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-<<<<<<< HEAD
 use Doctrine\ORM\QueryBuilder;
-=======
->>>>>>> origin/sara
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -22,7 +19,6 @@ class SujetForumRepository extends ServiceEntityRepository
 
     public function findBySearch(?string $query, ?string $status): array
     {
-<<<<<<< HEAD
         return $this->createSearchQueryBuilder($query, $status)
             ->getQuery()
             ->getResult();
@@ -35,8 +31,6 @@ class SujetForumRepository extends ServiceEntityRepository
 
     public function createFilteredQueryBuilder(?string $query, ?string $status, string $sort, string $direction): QueryBuilder
     {
-=======
->>>>>>> origin/sara
         $qb = $this->createQueryBuilder('s');
 
         if ($query !== null && $query !== '') {
@@ -44,16 +38,11 @@ class SujetForumRepository extends ServiceEntityRepository
                 ->setParameter('query', '%' . strtolower($query) . '%');
         }
 
-<<<<<<< HEAD
         if ($status !== null && $status !== '' && $status !== 'all') {
-=======
-        if ($status !== null && $status !== '') {
->>>>>>> origin/sara
             $qb->andWhere('s.status = :status')
                 ->setParameter('status', $status);
         }
 
-<<<<<<< HEAD
         $sortMap = [
             'date' => 's.dateCreation',
             'title' => 's.titre',
@@ -67,10 +56,5 @@ class SujetForumRepository extends ServiceEntityRepository
             ->orderBy('s.isPinned', 'DESC')
             ->addOrderBy($sortField, $sortDirection)
             ->addOrderBy('s.id', 'DESC');
-=======
-        return $qb->orderBy('s.dateCreation', 'DESC')
-            ->getQuery()
-            ->getResult();
->>>>>>> origin/sara
     }
 }

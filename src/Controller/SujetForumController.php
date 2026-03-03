@@ -3,17 +3,12 @@
 namespace App\Controller;
 
 use App\Entity\SujetForum;
-<<<<<<< HEAD
 use App\Repository\SujetForumRepository;
 use App\Service\OpenAiModerationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormError;
-=======
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
->>>>>>> origin/sara
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -27,7 +22,6 @@ use Symfony\Component\Routing\Annotation\Route;
 class SujetForumController extends AbstractController
 {
     #[Route('/forum/sujets', name: 'sujet_forum_index', methods: ['GET'])]
-<<<<<<< HEAD
     public function index(Request $request, EntityManagerInterface $em, SujetForumRepository $repository, PaginatorInterface $paginator): Response
     {
         $filters = $this->extractFilters($request);
@@ -48,25 +42,11 @@ class SujetForumController extends AbstractController
             'stats' => $stats,
             'filters' => $filters,
             'visible_count' => count($pagination),
-=======
-    public function index(Request $request, EntityManagerInterface $em): Response
-    {
-        $filters = $this->extractFilters($request);
-        $rows = $this->loadSujetRows($em, $filters);
-        $stats = $this->buildSujetStats($em);
-
-        return $this->render('forum/sujet/index.html.twig', [
-            'rows' => $rows,
-            'stats' => $stats,
-            'filters' => $filters,
-            'visible_count' => count($rows),
->>>>>>> origin/sara
             'statusChoices' => SujetForum::getStatusChoices(),
         ]);
     }
 
     #[Route('/forum/sujets/ajax', name: 'sujet_forum_ajax', methods: ['GET'])]
-<<<<<<< HEAD
     public function ajax(Request $request, EntityManagerInterface $em, SujetForumRepository $repository, PaginatorInterface $paginator): Response
     {
         $filters = $this->extractFilters($request);
@@ -80,36 +60,19 @@ class SujetForumController extends AbstractController
             max(1, (int) $request->query->get('page', 1)),
             5
         );
-=======
-    public function ajax(Request $request, EntityManagerInterface $em): Response
-    {
-        $filters = $this->extractFilters($request);
-        $rows = $this->loadSujetRows($em, $filters);
->>>>>>> origin/sara
         $stats = $this->buildSujetStats($em);
 
         return $this->json([
             'rowsHtml' => $this->renderView('forum/sujet/_rows.html.twig', [
-<<<<<<< HEAD
                 'sujets' => $pagination,
             ]),
             'stats' => $stats,
             'visibleCount' => count($pagination),
-=======
-                'rows' => $rows,
-            ]),
-            'stats' => $stats,
-            'visibleCount' => count($rows),
->>>>>>> origin/sara
         ]);
     }
 
     #[Route('/forum/sujets/new', name: 'sujet_forum_new', methods: ['GET', 'POST'])]
-<<<<<<< HEAD
     public function new(Request $request, EntityManagerInterface $entityManager, OpenAiModerationService $moderationService): Response
-=======
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
->>>>>>> origin/sara
     {
        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -119,7 +82,6 @@ class SujetForumController extends AbstractController
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
-<<<<<<< HEAD
             ->add('isAnonymous', ChoiceType::class, [
                 'label' => 'Publication anonyme',
                 'choices' => [
@@ -129,8 +91,6 @@ class SujetForumController extends AbstractController
                 'expanded' => true,
                 'multiple' => false,
             ])
-=======
->>>>>>> origin/sara
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
             ->add('status', ChoiceType::class, [
@@ -144,7 +104,6 @@ class SujetForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-<<<<<<< HEAD
             $moderation = $moderationService->moderate($sujet->getDescription() ?? '');
             $errorType = $moderation['errorType'] ?? null;
             $errorMessage = $moderation['errorMessage'] ?? null;
@@ -175,13 +134,6 @@ class SujetForumController extends AbstractController
 
                 return $this->redirectToRoute('sujet_forum_index');
             }
-=======
-            $this->handleSujetUploads($form, $sujet);
-            $entityManager->persist($sujet);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('sujet_forum_index');
->>>>>>> origin/sara
         }
 
         return $this->render('forum/sujet/new.html.twig', [
@@ -198,16 +150,11 @@ class SujetForumController extends AbstractController
     }
 
     #[Route('/forum/sujets/{id}/edit', name: 'sujet_forum_edit', methods: ['GET', 'POST'])]
-<<<<<<< HEAD
     public function edit(Request $request, SujetForum $sujet, EntityManagerInterface $entityManager, OpenAiModerationService $moderationService): Response
-=======
-    public function edit(Request $request, SujetForum $sujet, EntityManagerInterface $entityManager): Response
->>>>>>> origin/sara
     {
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
-<<<<<<< HEAD
             ->add('isAnonymous', ChoiceType::class, [
                 'label' => 'Publication anonyme',
                 'choices' => [
@@ -217,8 +164,6 @@ class SujetForumController extends AbstractController
                 'expanded' => true,
                 'multiple' => false,
             ])
-=======
->>>>>>> origin/sara
             ->add('imageFile', FileType::class, ['mapped' => false, 'required' => false])
             ->add('isPinned', CheckboxType::class, ['required' => false])
             ->add('status', ChoiceType::class, [
@@ -232,7 +177,6 @@ class SujetForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-<<<<<<< HEAD
             $moderation = $moderationService->moderate($sujet->getDescription() ?? '');
             $errorType = $moderation['errorType'] ?? null;
             $errorMessage = $moderation['errorMessage'] ?? null;
@@ -262,12 +206,6 @@ class SujetForumController extends AbstractController
 
                 return $this->redirectToRoute('sujet_forum_index');
             }
-=======
-            $this->handleSujetUploads($form, $sujet);
-            $entityManager->flush();
-
-            return $this->redirectToRoute('sujet_forum_index');
->>>>>>> origin/sara
         }
 
         return $this->render('forum/sujet/edit.html.twig', [
@@ -356,50 +294,6 @@ class SujetForumController extends AbstractController
         ];
     }
 
-<<<<<<< HEAD
-=======
-    private function loadSujetRows(EntityManagerInterface $em, array $filters): array
-    {
-        $qb = $em->createQueryBuilder()
-            ->select('s')
-            ->from(SujetForum::class, 's');
-
-        if ($filters['query'] !== '') {
-            $qb->andWhere('LOWER(s.titre) LIKE :q OR LOWER(s.description) LIKE :q')
-                ->setParameter('q', '%' . strtolower($filters['query']) . '%');
-        }
-
-        if ($filters['status'] !== 'all') {
-            $qb->andWhere('s.status = :status')
-                ->setParameter('status', $filters['status']);
-        }
-
-        $sortMap = [
-            'date' => 's.dateCreation',
-            'title' => 's.titre',
-            'status' => 's.status',
-        ];
-
-        $qb->orderBy($sortMap[$filters['sort']], $filters['direction'])
-            ->addOrderBy('s.id', 'DESC');
-
-        $sujets = $qb->getQuery()->getResult();
-        $rows = [];
-
-        foreach ($sujets as $sujet) {
-            if (!$sujet instanceof SujetForum) {
-                continue;
-            }
-
-            $rows[] = [
-                'sujet' => $sujet,
-            ];
-        }
-
-        return $rows;
-    }
-
->>>>>>> origin/sara
     private function buildSujetStats(EntityManagerInterface $em): array
     {
         $total = (int) $em->getRepository(SujetForum::class)->count([]);

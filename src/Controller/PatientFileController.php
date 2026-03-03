@@ -9,10 +9,7 @@ use App\Form\FullPatientFileType;
 use App\Repository\PatientFileRepository;
 use App\Repository\UserRepository;
 use App\Repository\AppointmentRepository;
-<<<<<<< HEAD
 use App\Service\OllamaService;
-=======
->>>>>>> origin/sara
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -90,12 +87,8 @@ class PatientFileController extends AbstractController
         Request $request, 
         UserRepository $userRepository, 
         AppointmentRepository $appointmentRepository,
-<<<<<<< HEAD
         EntityManagerInterface $em,
         OllamaService $ollamaService
-=======
-        EntityManagerInterface $em
->>>>>>> origin/sara
     ): Response {
         $this->denyAccessUnlessGranted('ROLE_PSYCHOLOGUE');
         
@@ -136,23 +129,16 @@ class PatientFileController extends AbstractController
             return $this->redirectToRoute('admin_patient_file_show', ['id' => $id]);
         }
 
-<<<<<<< HEAD
         // AI insights are loaded on-demand via AJAX (see template)
         $canGenerateAI = $patientFile->getId() && ($patientFile->getAntecedentsPersonnels() || $patientFile->getNotesGenerales());
 
-=======
->>>>>>> origin/sara
         return $this->render('patient_file/show.html.twig', [
             'form' => $form->createView(),
             'student' => $student,
             'patientFile' => $patientFile,
             'isAdmin' => $isAdmin,
-<<<<<<< HEAD
             'isNew' => $isNew,
             'canGenerateAI' => $canGenerateAI
-=======
-            'isNew' => $isNew
->>>>>>> origin/sara
         ]);
     }
 
@@ -178,7 +164,6 @@ class PatientFileController extends AbstractController
 
         return $this->redirectToRoute('admin_patient_file_index');
     }
-<<<<<<< HEAD
 
     /**
      * AI: Generate clinical insights on-demand
@@ -227,6 +212,4 @@ class PatientFileController extends AbstractController
         
         return $this->json(['summary' => $summary]);
     }
-=======
->>>>>>> origin/sara
 }

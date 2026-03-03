@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-<<<<<<< HEAD
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
@@ -11,12 +10,6 @@ use Vich\UploaderBundle\Mapping\Annotation as Vich;
 #[ORM\Entity(repositoryClass: "App\Repository\AppointmentRepository")]
 #[ORM\Table(name: 'appointment')]
 #[Vich\Uploadable]
-=======
-use Symfony\Component\Validator\Constraints as Assert;
-
-#[ORM\Entity(repositoryClass: "App\Repository\AppointmentRepository")]
-#[ORM\Table(name: 'appointment')]
->>>>>>> origin/sara
 class Appointment
 {
     #[ORM\Id]
@@ -52,7 +45,6 @@ class Appointment
     #[ORM\JoinColumn(nullable: true, onDelete: 'SET NULL')]
     private ?PatientFile $patientFile = null;
 
-<<<<<<< HEAD
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $zoomMeetingId = null;
 
@@ -71,8 +63,6 @@ class Appointment
     #[ORM\Column(type: 'datetime', nullable: true)]
     private ?\DateTimeInterface $reportUpdatedAt = null;
 
-=======
->>>>>>> origin/sara
     // Getters and setters
     public function getId(): ?int
     {
@@ -155,7 +145,6 @@ class Appointment
         $this->patientFile = $patientFile;
         return $this;
     }
-<<<<<<< HEAD
 
     public function getZoomMeetingId(): ?string
     {
@@ -227,6 +216,4 @@ class Appointment
     {
         return $this->reportUpdatedAt;
     }
-=======
->>>>>>> origin/sara
 }

@@ -12,14 +12,10 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-<<<<<<< HEAD
-use Symfony\Component\Routing\Annotation\Route;
-=======
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
->>>>>>> origin/sara
 
 class FrontEventController extends AbstractController
 {
@@ -27,9 +23,6 @@ class FrontEventController extends AbstractController
     public function index(Request $request, EventRepository $eventRepository, EventReservationRepository $reservationRepository): Response
     {
         $query = trim((string) $request->query->get('q', ''));
-<<<<<<< HEAD
-        $events = $eventRepository->findBySearch($query !== '' ? $query : null);
-=======
         $sortBy = $request->query->get('sort', 'date');
         $category = $request->query->get('category', '');
         $dateFilter = $request->query->get('date', '');
@@ -60,7 +53,6 @@ class FrontEventController extends AbstractController
                 // Invalid date format, ignore filter
             }
         }
->>>>>>> origin/sara
 
         $remainingById = [];
         foreach ($events as $event) {
@@ -68,12 +60,6 @@ class FrontEventController extends AbstractController
             $remainingById[$event->getId()] = max(0, $event->getCapacite() - $activeCount);
         }
 
-<<<<<<< HEAD
-        return $this->render('front/event/index.html.twig', [
-            'events' => $events,
-            'q' => $query,
-            'remainingById' => $remainingById,
-=======
         // Generate calendar availability data - ALL DAYS for 12 months
         $now = new \DateTime();
         $startDate = clone $now;
@@ -146,16 +132,11 @@ class FrontEventController extends AbstractController
             'startDate' => $startDate,
             'endDate' => $endDate,
             'userReservedDates' => $userReservedDates,
->>>>>>> origin/sara
         ]);
     }
 
     #[Route('/events/{id}', name: 'front_events_show', methods: ['GET'])]
-<<<<<<< HEAD
-    public function show(Event $event, EventReservationRepository $reservationRepository): Response
-=======
     public function show(Event $event, EventReservationRepository $reservationRepository, EventRepository $eventRepository): Response
->>>>>>> origin/sara
     {
         $activeCount = $reservationRepository->countActiveByEvent($event);
         $remaining = max(0, $event->getCapacite() - $activeCount);
@@ -178,17 +159,11 @@ class FrontEventController extends AbstractController
 
             $reservation = new EventReservation();
             $formView = $this->createForm(EventReservationType::class, $reservation, [
-<<<<<<< HEAD
-                'action' => $this->generateUrl('front_events_reserve', ['id' => $event->getId()]),
-=======
                 'action' => $this->generateUrl('front_events_reserve_post', ['id' => $event->getId()]),
->>>>>>> origin/sara
                 'method' => 'POST',
             ])->createView();
         }
 
-<<<<<<< HEAD
-=======
         // Generate calendar availability data
         $eventDate = $event->getDateEvent();
         $startDate = clone $eventDate;
@@ -243,7 +218,6 @@ class FrontEventController extends AbstractController
         // Sort calendar data by date
         ksort($calendarData);
 
->>>>>>> origin/sara
         return $this->render('front/event/show.html.twig', [
             'event' => $event,
             'activeCount' => $activeCount,
@@ -251,13 +225,6 @@ class FrontEventController extends AbstractController
             'userReservation' => $userReservation,
             'canReserve' => $canReserve,
             'form' => $formView,
-<<<<<<< HEAD
-        ]);
-    }
-
-    #[Route('/events/{id}/reserve', name: 'front_events_reserve', methods: ['POST'])]
-    public function reserve(Event $event, Request $request, EventReservationRepository $reservationRepository, EntityManagerInterface $em): Response
-=======
             'calendarData' => $calendarData,
             'startDate' => $startDate,
             'endDate' => $endDate,
@@ -273,7 +240,6 @@ class FrontEventController extends AbstractController
 
     #[Route('/events/{id}/reserve', name: 'front_events_reserve_post', methods: ['POST'])]
     public function reserve(Event $event, Request $request, EventReservationRepository $reservationRepository, EventRepository $eventRepository, EntityManagerInterface $em, MailerInterface $mailer): Response
->>>>>>> origin/sara
     {
         $user = $this->getUser();
         if (!$user instanceof User) {
@@ -286,10 +252,6 @@ class FrontEventController extends AbstractController
         }
 
         $reservation = new EventReservation();
-<<<<<<< HEAD
-        $form = $this->createForm(EventReservationType::class, $reservation, [
-            'action' => $this->generateUrl('front_events_reserve', ['id' => $event->getId()]),
-=======
         // Set these BEFORE handleRequest so entity validation passes
         $reservation->setEvent($event);
         $reservation->setUser($user);
@@ -298,7 +260,6 @@ class FrontEventController extends AbstractController
 
         $form = $this->createForm(EventReservationType::class, $reservation, [
             'action' => $this->generateUrl('front_events_reserve_post', ['id' => $event->getId()]),
->>>>>>> origin/sara
             'method' => 'POST',
         ]);
         $form->handleRequest($request);
@@ -312,19 +273,9 @@ class FrontEventController extends AbstractController
             return $this->redirectToRoute('front_events_show', ['id' => $event->getId()]);
         }
 
-<<<<<<< HEAD
-        $activeCount = $reservationRepository->countActiveByEvent($event);
-        if ($activeCount >= $event->getCapacite()) {
-            $this->addFlash('error', 'Desole, la capacite est atteinte.');
-            return $this->redirectToRoute('front_events_show', ['id' => $event->getId()]);
-        }
-
-        if (!$form->isSubmitted() || !$form->isValid()) {
-=======
         if (!$form->isSubmitted() || !$form->isValid()) {
             // Return form with errors
             $activeCount = $reservationRepository->countActiveByEvent($event);
->>>>>>> origin/sara
             $remaining = max(0, $event->getCapacite() - $activeCount);
             $userReservation = $reservationRepository->findLatestByUserAndEvent($user, $event);
             $hasActiveReservation = $userReservation && in_array($userReservation->getStatut(), [
@@ -332,8 +283,6 @@ class FrontEventController extends AbstractController
                 EventReservation::STATUS_ACCEPTED,
             ], true);
 
-<<<<<<< HEAD
-=======
             // Generate calendar availability data
             $eventDate = $event->getDateEvent();
             $startDate = clone $eventDate;
@@ -384,7 +333,6 @@ class FrontEventController extends AbstractController
 
             ksort($calendarData);
 
->>>>>>> origin/sara
             return $this->render('front/event/show.html.twig', [
                 'event' => $event,
                 'activeCount' => $activeCount,
@@ -392,15 +340,6 @@ class FrontEventController extends AbstractController
                 'userReservation' => $userReservation,
                 'canReserve' => !$hasActiveReservation && $remaining > 0,
                 'form' => $form->createView(),
-<<<<<<< HEAD
-            ]);
-        }
-
-        $reservation->setEvent($event);
-        $reservation->setUser($user);
-        $reservation->setDateReservation(new \DateTime());
-        $reservation->setStatut(EventReservation::STATUS_PENDING);
-=======
                 'calendarData' => $calendarData,
                 'startDate' => $startDate,
                 'endDate' => $endDate,
@@ -419,18 +358,10 @@ class FrontEventController extends AbstractController
 
         // Save reservation as PENDING with token
         $reservation->setConfirmationToken($token);
->>>>>>> origin/sara
 
         $em->persist($reservation);
         $em->flush();
 
-<<<<<<< HEAD
-        $this->addFlash('success', 'Votre reservation a ete envoyee.');
-
-        return $this->redirectToRoute('front_events_show', ['id' => $event->getId()]);
-    }
-}
-=======
         // Send confirmation email
         $confirmUrl = $this->generateUrl('front_events_confirm_reservation', ['token' => $token], UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -588,4 +519,3 @@ HTML;
     }
 }
 
->>>>>>> origin/sara

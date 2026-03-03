@@ -26,16 +26,10 @@ class CommentaireType extends AbstractType
             ])
             ->add('rating', ChoiceType::class, [
                 'label' => 'Votre note',
-<<<<<<< HEAD
                 'required' => true,
                 'expanded' => true,
                 'multiple' => false,
                 'placeholder' => false,
-=======
-                'required' => false,
-                'expanded' => true,
-                'multiple' => false,
->>>>>>> origin/sara
                 'choices' => [
                     '5' => 5,
                     '4' => 4,

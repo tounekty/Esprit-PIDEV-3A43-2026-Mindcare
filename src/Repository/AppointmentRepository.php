@@ -177,7 +177,6 @@ class AppointmentRepository extends ServiceEntityRepository
         return $qb->getQuery()->getResult();
     }
 
-<<<<<<< HEAD
     /**
      * Check if student already has an appointment with this psychologue in the same week
      */
@@ -210,8 +209,6 @@ class AppointmentRepository extends ServiceEntityRepository
         $count = (int) $qb->getQuery()->getSingleScalarResult();
         return $count > 0;
     }
-=======
->>>>>>> origin/sara
 
 //    /**
 //     * @return Reservation[] Returns an array of Reservation objects

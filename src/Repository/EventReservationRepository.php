@@ -33,8 +33,6 @@ class EventReservationRepository extends ServiceEntityRepository
             ->getSingleScalarResult();
     }
 
-<<<<<<< HEAD
-=======
     public function findByConfirmationToken(string $token): ?EventReservation
     {
         return $this->createQueryBuilder('r')
@@ -44,7 +42,6 @@ class EventReservationRepository extends ServiceEntityRepository
             ->getOneOrNullResult();
     }
 
->>>>>>> origin/sara
     public function findLatestByUserAndEvent(User $user, Event $event): ?EventReservation
     {
         return $this->createQueryBuilder('r')
@@ -103,8 +100,6 @@ class EventReservationRepository extends ServiceEntityRepository
 
         return $qb->getQuery()->getResult();
     }
-<<<<<<< HEAD
-=======
 
     /**
      * Get event dates reserved by a user (accepted or pending)
@@ -149,5 +144,4 @@ class EventReservationRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
->>>>>>> origin/sara
 }
