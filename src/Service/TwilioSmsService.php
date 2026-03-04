@@ -8,6 +8,7 @@ class TwilioSmsService
 {
     private Client $client;
     private string $fromNumber;
+    private ?string $lastError = null;
 
     public function __construct(
         string $twilioAccountSid,

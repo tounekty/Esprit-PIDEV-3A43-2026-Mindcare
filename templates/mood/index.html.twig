@@ -776,4 +776,7 @@
     {% endif %}
 </div>
 {% endblock %}
-
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('app') }}
+{% endblock %}

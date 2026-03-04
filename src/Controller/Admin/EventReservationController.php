@@ -117,6 +117,10 @@ class EventReservationController extends AbstractController
                 $sent++;
             } else {
                 $failed++;
+                $lastSmsError = $smsService->getLastError();
+                if ($lastSmsError) {
+                    $this->addFlash('error', "SMS vers {$phone} a echoue: {$lastSmsError}");
+                }
             }
         }
 
