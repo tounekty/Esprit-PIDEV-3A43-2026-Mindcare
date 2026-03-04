@@ -78,6 +78,10 @@ class HuggingFaceForumAnalysisService
                 return $this->analyzeTextLocally($cleanText, 'http_error');
             }
 
+            if (is_array($payload) && isset($payload[0]) && is_array($payload[0])) {
+                $payload = $payload[0];
+            }
+
             if (!is_array($payload) || !isset($payload['labels'], $payload['scores']) || !is_array($payload['labels']) || !is_array($payload['scores'])) {
                 $this->logger->warning('Forum AI invalid payload, using local fallback.', [
                     'model' => $this->modelName,
