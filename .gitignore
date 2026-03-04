@@ -23,14 +23,11 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
-<<<<<<< HEAD
-<<<<<<< HEAD
 config/ga4-service-account.json
 
 ###> lexik/jwt-authentication-bundle ###
 /config/jwt/*.pem
 ###< lexik/jwt-authentication-bundle ###
-=======
 
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
@@ -38,6 +35,3 @@ config/ga4-service-account.json
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
->>>>>>> origin/sara
-=======
->>>>>>> origin/gestion-tracker

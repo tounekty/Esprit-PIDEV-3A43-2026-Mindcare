@@ -11,6 +11,7 @@ services:
         bind:
             string $groqApiKey: '%env(string:GROQ_API_KEY)%'
             string $hfApiToken: '%env(string:HF_API_TOKEN)%'
+            string $huggingFaceApiToken: '%env(string:HF_API_TOKEN)%'
             bool $localCommentFilterEnabled: '%env(bool:LOCAL_COMMENT_FILTER_ENABLED)%'
             bool $localFilterAllowOnApiFailure: '%env(bool:LOCAL_FILTER_ALLOW_ON_API_FAILURE)%'
 
@@ -52,7 +53,7 @@ services:
 
     App\Service\HuggingFaceForumAnalysisService:
         arguments:
-            $apiToken: '%env(HUGGINGFACE_API_TOKEN)%'
+            $apiToken: '%env(string:HF_API_TOKEN)%'
             $modelName: '%env(HUGGINGFACE_FORUM_MODEL)%'
             $urgencyThreshold: '%env(float:HUGGINGFACE_URGENCY_THRESHOLD)%'
             $urgencyMargin: '%env(float:HUGGINGFACE_URGENCY_MARGIN)%'
