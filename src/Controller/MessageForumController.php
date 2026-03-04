@@ -7,12 +7,10 @@ use App\Entity\SujetForum;
 use App\Message\AnalyzeForumMessage;
 use App\Repository\MessageForumRepository;
 use App\Service\ForumReplyNotificationService;
-use App\Service\OpenAiModerationService;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
@@ -41,7 +39,7 @@ class MessageForumController extends AbstractController
     }
 
     #[Route('/forum/messages/new', name: 'message_forum_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, ForumReplyNotificationService $notificationService, MessageBusInterface $messageBus, OpenAiModerationService $moderationService): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, ForumReplyNotificationService $notificationService, MessageBusInterface $messageBus): Response
     {
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
@@ -76,40 +74,15 @@ class MessageForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $moderation = $moderationService->moderate($message->getContenu() ?? '');
-            $errorType = $moderation['errorType'] ?? null;
-            $errorMessage = $moderation['errorMessage'] ?? null;
-            $detailSuffix = is_string($errorMessage) && $errorMessage !== '' ? ' Detail: ' . $errorMessage . '.' : '';
-
-            if (!$moderation['enabled']) {
-                $form->addError(new FormError('Moderation OpenAI non configuree. Ajoutez OPENAI_API_KEY dans .env.local.'));
-            } elseif (!$moderation['checked']) {
-                if ($errorType === 'rate_limit') {
-                    $form->addError(new FormError('OpenAI refuse la verification (429). Verifiez votre quota/facturation et les limites du projet sur platform.openai.com, puis reessayez.' . $detailSuffix));
-                } elseif ($errorType === 'auth') {
-                    $form->addError(new FormError('Cle OpenAI invalide ou sans droits. Verifiez OPENAI_API_KEY dans .env.local.' . $detailSuffix));
-                } elseif ($errorType === 'provider') {
-                    $form->addError(new FormError('Service OpenAI indisponible temporairement. Reessayez plus tard.' . $detailSuffix));
-                } else {
-                    $form->addError(new FormError('Impossible de verifier le commentaire avec OpenAI pour le moment. Reessayez plus tard.' . $detailSuffix));
-                }
-            } elseif ($moderation['flagged']) {
-                $categories = $moderation['categories'] ?? [];
-                $details = $categories !== [] ? ' Categories detectees: ' . implode(', ', $categories) . '.' : '';
-
-                $form->get('contenu')->addError(new FormError('Commentaire refuse: contenu toxique ou spam detecte.' . $details));
-                $this->addFlash('danger', 'Commentaire refuse: contenu toxique ou spam detecte.');
-            } else {
-                $this->handleMessageUploads($form, $message);
-                $entityManager->persist($message);
-                $entityManager->flush();
-                $notificationService->notifyTopicOwnerOnReply($message);
-                if ($message->getId() !== null) {
-                    $messageBus->dispatch(new AnalyzeForumMessage($message->getId()));
-                }
-
-                return $this->redirectToRoute('message_forum_index');
+            $this->handleMessageUploads($form, $message);
+            $entityManager->persist($message);
+            $entityManager->flush();
+            $notificationService->notifyTopicOwnerOnReply($message);
+            if ($message->getId() !== null) {
+                $messageBus->dispatch(new AnalyzeForumMessage($message->getId()));
             }
+
+            return $this->redirectToRoute('message_forum_index');
         }
 
         return $this->render('forum/message/new.html.twig', [
@@ -126,7 +99,7 @@ class MessageForumController extends AbstractController
     }
 
     #[Route('/forum/messages/{id}/edit', name: 'message_forum_edit', methods: ['GET', 'POST'])]
-    public function edit(Request $request, MessageForum $message, EntityManagerInterface $entityManager, OpenAiModerationService $moderationService): Response
+    public function edit(Request $request, MessageForum $message, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createFormBuilder($message)
             ->add('sujet', EntityType::class, [
@@ -149,35 +122,10 @@ class MessageForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $moderation = $moderationService->moderate($message->getContenu() ?? '');
-            $errorType = $moderation['errorType'] ?? null;
-            $errorMessage = $moderation['errorMessage'] ?? null;
-            $detailSuffix = is_string($errorMessage) && $errorMessage !== '' ? ' Detail: ' . $errorMessage . '.' : '';
+            $this->handleMessageUploads($form, $message);
+            $entityManager->flush();
 
-            if (!$moderation['enabled']) {
-                $form->addError(new FormError('Moderation OpenAI non configuree. Ajoutez OPENAI_API_KEY dans .env.local.'));
-            } elseif (!$moderation['checked']) {
-                if ($errorType === 'rate_limit') {
-                    $form->addError(new FormError('OpenAI refuse la verification (429). Verifiez votre quota/facturation et les limites du projet sur platform.openai.com, puis reessayez.' . $detailSuffix));
-                } elseif ($errorType === 'auth') {
-                    $form->addError(new FormError('Cle OpenAI invalide ou sans droits. Verifiez OPENAI_API_KEY dans .env.local.' . $detailSuffix));
-                } elseif ($errorType === 'provider') {
-                    $form->addError(new FormError('Service OpenAI indisponible temporairement. Reessayez plus tard.' . $detailSuffix));
-                } else {
-                    $form->addError(new FormError('Impossible de verifier le commentaire avec OpenAI pour le moment. Reessayez plus tard.' . $detailSuffix));
-                }
-            } elseif ($moderation['flagged']) {
-                $categories = $moderation['categories'] ?? [];
-                $details = $categories !== [] ? ' Categories detectees: ' . implode(', ', $categories) . '.' : '';
-
-                $form->get('contenu')->addError(new FormError('Commentaire refuse: contenu toxique ou spam detecte.' . $details));
-                $this->addFlash('danger', 'Commentaire refuse: contenu toxique ou spam detecte.');
-            } else {
-                $this->handleMessageUploads($form, $message);
-                $entityManager->flush();
-
-                return $this->redirectToRoute('message_forum_index');
-            }
+            return $this->redirectToRoute('message_forum_index');
         }
 
         return $this->render('forum/message/edit.html.twig', [

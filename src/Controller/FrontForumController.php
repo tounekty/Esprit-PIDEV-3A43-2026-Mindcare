@@ -165,7 +165,10 @@ class FrontForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $moderation = $moderationService->moderate($sujet->getDescription() ?? '');
+            $this->handleSujetUploads($form, $sujet);
+            $entityManager->persist($sujet);
+            $entityManager->flush();
+            $tagNotificationService->notifyTaggedPsychologuesOnTopicCreation($sujet);
 
             if ($moderation['checked'] && $moderation['flagged']) {
                 $categories = $moderation['categories'] ?? [];
@@ -190,7 +193,7 @@ class FrontForumController extends AbstractController
     }
 
     #[Route('/forum/sujet/{id}', name: 'front_forum_show', methods: ['GET', 'POST'])]
-    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, LikeMessageRepository $likeMessageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ForumReplyNotificationService $notificationService, MessageBusInterface $messageBus, OpenAiModerationService $moderationService): Response
+    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, LikeMessageRepository $likeMessageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ForumReplyNotificationService $notificationService, MessageBusInterface $messageBus): Response
     {
         $message = new MessageForum();
         $message->setSujet($sujet);
@@ -264,40 +267,6 @@ class FrontForumController extends AbstractController
 
             $form->handleRequest($request);
             if ($form->isSubmitted() && $form->isValid()) {
-                $moderation = $moderationService->moderate($message->getContenu() ?? '');
-                if ($moderation['checked'] && $moderation['flagged']) {
-                    $categories = $moderation['categories'] ?? [];
-                    $details = $categories !== [] ? ' Categories detectees: ' . implode(', ', $categories) . '.' : '';
-                    $form->get('contenu')->addError(new FormError('Commentaire refuse: contenu toxique ou spam detecte.' . $details));
-                    $this->addFlash('danger', 'Commentaire refuse: contenu toxique ou spam detecte.');
-
-                    return $this->render('front/forum/show.html.twig', [
-                        'sujet' => $sujet,
-                        'messages' => $messages,
-                        'q' => $query,
-                        'form' => $form->createView(),
-                        'likeCounts' => $likeCounts,
-                        'likedMessageIds' => $likedMessageIds,
-                        'childrenByParent' => $childrenByParent,
-                        'maxReplyDepth' => self::MAX_REPLY_DEPTH,
-                    ]);
-                }
-
-                if (!$moderation['checked']) {
-                    $form->addError(new FormError('Impossible de verifier le commentaire avec OpenAI pour le moment. Reessayez plus tard.'));
-
-                    return $this->render('front/forum/show.html.twig', [
-                        'sujet' => $sujet,
-                        'messages' => $messages,
-                        'q' => $query,
-                        'form' => $form->createView(),
-                        'likeCounts' => $likeCounts,
-                        'likedMessageIds' => $likedMessageIds,
-                        'childrenByParent' => $childrenByParent,
-                        'maxReplyDepth' => self::MAX_REPLY_DEPTH,
-                    ]);
-                }
-
                 $parentId = (int) $request->request->get('parent_id', 0);
                 if ($parentId > 0) {
                     $parentMessage = $messageRepository->findOneBy([

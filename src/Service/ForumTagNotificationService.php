@@ -63,7 +63,7 @@ class ForumTagNotificationService
             try {
                 $this->mailer->send(
                     (new Email())
-                        ->from($this->getFromAddress())
+                        ->from('no-reply@mindcare.tn')
                         ->to($email)
                         ->subject('Vous avez été tagué(e) dans un sujet : ' . $sujet->getTitre())
                         ->html($this->twig->render('emails/forum_tagged_psychologue.html.twig', [
@@ -82,12 +82,5 @@ class ForumTagNotificationService
                 ]);
             }
         }
-    }
-
-    private function getFromAddress(): string
-    {
-        return $_ENV['MAILER_FROM_ADDRESS']
-            ?? $_SERVER['MAILER_FROM_ADDRESS']
-            ?? 'nawreshichri0@gmail.com';
     }
 }

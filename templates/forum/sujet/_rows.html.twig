@@ -1,18 +1,19 @@
-{% set items = rows is defined ? rows : (sujets is defined ? sujets : []) %}
-{% for row in items %}
-    {% set sujet = row.sujet is defined ? row.sujet : row %}
+{% for sujet in sujets %}
     <tr>
         <td>
             {{ sujet.titre }}
             {% if sujet.isPinned %}<span class="badge bg-warning ms-1">📌</span>{% endif %}
         </td>
         <td>{{ sujet.description|slice(0, 50) }}...</td>
-        <td>{{ sujet.dateCreation|date('Y-m-d H:i') }}</td>
+        <td><span title="{{ sujet.dateCreation|date('Y-m-d H:i') }}">{{ sujet.dateCreation|ago(null, 'fr') }}</span></td>
         <td>
             {% if sujet.user %}
                 {{ sujet.user.firstName }} {{ sujet.user.lastName }}
             {% else %}
                 -
+            {% endif %}
+            {% if sujet.isAnonymous %}
+                <span class="badge bg-secondary ms-1">Anonyme</span>
             {% endif %}
         </td>
         <td>

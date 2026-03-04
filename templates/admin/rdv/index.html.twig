@@ -12,7 +12,7 @@
         <h1 class="mb-4">Gestion Rendez-vous</h1>
 
         <!-- Dashboard Statistics -->
-        <div class="row mb-5">
+        <div class="row mb-3">
             <div class="col-md-3">
                 <div class="card border-warning">
                     <div class="card-body">
@@ -45,6 +45,42 @@
                     <div class="card-body">
                         <h5 class="card-title">Annulés</h5>
                         <p class="card-text display-4 text-secondary">{{ cancelledCount }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Statistics Row -->
+        <div class="row mb-5">
+            <div class="col-md-3">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">En Cours</h5>
+                        <p class="card-text display-4 text-primary">{{ inProgressCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-info">
+                    <div class="card-body">
+                        <h5 class="card-title">Terminés</h5>
+                        <p class="card-text display-4 text-info">{{ completedCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">Patients Absents</h5>
+                        <p class="card-text display-4 text-warning">{{ absentCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Archivés</h5>
+                        <p class="card-text display-4 text-dark">{{ archivedCount }}</p>
                     </div>
                 </div>
             </div>
@@ -88,6 +124,18 @@
                                    class="btn btn-sm {{ currentStatus == 'cancelled' ? 'btn-secondary' : 'btn-outline-secondary' }}">
                                     Annulés
                                 </a>
+                                <a href="{{ path('admin_rdv_index', {status: 'in_progress', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'in_progress' ? 'btn-primary' : 'btn-outline-primary' }}">
+                                    En cours
+                                </a>
+                                <a href="{{ path('admin_rdv_index', {status: 'completed', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'completed' ? 'btn-info' : 'btn-outline-info' }}">
+                                    Terminés
+                                </a>
+                                <a href="{{ path('admin_rdv_index', {status: 'absent', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'absent' ? 'btn-warning' : 'btn-outline-warning' }}">
+                                    Absents
+                                </a>
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -114,7 +162,7 @@
                     </div>
                 {% endif %}
                 
-                {% if is_granted('ROLE_ADMIN') and not is_granted('ROLE_PSYCHOLOGUE') %}
+                {% if is_granted('ROLE_ADMIN') %}
                     <div class="mb-3">
                         <a href="{{ path('admin_rdv_new') }}" class="btn btn-primary btn-sm">Créer un rendez-vous</a>
                     </div>
@@ -185,6 +233,14 @@
                                                 <span class="badge bg-danger">Refusé</span>
                                             {% elseif appointment.getStatus() == 'cancelled' %}
                                                 <span class="badge bg-secondary">Annulé</span>
+                                            {% elseif appointment.getStatus() == 'in_progress' %}
+                                                <span class="badge bg-primary">En cours</span>
+                                            {% elseif appointment.getStatus() == 'completed' %}
+                                                <span class="badge bg-info">Terminé</span>
+                                            {% elseif appointment.getStatus() == 'absent' %}
+                                                <span class="badge bg-warning">Absent</span>
+                                            {% elseif appointment.getStatus() == 'archived' %}
+                                                <span class="badge bg-dark">Archivé</span>
                                             {% endif %}
                                         </td>
                                         <td>
@@ -206,6 +262,20 @@
                                                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ appointment.getId()) }}">
                                                     <button class="btn btn-sm btn-danger">Supprimer</button>
                                                 </form>
+                                                {# Add mark absent / undo absent buttons for psychologue #}
+                                                {% if appointment.getStatus() in ['in_progress', 'completed'] %}
+                                                    <form method="post" action="{{ path('admin_rdv_mark_absent', {'id': appointment.getId()}) }}" style="display:inline-block;" onsubmit="return confirm('Marquer ce patient comme absent ?');">
+                                                        <button class="btn btn-sm btn-outline-warning" title="Marquer absent">
+                                                            <i class="fa fa-user-times"></i> Absent
+                                                        </button>
+                                                    </form>
+                                                {% elseif appointment.getStatus() == 'absent' %}
+                                                    <form method="post" action="{{ path('admin_rdv_undo_absent', {'id': appointment.getId()}) }}" style="display:inline-block;">
+                                                        <button class="btn btn-sm btn-outline-success" title="Annuler absence">
+                                                            <i class="fa fa-undo"></i> Annuler
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
                                             {% endif %}
                                         </td>
                                     </tr>

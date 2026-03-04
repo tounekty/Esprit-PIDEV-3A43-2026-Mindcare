@@ -19,6 +19,11 @@
                 {{ form_errors(form.description) }}
             </div>
             <div class="mb-3">
+                {{ form_label(form.isAnonymous) }}
+                {{ form_widget(form.isAnonymous) }}
+                {{ form_errors(form.isAnonymous) }}
+            </div>
+            <div class="mb-3">
                 {{ form_label(form.imageFile) }}
                 {{ form_widget(form.imageFile) }}
                 {{ form_errors(form.imageFile) }}

@@ -51,12 +51,6 @@ services:
             $ga4LookbackDays: '%env(int:GA4_LOOKBACK_DAYS)%'
             $projectDir: '%kernel.project_dir%'
 
-    App\Service\HuggingFaceForumAnalysisService:
-        arguments:
-            $apiToken: '%env(string:HF_API_TOKEN)%'
-            $modelName: '%env(HUGGINGFACE_FORUM_MODEL)%'
-            $urgencyThreshold: '%env(float:HUGGINGFACE_URGENCY_THRESHOLD)%'
-            $urgencyMargin: '%env(float:HUGGINGFACE_URGENCY_MARGIN)%'
 
     App\Security\FaceLoginAuthenticator:
         autowire: true
@@ -73,3 +67,10 @@ services:
     App\MessageHandler\GenerateMoodPdfMessageHandler:
         arguments:
             $projectDir: '%kernel.project_dir%'
+
+    App\Service\HuggingFaceForumAnalysisService:
+        arguments:
+            $apiToken: '%env(HUGGINGFACE_API_TOKEN)%'
+            $modelName: '%env(HUGGINGFACE_FORUM_MODEL)%'
+            $urgencyThreshold: '%env(float:HUGGINGFACE_URGENCY_THRESHOLD)%'
+            $urgencyMargin: '%env(float:HUGGINGFACE_URGENCY_MARGIN)%'

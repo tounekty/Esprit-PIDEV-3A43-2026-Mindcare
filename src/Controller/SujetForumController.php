@@ -72,7 +72,7 @@ class SujetForumController extends AbstractController
     }
 
     #[Route('/forum/sujets/new', name: 'sujet_forum_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager, OpenAiModerationService $moderationService): Response
+    public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 

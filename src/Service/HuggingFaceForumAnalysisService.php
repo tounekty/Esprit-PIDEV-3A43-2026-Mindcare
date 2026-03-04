@@ -32,11 +32,11 @@ class HuggingFaceForumAnalysisService
     {
         $cleanText = trim($text);
         if ($cleanText === '') {
-            return $this->analyzeTextLocally($cleanText, 'empty_text');
+            throw new \RuntimeException('Le texte à analyser est vide.');
         }
 
         if (trim($this->apiToken) === '') {
-            return $this->analyzeTextLocally($cleanText, 'missing_api_token');
+            throw new \RuntimeException('HUGGINGFACE_API_TOKEN est manquant.');
         }
 
         $candidateLabels = [
@@ -48,55 +48,31 @@ class HuggingFaceForumAnalysisService
             'détresse psychologique',
         ];
 
-        try {
-            $response = $this->httpClient->request('POST', sprintf('https://router.huggingface.co/hf-inference/models/%s', $this->modelName), [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->apiToken,
-                    'Content-Type' => 'application/json',
+        $response = $this->httpClient->request('POST', sprintf('https://router.huggingface.co/hf-inference/models/%s', $this->modelName), [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $this->apiToken,
+                'Content-Type' => 'application/json',
+            ],
+            'json' => [
+                'inputs' => $cleanText,
+                'parameters' => [
+                    'candidate_labels' => $candidateLabels,
+                    'multi_label' => true,
                 ],
-                'json' => [
-                    'inputs' => $cleanText,
-                    'parameters' => [
-                        'candidate_labels' => $candidateLabels,
-                        'multi_label' => true,
-                    ],
-                ],
-                'timeout' => 30,
-            ]);
+            ],
+            'timeout' => 30,
+        ]);
 
-            $statusCode = $response->getStatusCode();
-            $payload = $response->toArray(false);
+        $statusCode = $response->getStatusCode();
+        $payload = $response->toArray(false);
 
-            if ($statusCode >= 400) {
-                $errorMessage = is_array($payload) ? (string) ($payload['error'] ?? 'Erreur Hugging Face.') : 'Erreur Hugging Face.';
-                $this->logger->warning('Forum AI HTTP error, using local fallback.', [
-                    'status' => $statusCode,
-                    'error' => $errorMessage,
-                    'model' => $this->modelName,
-                ]);
+        if ($statusCode >= 400) {
+            $errorMessage = is_array($payload) ? (string) ($payload['error'] ?? 'Erreur Hugging Face.') : 'Erreur Hugging Face.';
+            throw new \RuntimeException($errorMessage);
+        }
 
-                return $this->analyzeTextLocally($cleanText, 'http_error');
-            }
-
-            if (is_array($payload) && isset($payload[0]) && is_array($payload[0])) {
-                $payload = $payload[0];
-            }
-
-            if (!is_array($payload) || !isset($payload['labels'], $payload['scores']) || !is_array($payload['labels']) || !is_array($payload['scores'])) {
-                $this->logger->warning('Forum AI invalid payload, using local fallback.', [
-                    'model' => $this->modelName,
-                    'payload_type' => get_debug_type($payload),
-                ]);
-
-                return $this->analyzeTextLocally($cleanText, 'invalid_payload');
-            }
-        } catch (\Throwable $exception) {
-            $this->logger->warning('Forum AI request failed, using local fallback.', [
-                'error' => $exception->getMessage(),
-                'model' => $this->modelName,
-            ]);
-
-            return $this->analyzeTextLocally($cleanText, 'request_exception');
+        if (!is_array($payload) || !isset($payload['labels'], $payload['scores']) || !is_array($payload['labels']) || !is_array($payload['scores'])) {
+            throw new \RuntimeException('Réponse Hugging Face invalide.');
         }
 
         $scoreByLabel = [];
