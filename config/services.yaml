@@ -71,6 +71,7 @@ services:
     App\Service\HuggingFaceForumAnalysisService:
         arguments:
             $apiToken: '%env(HUGGINGFACE_API_TOKEN)%'
+            $apiBaseUrl: '%env(HUGGINGFACE_FORUM_API_URL)%'
             $modelName: '%env(HUGGINGFACE_FORUM_MODEL)%'
             $urgencyThreshold: '%env(float:HUGGINGFACE_URGENCY_THRESHOLD)%'
             $urgencyMargin: '%env(float:HUGGINGFACE_URGENCY_MARGIN)%'

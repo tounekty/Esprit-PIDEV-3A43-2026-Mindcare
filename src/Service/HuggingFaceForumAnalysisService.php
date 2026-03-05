@@ -10,6 +10,7 @@ class HuggingFaceForumAnalysisService
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly string $apiToken,
+        private readonly string $apiBaseUrl,
         private readonly string $modelName,
         private readonly float $urgencyThreshold,
         private readonly float $urgencyMargin,
@@ -48,7 +49,7 @@ class HuggingFaceForumAnalysisService
             'détresse psychologique',
         ];
 
-        $response = $this->httpClient->request('POST', sprintf('https://router.huggingface.co/hf-inference/models/%s', $this->modelName), [
+        $response = $this->httpClient->request('POST', sprintf('%s/%s', rtrim($this->apiBaseUrl, '/'), $this->modelName), [
             'headers' => [
                 'Authorization' => 'Bearer ' . $this->apiToken,
                 'Content-Type' => 'application/json',
@@ -67,22 +68,30 @@ class HuggingFaceForumAnalysisService
         $payload = $response->toArray(false);
 
         if ($statusCode >= 400) {
-            $errorMessage = (string) ($payload['error'] ?? 'Erreur Hugging Face.');
+            $errorMessage = is_array($payload) ? (string) ($payload['error'] ?? json_encode($payload)) : 'Erreur Hugging Face.';
             throw new \RuntimeException($errorMessage);
         }
 
-        if (!isset($payload['labels'], $payload['scores']) || !is_array($payload['labels']) || !is_array($payload['scores'])) {
-            throw new \RuntimeException('Réponse Hugging Face invalide.');
-        }
-
         $scoreByLabel = [];
-        foreach ($payload['labels'] as $index => $label) {
-            if (!is_string($label) || !isset($payload['scores'][$index])) {
-                continue;
-            }
 
-            $score = (float) $payload['scores'][$index];
-            $scoreByLabel[mb_strtolower(trim($label))] = $score;
+        if (isset($payload['labels'], $payload['scores']) && is_array($payload['labels']) && is_array($payload['scores'])) {
+            // Format: {"labels": [...], "scores": [...]}
+            foreach ($payload['labels'] as $index => $label) {
+                if (!is_string($label) || !isset($payload['scores'][$index])) {
+                    continue;
+                }
+                $scoreByLabel[mb_strtolower(trim($label))] = (float) $payload['scores'][$index];
+            }
+        } elseif (is_array($payload) && isset($payload[0]) && is_array($payload[0]) && array_key_exists('label', $payload[0])) {
+            // Format: [{"label": "...", "score": ...}, ...]
+            foreach ($payload as $item) {
+                if (!isset($item['label'], $item['score'])) {
+                    continue;
+                }
+                $scoreByLabel[mb_strtolower(trim((string) $item['label']))] = (float) $item['score'];
+            }
+        } else {
+            throw new \RuntimeException('Réponse Hugging Face invalide.');
         }
 
         $sentimentCandidates = [
