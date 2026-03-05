@@ -54,11 +54,11 @@ class ForumUrgencyAlertService
             }
 
             $email = $psychologue->getEmail();
-            if ($email === null || $email === '') {
+            if ($email === '') {
                 continue;
             }
 
-            $psychologueName = trim((string) ($psychologue->getFirstName() ?? '') . ' ' . (string) ($psychologue->getLastName() ?? ''));
+            $psychologueName = trim($psychologue->getFirstName() . ' ' . $psychologue->getLastName());
 
             try {
                 $this->mailer->send(

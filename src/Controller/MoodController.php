@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Mood;
+use App\Entity\User;
 use App\Form\MoodType;
 use App\Message\AnalyzeAIMoodMessage;
 use App\Message\GenerateMoodPdfMessage;
@@ -237,7 +238,10 @@ final class MoodController extends AbstractController
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         $mood = new Mood();
-        $mood->setUser($this->getUser());
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $mood->setUser($user);
+        }
         $form = $this->createForm(MoodType::class, $mood);
         $form->handleRequest($request);
 

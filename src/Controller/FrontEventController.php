@@ -166,11 +166,11 @@ class FrontEventController extends AbstractController
 
         // Generate calendar availability data
         $eventDate = $event->getDateEvent();
-        $startDate = clone $eventDate;
+        $startDate = \DateTime::createFromInterface($eventDate);
         $startDate->modify('-1 month');
         $startDate->modify('first day of this month');
         
-        $endDate = clone $eventDate;
+        $endDate = \DateTime::createFromInterface($eventDate);
         $endDate->modify('+1 month');
         $endDate->modify('last day of this month');
 
@@ -255,7 +255,7 @@ class FrontEventController extends AbstractController
         // Set these BEFORE handleRequest so entity validation passes
         $reservation->setEvent($event);
         $reservation->setUser($user);
-        $reservation->setDateReservation(new \DateTime());
+        $reservation->reserveNow();
         $reservation->setStatut(EventReservation::STATUS_PENDING);
 
         $form = $this->createForm(EventReservationType::class, $reservation, [
@@ -285,11 +285,11 @@ class FrontEventController extends AbstractController
 
             // Generate calendar availability data
             $eventDate = $event->getDateEvent();
-            $startDate = clone $eventDate;
+            $startDate = \DateTime::createFromInterface($eventDate);
             $startDate->modify('-1 month');
             $startDate->modify('first day of this month');
             
-            $endDate = clone $eventDate;
+            $endDate = \DateTime::createFromInterface($eventDate);
             $endDate->modify('+1 month');
             $endDate->modify('last day of this month');
 

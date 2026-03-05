@@ -45,7 +45,7 @@ class AnalyzeForumMessageHandler
             ->setStatus(MessageForumAnalysis::STATUS_PENDING)
             ->setErrorMessage(null)
             ->setIsUrgent(false)
-            ->setAnalyzedAt(null)
+            ->resetAnalysis()
             ->touch();
 
         $this->entityManager->flush();
@@ -62,7 +62,7 @@ class AnalyzeForumMessageHandler
                 ->setIsUrgent((bool) $result['is_urgent'])
                 ->setModelName($result['model_name'])
                 ->setRawResponse($result['raw_response'])
-                ->setAnalyzedAt(new \DateTimeImmutable())
+                ->markAnalyzed()
                 ->setErrorMessage(null)
                 ->touch();
 
@@ -75,7 +75,7 @@ class AnalyzeForumMessageHandler
             $analysis
                 ->setStatus(MessageForumAnalysis::STATUS_FAILED)
                 ->setErrorMessage(mb_substr($exception->getMessage(), 0, 500))
-                ->setAnalyzedAt(new \DateTimeImmutable())
+                ->markAnalyzed()
                 ->touch();
 
             $this->entityManager->flush();

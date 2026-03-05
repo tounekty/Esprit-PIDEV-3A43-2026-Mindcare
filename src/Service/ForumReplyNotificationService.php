@@ -29,9 +29,9 @@ class ForumReplyNotificationService
             return;
         }
 
-        $authorName = trim((string) ($author->getFirstName() ?? '') . ' ' . (string) ($author->getLastName() ?? ''));
+        $authorName = trim($author->getFirstName() . ' ' . $author->getLastName());
         if ($authorName === '') {
-            $authorName = $author->getEmail() ?? 'Un utilisateur';
+            $authorName = $author->getEmail();
         }
 
         $preview = trim(strip_tags($reply->getContenu()));
@@ -66,11 +66,11 @@ class ForumReplyNotificationService
 
         foreach ($uniqueRecipients as $recipient) {
             $recipientEmail = $recipient->getEmail();
-            if ($recipientEmail === null || $recipientEmail === '') {
+            if ($recipientEmail === '') {
                 continue;
             }
 
-            $recipientName = trim((string) ($recipient->getFirstName() ?? '') . ' ' . (string) ($recipient->getLastName() ?? ''));
+            $recipientName = trim($recipient->getFirstName() . ' ' . $recipient->getLastName());
 
             try {
                 $this->mailer->send(

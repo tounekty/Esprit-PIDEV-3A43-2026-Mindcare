@@ -2,6 +2,7 @@
 namespace App\EventListener;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Session\FlashBagAwareSessionInterface;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
@@ -29,7 +30,10 @@ class LoginCaptchaListener
 
             if (!$recaptchaToken || !$this->verifyRecaptcha($recaptchaToken)) {
                 // Redirect back with flash message
-                $request->getSession()->getFlashBag()->add('error', 'Please confirm you are not a robot (Captcha required).');
+                $session = $request->getSession();
+                if ($session instanceof FlashBagAwareSessionInterface) {
+                    $session->getFlashBag()->add('error', 'Please confirm you are not a robot (Captcha required).');
+                }
                 $event->setResponse(new RedirectResponse($this->router->generate('app_login')));
             }
         }

@@ -6,8 +6,10 @@ use App\Repository\LikeMessageRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: LikeMessageRepository::class)]
-#[ORM\Table(name: 'like_message')]
-#[ORM\UniqueConstraint(name: 'uniq_like_user_message', columns: ['id_user', 'id_message'])]
+#[ORM\Table(name: 'like_message', indexes: [
+    new ORM\Index(columns: ['message_id']),
+])]
+#[ORM\UniqueConstraint(name: 'uniq_like_user_message', columns: ['user_id', 'message_id'])]
 class LikeMessage
 {
     #[ORM\Id]
@@ -15,12 +17,12 @@ class LikeMessage
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_message', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(targetEntity: MessageForum::class)]
+    #[ORM\JoinColumn(name: 'message_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?MessageForum $message = null;
 
     public function getId(): ?int

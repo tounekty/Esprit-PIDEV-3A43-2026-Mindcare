@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\SujetForum;
+use App\Entity\User;
 use App\Repository\SujetForumRepository;
 use App\Service\OpenAiModerationService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -72,13 +73,16 @@ class SujetForumController extends AbstractController
     }
 
     #[Route('/forum/sujets/new', name: 'sujet_forum_new', methods: ['GET', 'POST'])]
-    public function new(Request $request, EntityManagerInterface $entityManager): Response
+    public function new(Request $request, EntityManagerInterface $entityManager, OpenAiModerationService $moderationService): Response
     {
        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
 
         $sujet = new SujetForum();
         $sujet->setStatus(SujetForum::STATUS_VISIBLE);
-        $sujet->setUser($this->getUser());
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $sujet->setUser($user);
+        }
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class)
             ->add('description', TextareaType::class)
@@ -104,7 +108,7 @@ class SujetForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $moderation = $moderationService->moderate($sujet->getDescription() ?? '');
+            $moderation = $moderationService->moderate($sujet->getDescription());
             $errorType = $moderation['errorType'] ?? null;
             $errorMessage = $moderation['errorMessage'] ?? null;
             $detailSuffix = is_string($errorMessage) && $errorMessage !== '' ? ' Detail: ' . $errorMessage . '.' : '';
@@ -177,7 +181,7 @@ class SujetForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
-            $moderation = $moderationService->moderate($sujet->getDescription() ?? '');
+            $moderation = $moderationService->moderate($sujet->getDescription());
             $errorType = $moderation['errorType'] ?? null;
             $errorMessage = $moderation['errorMessage'] ?? null;
             $detailSuffix = is_string($errorMessage) && $errorMessage !== '' ? ' Detail: ' . $errorMessage . '.' : '';

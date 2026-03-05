@@ -80,7 +80,7 @@ class NotificationService
                 <p><strong>Type d'alerte:</strong> <span class="alert-type">{$this->formatAlertType($alertType)}</span></p>
                 <p><strong>Description:</strong> {$description}</p>
                 <p><strong>Details:</strong> {$details}</p>
-                <p><strong>Date d'alerte:</strong> {$alert->getCreatedAt()?->format('d/m/Y H:i:s')}</p>
+                <p><strong>Date d'alerte:</strong> {$alert->getCreatedAt()->format('d/m/Y H:i:s')}</p>
             </div>
             <p><strong>Action requise:</strong> Veuillez consulter MindCare pour plus de details.</p>
         </div>

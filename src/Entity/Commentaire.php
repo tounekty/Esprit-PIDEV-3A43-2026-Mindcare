@@ -4,9 +4,15 @@ namespace App\Entity;
 
 use App\Repository\CommentaireRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: CommentaireRepository::class)]
+#[ORM\Table(name: 'commentaire', indexes: [
+    new ORM\Index(columns: ['resource_id']),
+    new ORM\Index(columns: ['user_id']),
+])]
+#[ORM\HasLifecycleCallbacks]
 class Commentaire
 {
     #[ORM\Id]
@@ -20,7 +26,7 @@ class Commentaire
 
     
     #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
     #[ORM\Column(length: 100)]
@@ -35,7 +41,7 @@ class Commentaire
         pattern: "/^[\\p{L}\\p{M}\\s'\\-]+$/u",
         message: 'Le nom contient des caracteres non autorises.'
     )]
-    private ?string $authorName = null;
+    private string $authorName = '';
 
     #[ORM\Column(length: 180)]
     #[Assert\NotBlank(message: 'L email est obligatoire.')]
@@ -46,7 +52,7 @@ class Commentaire
     #[Assert\Email(
         message: 'Adresse email invalide (ex: nom@domaine.com).'
     )]
-    private ?string $authorEmail = null;
+    private string $authorEmail = '';
 
     #[ORM\Column(type: 'text')]
     #[Assert\NotBlank(message: 'Le contenu du commentaire est obligatoire.')]
@@ -56,7 +62,7 @@ class Commentaire
         minMessage: 'Le commentaire doit contenir au moins {{ limit }} caracteres.',
         maxMessage: 'Le commentaire ne doit pas depasser {{ limit }} caracteres.'
     )]
-    private ?string $content = null;
+    private string $content = '';
 
     #[ORM\Column(nullable: true)]
     #[Assert\NotNull(message: 'Veuillez selectionner une note entre 1 et 5.')]
@@ -71,14 +77,27 @@ class Commentaire
     private \DateTimeImmutable $createdAt;
 
     #[ORM\Column(length: 64, nullable: true)]
+    #[Ignore]
     private ?string $editToken = null;
 
     #[ORM\Column(type: 'boolean')]
     private bool $approved = false;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $updatedBy = null;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $updatedAt;
+
     public function __construct()
     {
         $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int { return $this->id; }
@@ -96,19 +115,19 @@ class Commentaire
         return $this;
     }
     
-    public function getAuthorName(): ?string { return $this->authorName; }
+    public function getAuthorName(): string { return $this->authorName; }
     public function setAuthorName(string $authorName): self {
         $this->authorName = trim($authorName);
         return $this;
     }
 
-    public function getAuthorEmail(): ?string { return $this->authorEmail; }
+    public function getAuthorEmail(): string { return $this->authorEmail; }
     public function setAuthorEmail(string $authorEmail): self {
         $this->authorEmail = strtolower(trim($authorEmail));
         return $this;
     }
 
-    public function getContent(): ?string { return $this->content; }
+    public function getContent(): string { return $this->content; }
     public function setContent(string $content): self {
         $this->content = trim($content);
         return $this;
@@ -127,14 +146,29 @@ class Commentaire
     }
 
     public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
-    public function setCreatedAt(\DateTimeImmutable $createdAt): self {
+    protected function setCreatedAt(\DateTimeImmutable $createdAt): self {
         $this->createdAt = $createdAt;
         return $this;
     }
 
     public function getEditToken(): ?string { return $this->editToken; }
-    public function setEditToken(?string $editToken): self {
+    public function setEditToken(#[\SensitiveParameter] ?string $editToken): self {
         $this->editToken = $editToken;
         return $this;
+    }
+
+    public function getCreatedBy(): ?User { return $this->createdBy; }
+    public function setCreatedBy(?User $createdBy): self { $this->createdBy = $createdBy; return $this; }
+
+    public function getUpdatedBy(): ?User { return $this->updatedBy; }
+    public function setUpdatedBy(?User $updatedBy): self { $this->updatedBy = $updatedBy; return $this; }
+
+    public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
+    protected function setUpdatedAt(\DateTimeImmutable $updatedAt): self { $this->updatedAt = $updatedAt; return $this; }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

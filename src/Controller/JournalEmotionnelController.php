@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\JournalEmotionnel;
+use App\Entity\User;
 use App\Form\JournalEmotionnelType;
 use App\Message\GenerateJournalPdfMessage;
 use App\Repository\JournalEmotionnelRepository;
@@ -50,7 +51,7 @@ final class JournalEmotionnelController extends AbstractController
                ->setParameter('search', '%'.$search.'%');
         }
 
-        // Valider les paramètres de tri
+        // Valider les paramÃ¨tres de tri
         $allowedSorts = ['id', 'dateecriture', 'mood'];
         $allowedDirections = ['asc', 'desc'];
         
@@ -111,7 +112,7 @@ final class JournalEmotionnelController extends AbstractController
         // Build charts for journal statistics
         $journalMoodDistributionChart = $chartBuilder->createChart(Chart::TYPE_DOUGHNUT);
         $journalMoodDistributionChart->setData([
-            'labels' => ['😊 Heureux', '😐 Neutre', '😢 Triste', '😠 En Colère', '😰 Stressé', '😌 Calme', '😴 Fatigué', '😃 Excité'],
+            'labels' => ['ðŸ˜Š Heureux', 'ðŸ˜ Neutre', 'ðŸ˜¢ Triste', 'ðŸ˜  En ColÃ¨re', 'ðŸ˜° StressÃ©', 'ðŸ˜Œ Calme', 'ðŸ˜´ FatiguÃ©', 'ðŸ˜ƒ ExcitÃ©'],
             'datasets' => [[
                 'label' => 'Distribution des Humeurs',
                 'data' => array_values($stats['moodCounts']),
@@ -167,9 +168,9 @@ final class JournalEmotionnelController extends AbstractController
 
         $journalIntensityChart = $chartBuilder->createChart(Chart::TYPE_BAR);
         $journalIntensityChart->setData([
-            'labels' => ['Très faible', 'Faible', 'Moyen', 'Élevé', 'Très élevé'],
+            'labels' => ['TrÃ¨s faible', 'Faible', 'Moyen', 'Ã‰levÃ©', 'TrÃ¨s Ã©levÃ©'],
             'datasets' => [[
-                'label' => 'Intensité moyenne des émotions',
+                'label' => 'IntensitÃ© moyenne des Ã©motions',
                 'data' => $intensityData,
                 'backgroundColor' => 'rgba(156, 39, 176, 0.8)',
                 'borderColor' => 'rgb(156, 39, 176)',
@@ -197,14 +198,14 @@ final class JournalEmotionnelController extends AbstractController
         $points = $gamification['points'];
         $badges = $gamification['badges'] !== [] ? $gamification['badges'] : ['Aucun badge pour le moment'];
 
-        // Fetch 'metiers avancée' data
+        // Fetch 'metiers avancÃ©e' data
         $metiersAvancee = [
-            'title' => 'Amélioration des compétences',
-            'description' => 'Des outils pour rendre votre travail plus avancé et efficace.',
+            'title' => 'AmÃ©lioration des compÃ©tences',
+            'description' => 'Des outils pour rendre votre travail plus avancÃ© et efficace.',
             'tips' => [
-                'Utilisez des graphiques pour analyser vos émotions.',
+                'Utilisez des graphiques pour analyser vos Ã©motions.',
                 'Identifiez les tendances dans vos humeurs.',
-                'Fixez des objectifs pour améliorer votre bien-être.',
+                'Fixez des objectifs pour amÃ©liorer votre bien-Ãªtre.',
             ],
         ];
 
@@ -233,25 +234,28 @@ final class JournalEmotionnelController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             // Associate the currently authenticated user before persisting
-            if (method_exists($this, 'getUser') && $this->getUser() !== null) {
-                $journalEmotionnel->setUser($this->getUser());
+            $currentUser = $this->getUser();
+            if ($currentUser instanceof User) {
+                $journalEmotionnel->setUser($currentUser);
             }
 
             $entityManager->persist($journalEmotionnel);
             $entityManager->flush();
 
-            if ($this->getUser() instanceof \App\Entity\User) {
-                $statsService->recomputeStats($this->getUser());
+            if ($currentUser instanceof User) {
+                $statsService->recomputeStats($currentUser);
             }
 
             // Dispatch async PDF generation
-            $messageBus->dispatch(new GenerateJournalPdfMessage(
-                $journalEmotionnel->getId(),
-                $this->getUser()->getId()
-            ));
+            if ($currentUser instanceof User) {
+                $messageBus->dispatch(new GenerateJournalPdfMessage(
+                    (int) $journalEmotionnel->getId(),
+                    $currentUser->getId()
+                ));
+            }
 
             // Generate AI analysis based on journal content and selected mood
-            $content = $journalEmotionnel->getContenu() ?? '';
+            $content = $journalEmotionnel->getContenu();
             $selectedMood = $journalEmotionnel->getMood()?->getHumeur() ?? 'neutre';
             
             // Debug: log the selected mood
@@ -312,7 +316,7 @@ final class JournalEmotionnelController extends AbstractController
     #[Route('/new/success/{id}', name: 'app_journal_emotionnel_new_success', methods: ['GET'])]
     public function newSuccess(JournalEmotionnel $journalEmotionnel, AIJournalService $aiService): Response
     {
-        $content = $journalEmotionnel->getContenu() ?? '';
+        $content = $journalEmotionnel->getContenu();
         $selectedMood = $journalEmotionnel->getMood()?->getHumeur() ?? 'neutre';
         $aiAnalysis = $aiService->analyzJournal($content, strtolower($selectedMood));
 
@@ -333,14 +337,14 @@ final class JournalEmotionnelController extends AbstractController
         $affirmations = $meditationService->getAffirmations();
         $breathingExercises = $meditationService->getBreathingExercises();
 
-        // Fetch 'metiers avancée' data
+        // Fetch 'metiers avancÃ©e' data
         $metiersAvancee = [
-            'title' => 'Amélioration des compétences',
-            'description' => 'Des outils pour rendre votre travail plus avancé et efficace.',
+            'title' => 'AmÃ©lioration des compÃ©tences',
+            'description' => 'Des outils pour rendre votre travail plus avancÃ© et efficace.',
             'tips' => [
-                'Utilisez des graphiques pour analyser vos émotions.',
+                'Utilisez des graphiques pour analyser vos Ã©motions.',
                 'Identifiez les tendances dans vos humeurs.',
-                'Fixez des objectifs pour améliorer votre bien-être.',
+                'Fixez des objectifs pour amÃ©liorer votre bien-Ãªtre.',
             ],
         ];
 

@@ -43,13 +43,11 @@ class AppointmentController extends AbstractController
                 $status = $appointment->getStatus();
                 if ($status === 'accepted' || $status === 'pending') {
                     $start = $appointment->getDate();
-                    if ($start instanceof \DateTimeInterface) {
-                        $end = (clone $start)->modify('+1 hour');
-                        $busy[] = [
-                            'start' => $start->format('Y-m-d\TH:i:s'),
-                            'end' => $end->format('Y-m-d\TH:i:s'),
-                        ];
-                    }
+                    $end = \DateTime::createFromInterface($start)->modify('+1 hour');
+                    $busy[] = [
+                        'start' => $start->format('Y-m-d\TH:i:s'),
+                        'end' => $end->format('Y-m-d\TH:i:s'),
+                    ];
                 }
             }
 
@@ -111,8 +109,8 @@ class AppointmentController extends AbstractController
                 'psychologue' => $psy->getFirstName() . ' ' . $psy->getLastName(),
                 'analyzed_count' => count($appointmentData)
             ]);
-        } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Erreur AI: ' . $e->getMessage()], 503);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['error' => 'Service IA indisponible. Veuillez réessayer plus tard.'], 503);
         }
     }
 
@@ -157,15 +155,8 @@ class AppointmentController extends AbstractController
             }
 
             // Find most preferred day and time
-            $mostDay = array_key_first((array) $patterns['by_day']) ?: 'Unknown';
-            $mostHour = array_key_first(array_reverse((array) $patterns['by_hour'])) ?: 'Unknown';
-
-            if (!empty($patterns['by_day'])) {
-                $mostDay = array_keys($patterns['by_day'], max($patterns['by_day']))[0];
-            }
-            if (!empty($patterns['by_hour'])) {
-                $mostHour = array_keys($patterns['by_hour'], max($patterns['by_hour']))[0];
-            }
+            $mostDay = array_keys($patterns['by_day'], max($patterns['by_day']))[0];
+            $mostHour = array_keys($patterns['by_hour'], max($patterns['by_hour']))[0];
 
             return new JsonResponse([
                 'patterns' => $patterns,
@@ -226,53 +217,49 @@ class AppointmentController extends AbstractController
 
             // Check if the selected time is already booked for this psychologist
             $selectedDate = $appointment->getDate();
-            if ($selectedDate) {
-                $existingAppointments = $appointmentRepository->findBy([
-                    'psychologue' => $psy
-                ]);
+            $existingAppointments = $appointmentRepository->findBy([
+                'psychologue' => $psy
+            ]);
 
-                foreach ($existingAppointments as $existing) {
-                    if ($existing->getStatus() === 'refused') {
-                        continue; // Ignore refused appointments
-                    }
+            foreach ($existingAppointments as $existing) {
+                if ($existing->getStatus() === 'refused') {
+                    continue; // Ignore refused appointments
+                }
 
-                    $existingStart = $existing->getDate();
-                    $existingEnd = (clone $existingStart)->modify('+1 hour');
+                $existingStart = $existing->getDate();
+                $existingEnd = \DateTime::createFromInterface($existingStart)->modify('+1 hour');
 
-                    // Check if selected time overlaps with existing appointment
-                    if ($selectedDate >= $existingStart && $selectedDate < $existingEnd) {
-                        $form->get('date')->addError(new FormError(
-                            'Ce créneau n\'est pas disponible. Veuillez choisir une autre date.'
-                        ));
-                        break;
-                    }
+                // Check if selected time overlaps with existing appointment
+                if ($selectedDate >= $existingStart && $selectedDate < $existingEnd) {
+                    $form->get('date')->addError(new FormError(
+                        'Ce créneau n\'est pas disponible. Veuillez choisir une autre date.'
+                    ));
+                    break;
                 }
             }
 
             // Only save if no conflicts found
-            if ($form->isValid()) {
-                $appointment->setStatus('pending'); // Ensure status is set to pending
-                $em->persist($appointment);
-                $em->flush();
+            $appointment->setStatus('pending'); // Ensure status is set to pending
+            $em->persist($appointment);
+            $em->flush();
 
-                // Notify psychologue by email
-                if ($psy->getEmail()) {
-                    $email = (new Email())
-                        ->from('noreply@mindcare.com')
-                        ->to($psy->getEmail())
-                        ->subject('Nouveau rendez-vous demandé')
-                        ->html('<p>Bonjour ' . $psy->getFirstName() . ',</p>
-                                <p>Un nouveau rendez-vous a été demandé par <strong>' . $user->getFirstName() . ' ' . $user->getLastName() . '</strong>.</p>
-                                <p><strong>Date:</strong> ' . $appointment->getDate()->format('d/m/Y H:i') . '</p>
-                                <p><strong>Lieu:</strong> ' . ($appointment->getLocation() == 'in_office' ? 'En cabinet' : 'En ligne') . '</p>
-                                <p>Veuillez vous connecter à votre tableau de bord pour accepter ou refuser cette demande.</p>
-                                <p>Cordialement,<br>L\'équipe MindCare</p>');
+            // Notify psychologue by email
+            if ($psy->getEmail()) {
+                $email = (new Email())
+                    ->from('noreply@mindcare.com')
+                    ->to($psy->getEmail())
+                    ->subject('Nouveau rendez-vous demandé')
+                    ->html('<p>Bonjour ' . $psy->getFirstName() . ',</p>
+                            <p>Un nouveau rendez-vous a été demandé par <strong>' . $user->getFirstName() . ' ' . $user->getLastName() . '</strong>.</p>
+                            <p><strong>Date:</strong> ' . $appointment->getDate()->format('d/m/Y H:i') . '</p>
+                            <p><strong>Lieu:</strong> ' . ($appointment->getLocation() == 'in_office' ? 'En cabinet' : 'En ligne') . '</p>
+                            <p>Veuillez vous connecter à votre tableau de bord pour accepter ou refuser cette demande.</p>
+                            <p>Cordialement,<br>L\'équipe MindCare</p>');
 
-                    $mailer->send($email);
-                }
-
-                return $this->redirectToRoute('student_mes_rendezvous');
+                $mailer->send($email);
             }
+
+            return $this->redirectToRoute('student_mes_rendezvous');
         }
 
         return $this->render('reservation/new.html.twig', [
@@ -322,7 +309,7 @@ class AppointmentController extends AbstractController
                 if ($meetingData['join_url']) {
                     $appointment->setZoomMeetingId($meetingData['id']);
                     $appointment->setZoomJoinUrl($meetingData['join_url']);
-                    $appointment->setZoomCreatedAt(new \DateTime());
+                    $appointment->attachZoomMeeting();
                     $zoomLink = $meetingData['join_url'];
                 }
             } catch (\Exception $e) {
@@ -494,7 +481,7 @@ class AppointmentController extends AbstractController
                     }
 
                     $existingStart = $existing->getDate();
-                    $existingEnd = (clone $existingStart)->modify('+1 hour');
+                    $existingEnd = \DateTime::createFromInterface($existingStart)->modify('+1 hour');
 
                     if ($selectedDate >= $existingStart && $selectedDate < $existingEnd) {
                         $form->get('date')->addError(new FormError(
@@ -505,30 +492,28 @@ class AppointmentController extends AbstractController
                 }
             }
 
-            if ($form->isValid()) {
-                $appointment->setStatus('pending'); // Reset status to pending
-                $em->flush();
+            $appointment->setStatus('pending'); // Reset status to pending
+            $em->flush();
 
-                // Notify psychologue by email
-                $psy = $appointment->getPsychologue();
-                if ($psy && $psy->getEmail()) {
-                    $email = (new Email())
-                        ->from('noreply@mindcare.com')
-                        ->to($psy->getEmail())
-                        ->subject('Demande de report de rendez-vous')
-                        ->html('<p>Bonjour ' . $psy->getFirstName() . ',</p>
-                                <p>L\'étudiant <strong>' . $user->getFirstName() . ' ' . $user->getLastName() . '</strong> a demandé le report de son rendez-vous.</p>
-                                <p><strong>Nouvelle Date demandée:</strong> ' . $appointment->getDate()->format('d/m/Y H:i') . '</p>
-                                <p><strong>Lieu:</strong> ' . ($appointment->getLocation() == 'in_office' ? 'En cabinet' : 'En ligne') . '</p>
-                                <p>Veuillez vous connecter pour traiter cette demande.</p>
-                                <p>Cordialement,<br>L\'équipe MindCare</p>');
+            // Notify psychologue by email
+            $psy = $appointment->getPsychologue();
+            if ($psy && $psy->getEmail()) {
+                $email = (new Email())
+                    ->from('noreply@mindcare.com')
+                    ->to($psy->getEmail())
+                    ->subject('Demande de report de rendez-vous')
+                    ->html('<p>Bonjour ' . $psy->getFirstName() . ',</p>
+                            <p>L\'étudiant <strong>' . $user->getFirstName() . ' ' . $user->getLastName() . '</strong> a demandé le report de son rendez-vous.</p>
+                            <p><strong>Nouvelle Date demandée:</strong> ' . $appointment->getDate()->format('d/m/Y H:i') . '</p>
+                            <p><strong>Lieu:</strong> ' . ($appointment->getLocation() == 'in_office' ? 'En cabinet' : 'En ligne') . '</p>
+                            <p>Veuillez vous connecter pour traiter cette demande.</p>
+                            <p>Cordialement,<br>L\'équipe MindCare</p>');
 
-                    $mailer->send($email);
-                }
-
-                $this->addFlash('success', 'Votre demande de report a été envoyée. Le psychologue a été notifié par email.');
-                return $this->redirectToRoute('student_mes_rendezvous');
+                $mailer->send($email);
             }
+
+            $this->addFlash('success', 'Votre demande de report a été envoyée. Le psychologue a été notifié par email.');
+            return $this->redirectToRoute('student_mes_rendezvous');
         }
 
         return $this->render('reservation/postpone.html.twig', [
@@ -543,7 +528,7 @@ class AppointmentController extends AbstractController
     public function cancel(int $id, Request $request, AppointmentRepository $appointmentRepository, EntityManagerInterface $em, MailerInterface $mailer): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return $this->redirectToRoute('app_login');
         }
 

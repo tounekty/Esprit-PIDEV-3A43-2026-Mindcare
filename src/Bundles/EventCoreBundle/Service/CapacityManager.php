@@ -85,7 +85,7 @@ class CapacityManager
         $reservation = new EventReservation();
         $reservation->setEvent($event);
         $reservation->setUser($user);
-        $reservation->setDateReservation(new \DateTime());
+        $reservation->reserveNow();
         $reservation->setNom($nom);
         $reservation->setPrenom($prenom);
         $reservation->setTelephone($telephone);

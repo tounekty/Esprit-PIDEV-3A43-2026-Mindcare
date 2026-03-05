@@ -33,32 +33,36 @@ class OllamaService
         $defaultOptions = [
             'temperature' => 0.7,
             'max_tokens' => 500,
-            'timeout' => 180, // 3 minutes - let Ollama take its time
+            'timeout' => 180,
         ];
 
         $options = array_merge($defaultOptions, $options);
 
-        $response = $this->httpClient->request('POST', $this->ollamaUrl, [
-            'json' => [
-                'model' => $this->model,
-                'prompt' => $prompt,
-                'stream' => false,
-                'options' => [
-                    'temperature' => $options['temperature'],
-                    'num_predict' => $options['max_tokens'],
-                ]
-            ],
-            'timeout' => $options['timeout'],
-            'max_duration' => $options['timeout'],
-        ]);
+        try {
+            $response = $this->httpClient->request('POST', $this->ollamaUrl, [
+                'json' => [
+                    'model' => $this->model,
+                    'prompt' => $prompt,
+                    'stream' => false,
+                    'options' => [
+                        'temperature' => $options['temperature'],
+                        'num_predict' => $options['max_tokens'],
+                    ]
+                ],
+                'timeout' => $options['timeout'],
+                'max_duration' => $options['timeout'],
+            ]);
 
-        $data = $response->toArray();
-        
-        if (!isset($data['response']) || empty($data['response'])) {
-            throw new \RuntimeException('Ollama returned empty response');
+            $data = $response->toArray();
+
+            if (!isset($data['response']) || empty($data['response'])) {
+                throw new \RuntimeException('Ollama returned empty response');
+            }
+
+            return $data['response'];
+        } catch (\Throwable $e) {
+            throw new \RuntimeException('Ollama unavailable: ' . $e->getMessage(), 0, $e);
         }
-        
-        return $data['response'];
     }
 
     /**

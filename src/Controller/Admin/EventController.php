@@ -3,6 +3,7 @@
 namespace App\Controller\Admin;
 
 use App\Entity\Event;
+use App\Entity\User;
 use App\Form\EventType;
 use App\Repository\EventRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,7 +17,6 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 #[Route('/admin/events', name: 'admin_events_')]
 class EventController extends AbstractController
 {
-    private string $eventImageDirectory = 'uploads/events';
 
     private function handleEventImageUpload(?UploadedFile $file, ?string $oldImage = null): ?string
     {
@@ -124,7 +124,10 @@ class EventController extends AbstractController
         $this->denyAccessUnlessGranted('ROLE_PSYCHOLOGUE');
 
         $event = new Event();
-        $event->setUser($this->getUser());
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $event->setUser($user);
+        }
         $form = $this->createForm(EventType::class, $event);
         $form->handleRequest($request);
 

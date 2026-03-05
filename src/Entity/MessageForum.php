@@ -9,7 +9,11 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: MessageForumRepository::class)]
-#[ORM\Table(name: 'message_forum')]
+#[ORM\Table(name: 'message_forum', indexes: [
+    new ORM\Index(columns: ['sujet_id']),
+    new ORM\Index(columns: ['user_id']),
+    new ORM\Index(columns: ['parent_message_id']),
+])]
 class MessageForum
 {
     #[ORM\Id]
@@ -31,11 +35,11 @@ class MessageForum
     private \DateTimeImmutable $dateMessage;
 
     #[ORM\ManyToOne(targetEntity: SujetForum::class, inversedBy: 'messages')]
-    #[ORM\JoinColumn(name: 'id_sujet', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'sujet_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?SujetForum $sujet = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'children')]
@@ -45,7 +49,7 @@ class MessageForum
     /**
      * @var Collection<int, self>
      */
-    #[ORM\OneToMany(mappedBy: 'parentMessage', targetEntity: self::class)]
+    #[ORM\OneToMany(mappedBy: 'parentMessage', targetEntity: self::class, cascade: ['remove'])]
     private Collection $children;
 
     #[ORM\Column(name: 'is_anonymous', type: 'boolean')]
@@ -90,7 +94,7 @@ class MessageForum
         return $this->dateMessage;
     }
 
-    public function setDateMessage(\DateTimeImmutable $dateMessage): self
+    protected function setDateMessage(\DateTimeImmutable $dateMessage): self
     {
         $this->dateMessage = $dateMessage;
 

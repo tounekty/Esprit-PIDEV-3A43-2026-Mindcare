@@ -309,7 +309,7 @@ class AppointmentController extends AbstractController
                 if ($meetingData['join_url']) {
                     $appointment->setZoomMeetingId($meetingData['id']);
                     $appointment->setZoomJoinUrl($meetingData['join_url']);
-                    $appointment->setZoomCreatedAt(new \DateTime());
+                    $appointment->attachZoomMeeting();
                     $zoomLink = $meetingData['join_url'];
                 }
             } catch (\Exception $e) {
@@ -472,7 +472,7 @@ class AppointmentController extends AbstractController
         // Check if psychologist can edit their own or admin editing
         if ($this->isGranted('ROLE_PSYCHOLOGUE') && !$this->isGranted('ROLE_ADMIN')) {
             // Psychologist can only edit their own appointments
-            if ($appointment->getPsychologue()->getId() !== $user->getId()) {
+            if (!$user instanceof User || $appointment->getPsychologue()->getId() !== $user->getId()) {
                 throw $this->createAccessDeniedException();
             }
         } else {
@@ -537,7 +537,7 @@ class AppointmentController extends AbstractController
         // Check if psychologist can delete their own or admin deleting
         if ($this->isGranted('ROLE_PSYCHOLOGUE') && !$this->isGranted('ROLE_ADMIN')) {
             // Psychologist can only delete their own appointments
-            if ($appointment->getPsychologue()->getId() !== $user->getId()) {
+            if (!$user instanceof User || $appointment->getPsychologue()->getId() !== $user->getId()) {
                 throw $this->createAccessDeniedException();
             }
         } else {

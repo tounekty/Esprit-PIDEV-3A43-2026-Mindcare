@@ -7,15 +7,18 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: PsychologicalAlertRepository::class)]
-#[ORM\Table(name: 'psychological_alert')]
-final class PsychologicalAlert
+#[ORM\Table(name: 'psychological_alert', indexes: [
+    new ORM\Index(columns: ['user_id']),
+])]
+#[ORM\HasLifecycleCallbacks]
+class PsychologicalAlert
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne]
+    #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
@@ -46,9 +49,21 @@ final class PsychologicalAlert
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $adminNotes = null;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $updatedBy = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
+    private \DateTimeImmutable $updatedAt;
+
     public function __construct()
     {
         $this->createdAt = new \DateTime();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -105,7 +120,7 @@ final class PsychologicalAlert
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
+    protected function setCreatedAt(\DateTimeInterface $createdAt): self
     {
         $this->createdAt = $createdAt;
         return $this;
@@ -152,7 +167,7 @@ final class PsychologicalAlert
         return $this->resolvedAt;
     }
 
-    public function setResolvedAt(?\DateTimeInterface $resolvedAt): self
+    protected function setResolvedAt(?\DateTimeInterface $resolvedAt): self
     {
         $this->resolvedAt = $resolvedAt;
         return $this;
@@ -167,5 +182,20 @@ final class PsychologicalAlert
     {
         $this->adminNotes = $adminNotes;
         return $this;
+    }
+
+    public function getCreatedBy(): ?User { return $this->createdBy; }
+    public function setCreatedBy(?User $createdBy): self { $this->createdBy = $createdBy; return $this; }
+
+    public function getUpdatedBy(): ?User { return $this->updatedBy; }
+    public function setUpdatedBy(?User $updatedBy): self { $this->updatedBy = $updatedBy; return $this; }
+
+    public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
+    protected function setUpdatedAt(\DateTimeImmutable $updatedAt): self { $this->updatedAt = $updatedAt; return $this; }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

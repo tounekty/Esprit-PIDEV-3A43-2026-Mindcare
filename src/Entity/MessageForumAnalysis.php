@@ -19,7 +19,7 @@ class MessageForumAnalysis
     private ?int $id = null;
 
     #[ORM\OneToOne(inversedBy: 'analysis', targetEntity: MessageForum::class)]
-    #[ORM\JoinColumn(name: 'message_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE', unique: true)]
+    #[ORM\JoinColumn(name: 'message_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?MessageForum $message = null;
 
     #[ORM\Column(type: 'string', length: 20)]
@@ -46,7 +46,7 @@ class MessageForumAnalysis
     #[ORM\Column(name: 'raw_response', type: 'text', nullable: true)]
     private ?string $rawResponse = null;
 
-    #[ORM\Column(name: 'error_message', type: 'string', length: 500, nullable: true)]
+    #[ORM\Column(name: 'error_message', type: 'text', nullable: true)]
     private ?string $errorMessage = null;
 
     #[ORM\Column(name: 'analyzed_at', type: 'datetime_immutable', nullable: true)]
@@ -57,6 +57,14 @@ class MessageForumAnalysis
 
     #[ORM\Column(name: 'updated_at', type: 'datetime_immutable')]
     private \DateTimeImmutable $updatedAt;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $updatedBy = null;
 
     public function __construct()
     {
@@ -198,10 +206,22 @@ class MessageForumAnalysis
         return $this->analyzedAt;
     }
 
-    public function setAnalyzedAt(?\DateTimeImmutable $analyzedAt): self
+    protected function setAnalyzedAt(?\DateTimeImmutable $analyzedAt): self
     {
         $this->analyzedAt = $analyzedAt;
 
+        return $this;
+    }
+
+    public function resetAnalysis(): self
+    {
+        $this->analyzedAt = null;
+        return $this;
+    }
+
+    public function markAnalyzed(): self
+    {
+        $this->analyzedAt = new \DateTimeImmutable();
         return $this;
     }
 
@@ -221,4 +241,10 @@ class MessageForumAnalysis
 
         return $this;
     }
+
+    public function getCreatedBy(): ?User { return $this->createdBy; }
+    public function setCreatedBy(?User $createdBy): self { $this->createdBy = $createdBy; return $this; }
+
+    public function getUpdatedBy(): ?User { return $this->updatedBy; }
+    public function setUpdatedBy(?User $updatedBy): self { $this->updatedBy = $updatedBy; return $this; }
 }

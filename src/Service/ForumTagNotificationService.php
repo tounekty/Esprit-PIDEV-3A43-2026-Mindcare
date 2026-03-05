@@ -29,9 +29,9 @@ class ForumTagNotificationService
 
         $authorDisplayName = 'Anonyme';
         if (!$sujet->isAnonymous()) {
-            $authorDisplayName = trim((string) ($author->getFirstName() ?? '') . ' ' . (string) ($author->getLastName() ?? ''));
+            $authorDisplayName = trim($author->getFirstName() . ' ' . $author->getLastName());
             if ($authorDisplayName === '') {
-                $authorDisplayName = $author->getEmail() ?? 'Utilisateur';
+                $authorDisplayName = $author->getEmail();
             }
         }
 
@@ -54,11 +54,11 @@ class ForumTagNotificationService
             }
 
             $email = $psychologue->getEmail();
-            if ($email === null || $email === '') {
+            if ($email === '') {
                 continue;
             }
 
-            $psychologueName = trim((string) ($psychologue->getFirstName() ?? '') . ' ' . (string) ($psychologue->getLastName() ?? ''));
+            $psychologueName = trim($psychologue->getFirstName() . ' ' . $psychologue->getLastName());
 
             try {
                 $this->mailer->send(

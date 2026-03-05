@@ -10,6 +10,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 #[ORM\Entity(repositoryClass: MoodRepository::class)]
+#[ORM\Table(name: 'mood', indexes: [
+    new ORM\Index(columns: ['user_id']),
+])]
 class Mood
 {
 #[ORM\OneToMany(mappedBy: 'mood', targetEntity: JournalEmotionnel::class, cascade: ['remove'])]
@@ -28,7 +31,7 @@ private Collection $journals;
                 minMessage: "L'humeur doit comporter au moins {{ limit }} caractères.",
                 maxMessage: "L'humeur ne peut pas dépasser {{ limit }} caractères."
         )]
-        private ?string $humeur = null;
+        private string $humeur = '';
 
     #[ORM\Column]
     #[Assert\NotBlank(message: "L'intensité est obligatoire.")]
@@ -38,16 +41,16 @@ private Collection $journals;
         max: 5,
         notInRangeMessage: "L'intensité doit être entre {{ min }} et {{ max }}."
     )]
-    private ?int $intensite = null;
+    private int $intensite = 0;
 
     #[ORM\Column(type: "date")]
     #[Assert\NotBlank(message: "La date du mood est obligatoire.")]
     #[Assert\Type(type: "\DateTimeInterface", message: "La date doit être un objet DateTime valide.")]
     #[Assert\LessThanOrEqual("today", message: "La date ne peut pas être dans le futur.")]
-    private ?\DateTime $datemood = null;
+    private \DateTime $datemood;
 
-        #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+        #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
@@ -62,7 +65,7 @@ private Collection $journals;
         return $this->id;
     }
 
-    public function getHumeur(): ?string
+    public function getHumeur(): string
     {
         return $this->humeur;
     }
@@ -74,7 +77,7 @@ private Collection $journals;
         return $this;
     }
 
-    public function getIntensite(): ?int
+    public function getIntensite(): int
     {
         return $this->intensite;
     }
@@ -86,12 +89,12 @@ private Collection $journals;
         return $this;
     }
 
-    public function getDatemood(): ?\DateTime
+    public function getDatemood(): \DateTime
     {
         return $this->datemood;
     }
 
-    public function setDatemood(?\DateTime $datemood): static
+    public function setDatemood(\DateTime $datemood): static
     {
         $this->datemood = $datemood;
         return $this;
@@ -157,6 +160,7 @@ private Collection $journals;
 
     public function __construct()
     {
+        $this->datemood = new \DateTime();
         $this->journals = new ArrayCollection();
     }
 }

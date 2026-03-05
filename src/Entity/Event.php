@@ -9,7 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EventRepository::class)]
-#[ORM\Table(name: 'event')]
+#[ORM\Table(name: 'event', indexes: [
+    new ORM\Index(columns: ['user_id']),
+])]
 class Event
 {
     #[ORM\Id]
@@ -19,25 +21,25 @@ class Event
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: 'Le titre est obligatoire.')]
-    private ?string $titre = null;
+    private string $titre = '';
 
     #[ORM\Column(type: 'text')]
     #[Assert\NotBlank(message: 'La description est obligatoire.')]
-    private ?string $description = null;
+    private string $description = '';
 
     #[ORM\Column(type: 'datetime', name: 'date_event')]
     #[Assert\NotNull(message: 'La date est obligatoire.')]
     #[Assert\GreaterThan('now', message: 'La date doit etre dans le futur.')]
-    private ?\DateTimeInterface $dateEvent = null;
+    private \DateTimeInterface $dateEvent;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: 'Le lieu est obligatoire.')]
-    private ?string $lieu = null;
+    private string $lieu = '';
 
     #[ORM\Column(type: 'integer')]
     #[Assert\NotNull(message: 'La capacite est obligatoire.')]
     #[Assert\Positive(message: 'La capacite doit etre positive.')]
-    private ?int $capacite = null;
+    private int $capacite = 0;
 
     #[ORM\Column(type: 'string', length: 100, nullable: true)]
     private ?string $categorie = null;
@@ -46,18 +48,19 @@ class Event
     private ?string $image = null;
 
     
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
     /**
      * @var Collection<int, EventReservation>
      */
-    #[ORM\OneToMany(mappedBy: 'event', targetEntity: EventReservation::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'event', targetEntity: EventReservation::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $reservations;
 
     public function __construct()
     {
+        $this->dateEvent = new \DateTime();
         $this->reservations = new ArrayCollection();
     }
 
@@ -66,7 +69,7 @@ class Event
         return $this->id;
     }
 
-    public function getTitre(): ?string
+    public function getTitre(): string
     {
         return $this->titre;
     }
@@ -77,7 +80,7 @@ class Event
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -88,18 +91,18 @@ class Event
         return $this;
     }
 
-    public function getDateEvent(): ?\DateTimeInterface
+    public function getDateEvent(): \DateTimeInterface
     {
         return $this->dateEvent;
     }
 
-    public function setDateEvent(?\DateTimeInterface $dateEvent): self
+    public function setDateEvent(\DateTimeInterface $dateEvent): self
     {
         $this->dateEvent = $dateEvent;
         return $this;
     }
 
-    public function getLieu(): ?string
+    public function getLieu(): string
     {
         return $this->lieu;
     }
@@ -110,7 +113,7 @@ class Event
         return $this;
     }
 
-    public function getCapacite(): ?int
+    public function getCapacite(): int
     {
         return $this->capacite;
     }

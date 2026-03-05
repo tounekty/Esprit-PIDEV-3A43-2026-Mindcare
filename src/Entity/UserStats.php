@@ -7,6 +7,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: UserStatsRepository::class)]
+#[ORM\Table(name: 'user_stat')]
 class UserStats
 {
     #[ORM\Id]
@@ -14,7 +15,7 @@ class UserStats
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\OneToOne(inversedBy: 'stats', cascade: ['persist', 'remove'])]
+    #[ORM\OneToOne(inversedBy: 'stats', cascade: ['persist'])]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
@@ -30,8 +31,8 @@ class UserStats
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 0])]
     private int $consecutiveDays = 0;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true)]
-    private ?\DateTime $lastEntryDate = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $lastEntryDate = null;
 
     public function getId(): ?int
     {
@@ -115,14 +116,20 @@ class UserStats
         return $this;
     }
 
-    public function getLastEntryDate(): ?\DateTime
+    public function getLastEntryDate(): ?\DateTimeImmutable
     {
         return $this->lastEntryDate;
     }
 
-    public function setLastEntryDate(?\DateTime $date): static
+    protected function setLastEntryDate(?\DateTimeImmutable $date): static
     {
         $this->lastEntryDate = $date;
+        return $this;
+    }
+
+    public function recordLastEntry(?\DateTimeInterface $date): static
+    {
+        $this->lastEntryDate = $date !== null ? \DateTimeImmutable::createFromInterface($date) : null;
         return $this;
     }
 }

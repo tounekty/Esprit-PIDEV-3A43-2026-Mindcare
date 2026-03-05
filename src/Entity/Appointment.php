@@ -2,13 +2,18 @@
 
 namespace App\Entity;
 
+use App\Repository\AppointmentRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 
-#[ORM\Entity(repositoryClass: "App\Repository\AppointmentRepository")]
-#[ORM\Table(name: 'appointment')]
+#[ORM\Entity(repositoryClass: AppointmentRepository::class)]
+#[ORM\Table(name: 'appointment', indexes: [
+    new ORM\Index(columns: ['etudiant_id']),
+    new ORM\Index(columns: ['psy_id']),
+    new ORM\Index(columns: ['patient_file_id']),
+])]
 #[Vich\Uploadable]
 class Appointment
 {
@@ -19,25 +24,25 @@ class Appointment
 
     #[ORM\Column(type: 'datetime')]
     #[Assert\NotNull(message: "Veuillez sélectionner une date.")]
-    private ?\DateTimeInterface $date = null;
+    private \DateTimeInterface $date;
 
     #[ORM\Column(type: 'string', length: 255)]
     #[Assert\NotBlank(message: "Le lieu est obligatoire.")]
-    private ?string $location = null;
+    private string $location = '';
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
 
     #[ORM\Column(type: 'string', length: 20)]
-    private ?string $status = 'pending';
+    private string $status = 'pending';
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: 'idetudiant', referencedColumnName: 'id')]
+    #[ORM\JoinColumn(name: 'etudiant_id', referencedColumnName: 'id')]
     #[Assert\NotNull(message: "L'étudiant est obligatoire.")]
     private ?User $etudiant = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: 'idpsy', referencedColumnName: 'id')]
+    #[ORM\JoinColumn(name: 'psy_id', referencedColumnName: 'id')]
     #[Assert\NotNull(message: "Le psychologue est obligatoire.")]
     private ?User $psychologue = null;
 
@@ -64,23 +69,28 @@ class Appointment
     private ?\DateTimeInterface $reportUpdatedAt = null;
 
     // Getters and setters
+    public function __construct()
+    {
+        $this->date = new \DateTime();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDate(): ?\DateTimeInterface
+    public function getDate(): \DateTimeInterface
     {
         return $this->date;
     }
 
-    public function setDate(?\DateTimeInterface $date): self
+    public function setDate(\DateTimeInterface $date): self
     {
         $this->date = $date;
         return $this;
     }
 
-    public function getLocation(): ?string
+    public function getLocation(): string
     {
         return $this->location;
     }
@@ -124,7 +134,7 @@ class Appointment
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -173,9 +183,15 @@ class Appointment
         return $this->zoomCreatedAt;
     }
 
-    public function setZoomCreatedAt(?\DateTimeInterface $zoomCreatedAt): self
+    protected function setZoomCreatedAt(?\DateTimeInterface $zoomCreatedAt): self
     {
         $this->zoomCreatedAt = $zoomCreatedAt;
+        return $this;
+    }
+
+    public function attachZoomMeeting(): self
+    {
+        $this->zoomCreatedAt = new \DateTime();
         return $this;
     }
 
@@ -206,7 +222,7 @@ class Appointment
         return $this->reportName;
     }
 
-    public function setReportUpdatedAt(?\DateTimeInterface $reportUpdatedAt): self
+    protected function setReportUpdatedAt(?\DateTimeInterface $reportUpdatedAt): self
     {
         $this->reportUpdatedAt = $reportUpdatedAt;
         return $this;

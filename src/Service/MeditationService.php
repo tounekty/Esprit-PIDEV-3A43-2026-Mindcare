@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace App\Service;
 
-use Symfony\Contracts\HttpClient\HttpClientInterface;
-
 class MeditationService
 {
-    public function __construct(private HttpClientInterface $httpClient)
+    public function __construct()
     {
     }
 

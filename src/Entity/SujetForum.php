@@ -9,7 +9,9 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SujetForumRepository::class)]
-#[ORM\Table(name: 'sujet_forum')]
+#[ORM\Table(name: 'sujet_forum', indexes: [
+    new ORM\Index(columns: ['user_id']),
+])]
 class SujetForum
 {
     public const STATUS_VISIBLE = 'VISIBLE';
@@ -64,8 +66,8 @@ class SujetForum
     private \DateTimeImmutable $dateCreation;
 
   
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
     #[ORM\Column(name: 'image_url', type: 'string', length: 255, nullable: true)]
@@ -77,14 +79,14 @@ class SujetForum
     #[ORM\Column(name: 'is_anonymous', type: 'boolean')]
     private bool $isAnonymous = false;
 
-    #[ORM\Column(type: 'string', length: 50, nullable: true)]
+    #[ORM\Column(type: 'string', length: 30, nullable: true)]
     #[Assert\Length(
         max: 30,
         maxMessage: 'Le statut ne peut pas depasser {{ limit }} caracteres.'
     )]
     private ?string $status = null;
 
-    #[ORM\Column(type: 'string', length: 100, nullable: true)]
+    #[ORM\Column(type: 'string', length: 60, nullable: true)]
     #[Assert\Length(
         max: 60,
         maxMessage: 'La categorie ne peut pas depasser {{ limit }} caracteres.'
@@ -103,7 +105,7 @@ class SujetForum
     /**
      * @var Collection<int, MessageForum>
      */
-    #[ORM\OneToMany(mappedBy: 'sujet', targetEntity: MessageForum::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(mappedBy: 'sujet', targetEntity: MessageForum::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private Collection $messages;
 
     /**
@@ -111,8 +113,8 @@ class SujetForum
      */
     #[ORM\ManyToMany(targetEntity: User::class)]
     #[ORM\JoinTable(name: 'sujet_tagged_psychologue')]
-    #[ORM\JoinColumn(name: 'id_sujet', referencedColumnName: 'id', onDelete: 'CASCADE')]
-    #[ORM\InverseJoinColumn(name: 'id_psychologue', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'sujet_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[ORM\InverseJoinColumn(name: 'psychologue_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     private Collection $taggedPsychologues;
 
     public function __construct()
@@ -156,7 +158,7 @@ class SujetForum
         return $this->dateCreation;
     }
 
-    public function setDateCreation(\DateTimeImmutable $dateCreation): self
+    protected function setDateCreation(\DateTimeImmutable $dateCreation): self
     {
         $this->dateCreation = $dateCreation;
 

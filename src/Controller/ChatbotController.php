@@ -63,7 +63,7 @@ PROMPT;
             return $this->json(['error' => $result['error']], 503);
         }
 
-        return $this->json(['reply' => $result['reply'] ?? '']);
+        return $this->json(['reply' => $result['reply']]);
     }
 
     private function buildEventContext(EventRepository $eventRepository, EventReservationRepository $reservationRepository): string

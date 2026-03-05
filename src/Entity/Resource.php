@@ -10,6 +10,10 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 #[ORM\Entity(repositoryClass: ResourceRepository::class)]
+#[ORM\Table(name: 'resource', indexes: [
+    new ORM\Index(columns: ['user_id']),
+])]
+#[ORM\HasLifecycleCallbacks]
 class Resource
 {
     public const TYPE_ARTICLE = 'article';
@@ -28,7 +32,7 @@ class Resource
         minMessage: 'Le titre doit contenir au moins {{ limit }} caracteres.',
         maxMessage: 'Le titre ne doit pas depasser {{ limit }} caracteres.'
     )]
-    private ?string $title = null;
+    private string $title = '';
 
     #[ORM\Column(type: 'text')]
     #[Assert\NotBlank(message: 'La description est obligatoire.')]
@@ -38,7 +42,7 @@ class Resource
         minMessage: 'La description doit contenir au moins {{ limit }} caracteres.',
         maxMessage: 'La description ne doit pas depasser {{ limit }} caracteres.'
     )]
-    private ?string $description = null;
+    private string $description = '';
 
     #[ORM\Column(length: 255, nullable: true)]
     #[Assert\Length(
@@ -77,21 +81,35 @@ class Resource
     private ?string $imageUrl = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private \DateTimeImmutable $createdAt;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     private ?User $user = null;
 
     #[ORM\OneToMany(
         mappedBy: 'resource',
         targetEntity: Commentaire::class,
+        cascade: ['persist', 'remove'],
         orphanRemoval: true
     )]
     private Collection $commentaires;
 
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $createdBy = null;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?User $updatedBy = null;
+
+    #[ORM\Column]
+    private \DateTimeImmutable $updatedAt;
+
     public function __construct()
     {
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
         $this->commentaires = new ArrayCollection();
     }
 
@@ -102,7 +120,7 @@ class Resource
         return $this->id;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -113,7 +131,7 @@ class Resource
         return $this;
     }
 
-    public function getDescription(): ?string
+    public function getDescription(): string
     {
         return $this->description;
     }
@@ -224,7 +242,7 @@ class Resource
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
     }
@@ -333,6 +351,21 @@ class Resource
             return null;
         }
 
-        return $matches[1] ?? null;
+        return $matches[1];
+    }
+
+    public function getCreatedBy(): ?User { return $this->createdBy; }
+    public function setCreatedBy(?User $createdBy): self { $this->createdBy = $createdBy; return $this; }
+
+    public function getUpdatedBy(): ?User { return $this->updatedBy; }
+    public function setUpdatedBy(?User $updatedBy): self { $this->updatedBy = $updatedBy; return $this; }
+
+    public function getUpdatedAt(): \DateTimeImmutable { return $this->updatedAt; }
+    protected function setUpdatedAt(\DateTimeImmutable $updatedAt): self { $this->updatedAt = $updatedAt; return $this; }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 }

@@ -55,7 +55,7 @@ class StatsService
         $stats
             ->setTotalEntries($totalEntries)
             ->setConsecutiveDays($currentStreak)
-            ->setLastEntryDate($lastEntryDate)
+            ->recordLastEntry($lastEntryDate)
             ->setBadges($badges)
             ->setPoints($points);
 

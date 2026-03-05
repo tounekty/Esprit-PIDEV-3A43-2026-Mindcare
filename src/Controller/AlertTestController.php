@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Service\PsychologicalAlertService;
 use App\Repository\UserRepository;
 use App\Repository\MoodRepository;
+use App\Entity\User;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,7 +23,7 @@ final class AlertTestController extends AbstractController
         // Get current user
         $user = $this->getUser();
         
-        if (!$user) {
+        if (!$user instanceof User) {
             return new Response('❌ Vous devez être connecté d\'abord. <br><a href="/login">Se connecter</a>', 403);
         }
 
@@ -38,7 +39,7 @@ final class AlertTestController extends AbstractController
     public function debug2(PsychologicalAlertService $alertService): Response
     {
         $user = $this->getUser();
-        if (!$user) {
+        if (!$user instanceof User) {
             return new Response('Non connecté');
         }
 

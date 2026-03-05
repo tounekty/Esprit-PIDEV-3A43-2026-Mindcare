@@ -127,11 +127,9 @@ class AuthController extends AbstractController
 
             if ($user) {
                 // Generate 6-digit code
-                $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
                 
-                $user->setResetCode($code);
-                // FIX: Use DateTime not DateTimeImmutable to match your entity
-                $user->setResetCodeExpiresAt(new \DateTime('+15 minutes'));
+                $user->initiatePasswordReset($code);
                 $em->flush();
 
                 // Send the email
@@ -205,8 +203,7 @@ class AuthController extends AbstractController
             // Check if code exists and is valid
             if ($user->getResetCode() === $code && $expiresAt && $expiresAt > $now) {
                 // Clear the code but keep email in session
-                $user->setResetCode(null);
-                $user->setResetCodeExpiresAt(null);
+                $user->clearPasswordReset();
                 $em->flush();
 
                 $this->addFlash('success', 'Code verified successfully! Please enter your new password.');
@@ -217,8 +214,7 @@ class AuthController extends AbstractController
             
             // If code expired, clear it
             if ($expiresAt && $expiresAt <= $now) {
-                $user->setResetCode(null);
-                $user->setResetCodeExpiresAt(null);
+                $user->clearPasswordReset();
                 $em->flush();
             }
         }
@@ -266,8 +262,7 @@ class AuthController extends AbstractController
             $user->setPassword($hasher->hashPassword($user, $password));
             
             // Clear reset fields
-            $user->setResetCode(null);
-            $user->setResetCodeExpiresAt(null);
+            $user->clearPasswordReset();
             
             $em->flush();
 
@@ -323,11 +318,9 @@ class AuthController extends AbstractController
 
         if ($user) {
             // Generate new 6-digit code
-            $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $code = str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
             
-            $user->setResetCode($code);
-            // FIX: Use DateTime not DateTimeImmutable
-            $user->setResetCodeExpiresAt(new \DateTime('+15 minutes'));
+            $user->initiatePasswordReset($code);
             $em->flush();
 
             // Send the email

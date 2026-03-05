@@ -199,14 +199,14 @@ class GoogleAnalyticsResourceMetricsService
 
         $statusCode = $response->getStatusCode();
         $data = $response->toArray(false);
-        if ($statusCode >= 400 || !is_array($data)) {
+        if ($statusCode >= 400) {
             $message = $this->extractHttpErrorMessage($data) ?? 'runReport failed.';
             throw new \RuntimeException(sprintf('Google Analytics runReport failed (%d): %s', $statusCode, $message));
         }
 
         $rows = $data['rows'] ?? [];
 
-        return is_array($rows) ? $rows : [];
+        return $rows;
     }
 
     /**
@@ -232,7 +232,7 @@ class GoogleAnalyticsResourceMetricsService
                 continue;
             }
 
-            $resourceId = (int) ($matches[1] ?? 0);
+            $resourceId = (int) $matches[1];
             if ($resourceId <= 0) {
                 continue;
             }

@@ -126,7 +126,7 @@ Règles importantes :
 PROMPT;
     }
 
-    /** @param Resource[] $resources */
+    /** @param list<\App\Entity\Resource> $resources */
     private function buildCatalogue(array $resources): string
     {
         $catalogue = '';

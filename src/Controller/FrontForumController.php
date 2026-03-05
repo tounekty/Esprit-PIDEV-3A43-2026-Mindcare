@@ -109,7 +109,10 @@ class FrontForumController extends AbstractController
 
         $sujet = new SujetForum();
         $sujet->setStatus(SujetForum::STATUS_VISIBLE);
-        $sujet->setUser($this->getUser());
+        $currentUser = $this->getUser();
+        if ($currentUser instanceof User) {
+            $sujet->setUser($currentUser);
+        }
 
         $form = $this->createFormBuilder($sujet)
             ->add('titre', TextType::class, [
@@ -165,6 +168,7 @@ class FrontForumController extends AbstractController
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
+            $moderation = $moderationService->moderate($sujet->getDescription());
             $this->handleSujetUploads($form, $sujet);
             $entityManager->persist($sujet);
             $entityManager->flush();
@@ -199,7 +203,7 @@ class FrontForumController extends AbstractController
         $message->setSujet($sujet);
 
          $user = $this->getUser();
-        if ($user) {
+        if ($user instanceof User) {
             $message->setUser($user);
         } elseif ($request->isMethod('POST')) {
             $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
@@ -222,10 +226,6 @@ class FrontForumController extends AbstractController
         $topicChildren = $messageRepository->findChildrenForTopic($sujet);
         $childrenByParent = [];
         foreach ($topicChildren as $childMessage) {
-            if (!$childMessage instanceof MessageForum) {
-                continue;
-            }
-
             $parent = $childMessage->getParentMessage();
             if (!$parent instanceof MessageForum || $parent->getId() === null) {
                 continue;

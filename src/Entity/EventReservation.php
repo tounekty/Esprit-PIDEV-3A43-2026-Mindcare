@@ -4,10 +4,14 @@ namespace App\Entity;
 
 use App\Repository\EventReservationRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: EventReservationRepository::class)]
-#[ORM\Table(name: 'reservation_event')]
+#[ORM\Table(name: 'reservation_event', indexes: [
+    new ORM\Index(columns: ['event_id']),
+    new ORM\Index(columns: ['user_id']),
+])]
 class EventReservation
 {
     public const STATUS_PENDING = 'pending';
@@ -22,60 +26,72 @@ class EventReservation
 
     #[ORM\Column(type: 'datetime', name: 'date_reservation')]
     #[Assert\NotNull(message: 'La date de reservation est obligatoire.')]
-    private ?\DateTimeInterface $dateReservation = null;
+    private \DateTimeInterface $dateReservation;
 
     #[ORM\Column(type: 'string', length: 20)]
     #[Assert\NotBlank(message: 'Le statut est obligatoire.')]
-    private ?string $statut = self::STATUS_PENDING;
+    private string $statut = self::STATUS_PENDING;
 
     #[ORM\ManyToOne(targetEntity: Event::class, inversedBy: 'reservations')]
-    #[ORM\JoinColumn(name: 'id_event', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'event_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull(message: 'L\'evenement est obligatoire.')]
     private ?Event $event = null;
 
     #[ORM\ManyToOne(targetEntity: User::class)]
-    #[ORM\JoinColumn(name: 'id_user', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id', nullable: false, onDelete: 'CASCADE')]
     #[Assert\NotNull(message: 'L\'utilisateur est obligatoire.')]
     private ?User $user = null;
 
     #[ORM\Column(type: 'string', length: 100)]
     #[Assert\NotBlank(message: 'Le nom est obligatoire.')]
-    private ?string $nom = null;
+    private string $nom = '';
 
     #[ORM\Column(type: 'string', length: 100)]
     #[Assert\NotBlank(message: 'Le prenom est obligatoire.')]
-    private ?string $prenom = null;
+    private string $prenom = '';
 
     #[ORM\Column(type: 'string', length: 30)]
     #[Assert\NotBlank(message: 'Le telephone est obligatoire.')]
-    private ?string $telephone = null;
+    private string $telephone = '';
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $commentaire = null;
 
     #[ORM\Column(type: 'string', length: 64, nullable: true)]
+    #[Ignore]
     private ?string $confirmationToken = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $smsReminderSent = false;
+
+    public function __construct()
+    {
+        $this->dateReservation = new \DateTime();
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDateReservation(): ?\DateTimeInterface
+    public function getDateReservation(): \DateTimeInterface
     {
         return $this->dateReservation;
     }
 
-    public function setDateReservation(?\DateTimeInterface $dateReservation): self
+    protected function setDateReservation(\DateTimeInterface $dateReservation): self
     {
         $this->dateReservation = $dateReservation;
         return $this;
     }
 
-    public function getStatut(): ?string
+    public function reserveNow(): self
+    {
+        $this->dateReservation = new \DateTime();
+        return $this;
+    }
+
+    public function getStatut(): string
     {
         return $this->statut;
     }
@@ -108,7 +124,7 @@ class EventReservation
         return $this;
     }
 
-    public function getNom(): ?string
+    public function getNom(): string
     {
         return $this->nom;
     }
@@ -119,7 +135,7 @@ class EventReservation
         return $this;
     }
 
-    public function getPrenom(): ?string
+    public function getPrenom(): string
     {
         return $this->prenom;
     }
@@ -130,7 +146,7 @@ class EventReservation
         return $this;
     }
 
-    public function getTelephone(): ?string
+    public function getTelephone(): string
     {
         return $this->telephone;
     }
@@ -157,7 +173,7 @@ class EventReservation
         return $this->confirmationToken;
     }
 
-    public function setConfirmationToken(?string $confirmationToken): self
+    public function setConfirmationToken(#[\SensitiveParameter] ?string $confirmationToken): self
     {
         $this->confirmationToken = $confirmationToken;
         return $this;

@@ -67,11 +67,11 @@ class HuggingFaceForumAnalysisService
         $payload = $response->toArray(false);
 
         if ($statusCode >= 400) {
-            $errorMessage = is_array($payload) ? (string) ($payload['error'] ?? 'Erreur Hugging Face.') : 'Erreur Hugging Face.';
+            $errorMessage = (string) ($payload['error'] ?? 'Erreur Hugging Face.');
             throw new \RuntimeException($errorMessage);
         }
 
-        if (!is_array($payload) || !isset($payload['labels'], $payload['scores']) || !is_array($payload['labels']) || !is_array($payload['scores'])) {
+        if (!isset($payload['labels'], $payload['scores']) || !is_array($payload['labels']) || !is_array($payload['scores'])) {
             throw new \RuntimeException('Réponse Hugging Face invalide.');
         }
 
@@ -92,7 +92,7 @@ class HuggingFaceForumAnalysisService
             'negatif' => $scoreByLabel['negatif'] ?? 0.0,
         ];
 
-        if (($sentimentCandidates['negatif'] ?? 0.0) > ($sentimentCandidates['négatif'] ?? 0.0)) {
+        if (($sentimentCandidates['negatif']) > ($sentimentCandidates['négatif'])) {
             $sentimentCandidates['négatif'] = $sentimentCandidates['negatif'];
         }
         unset($sentimentCandidates['negatif']);

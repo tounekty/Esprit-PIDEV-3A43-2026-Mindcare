@@ -15,13 +15,13 @@ class EntryTemplate
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $title = null;
+    private string $title = '';
 
     #[ORM\Column(type: 'text')]
-    private ?string $prompt = null;
+    private string $prompt = '';
 
     #[ORM\Column(length: 50)]
-    private ?string $category = null; // inspiration, reflection, gratitude, challenge
+    private string $category = ''; // inspiration, reflection, gratitude, challenge
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $description = null;
@@ -37,7 +37,7 @@ class EntryTemplate
         return $this->id;
     }
 
-    public function getTitle(): ?string
+    public function getTitle(): string
     {
         return $this->title;
     }
@@ -48,7 +48,7 @@ class EntryTemplate
         return $this;
     }
 
-    public function getPrompt(): ?string
+    public function getPrompt(): string
     {
         return $this->prompt;
     }
@@ -59,7 +59,7 @@ class EntryTemplate
         return $this;
     }
 
-    public function getCategory(): ?string
+    public function getCategory(): string
     {
         return $this->category;
     }

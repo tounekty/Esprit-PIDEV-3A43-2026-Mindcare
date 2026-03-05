@@ -174,7 +174,7 @@ class UserController extends AbstractController
             $banUntilStr = $request->request->get('banned_until');
             if ($banUntilStr) {
                 $bannedUntil = new \DateTime($banUntilStr);
-                $user->setBannedUntil($bannedUntil);
+                $user->ban($bannedUntil);
                 $em->flush();
 
                 $this->addFlash('success', sprintf(
@@ -192,7 +192,7 @@ class UserController extends AbstractController
     public function unban(User $user, Request $request, EntityManagerInterface $em): Response
     {
         if ($this->isCsrfTokenValid('unban'.$user->getId(), $request->request->get('_token'))) {
-            $user->setBannedUntil(null);
+            $user->unban();
             $em->flush();
 
             $this->addFlash('success', sprintf(

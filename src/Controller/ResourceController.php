@@ -70,10 +70,10 @@ class ResourceController extends AbstractController
                 $commentaire->setUser($user);
                 $commentaire->setAuthorName(trim(sprintf('%s %s', (string) $user->getFirstName(), (string) $user->getLastName())));
                 $commentaire->setAuthorEmail((string) $user->getEmail());
-                $moderation = $moderationService->moderate($commentaire->getContent() ?? '');
+                $moderation = $moderationService->moderate($commentaire->getContent());
                 $errorType = $moderation['errorType'] ?? null;
                 $errorMessage = $moderation['errorMessage'] ?? null;
-                $fallbackUsed = (bool) ($moderation['fallbackUsed'] ?? false);
+                $fallbackUsed = (bool) $moderation['fallbackUsed'];
                 $detailSuffix = is_string($errorMessage) && $errorMessage !== '' ? ' Detail: ' . $errorMessage . '.' : '';
 
                 if (!$moderation['enabled']) {
@@ -89,7 +89,7 @@ class ResourceController extends AbstractController
                         $form->addError(new FormError('Impossible de verifier le commentaire avec OpenAI pour le moment. Reessayez plus tard.' . $detailSuffix));
                     }
                 } elseif ($moderation['flagged']) {
-                    $categories = $moderation['categories'] ?? [];
+                    $categories = $moderation['categories'];
                     $details = $categories !== [] ? ' Categories detectees: ' . implode(', ', $categories) . '.' : '';
 
                     $form->get('content')->addError(new FormError('Commentaire refuse: contenu toxique ou spam detecte.' . $details));

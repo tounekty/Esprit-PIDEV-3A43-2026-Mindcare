@@ -26,6 +26,9 @@ class PatientFileController extends AbstractController
     {
         $this->denyAccessUnlessGranted('ROLE_ETUDIANT');
         $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->redirectToRoute('app_login');
+        }
 
         $patientFile = $user->getPatientFile();
         if (!$patientFile) {

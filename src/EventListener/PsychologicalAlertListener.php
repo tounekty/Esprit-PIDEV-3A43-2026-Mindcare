@@ -10,6 +10,7 @@ use Doctrine\ORM\Event\PostUpdateEventArgs;
 
 class PsychologicalAlertListener
 {
+    /** @phpstan-ignore property.onlyWritten */
     public function __construct(private PsychologicalAlertService $alertService) {}
 
     // Listener disabled for now - use manual testing instead

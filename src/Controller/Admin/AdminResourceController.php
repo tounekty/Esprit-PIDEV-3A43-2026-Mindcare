@@ -4,6 +4,7 @@ namespace App\Controller\Admin;
 
 use App\Entity\Commentaire;
 use App\Entity\Resource;
+use App\Entity\User;
 use App\Form\ResourceType;
 use App\Service\GoogleAnalyticsResourceMetricsService;
 use Dompdf\Dompdf;
@@ -145,14 +146,14 @@ class AdminResourceController extends AbstractController
         $gaViewsChart = null;
         $gaCategoriesChart = null;
 
-        if (($gaAnalytics['available'] ?? false) && ($gaAnalytics['topResources'] ?? []) !== []) {
+        if ($gaAnalytics['available'] && $gaAnalytics['topResources'] !== []) {
             $gaViewLabels = [];
             $gaViewData = [];
 
             foreach ($gaAnalytics['topResources'] as $item) {
-                $title = (string) ($item['title'] ?? '');
+                $title = (string) $item['title'];
                 $gaViewLabels[] = mb_strlen($title) > 22 ? mb_substr($title, 0, 22) . '...' : $title;
-                $gaViewData[] = (int) ($item['views'] ?? 0);
+                $gaViewData[] = (int) $item['views'];
             }
 
             $gaViewsChart = $chartBuilder->createChart(Chart::TYPE_BAR);
@@ -184,12 +185,12 @@ class AdminResourceController extends AbstractController
             ]);
         }
 
-        if (($gaAnalytics['available'] ?? false) && ($gaAnalytics['topCategories'] ?? []) !== []) {
+        if ($gaAnalytics['available'] && $gaAnalytics['topCategories'] !== []) {
             $categoryLabels = [];
             $categoryData = [];
             foreach ($gaAnalytics['topCategories'] as $item) {
-                $categoryLabels[] = (string) ($item['label'] ?? 'Autre');
-                $categoryData[] = (int) ($item['views'] ?? 0);
+                $categoryLabels[] = (string) $item['label'];
+                $categoryData[] = (int) $item['views'];
             }
 
             $palette = [
@@ -364,7 +365,10 @@ class AdminResourceController extends AbstractController
     public function new(Request $request, EntityManagerInterface $em): Response
     {
         $resource = new Resource();
-        $resource->setUser($this->getUser());
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $resource->setUser($user);
+        }
         $form = $this->createForm(ResourceType::class, $resource);
         $form->handleRequest($request);
 

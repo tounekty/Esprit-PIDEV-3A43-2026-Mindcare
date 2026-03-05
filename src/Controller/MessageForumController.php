@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\MessageForum;
 use App\Entity\SujetForum;
+use App\Entity\User;
 use App\Message\AnalyzeForumMessage;
 use App\Repository\MessageForumRepository;
 use App\Service\ForumReplyNotificationService;
@@ -51,7 +52,10 @@ class MessageForumController extends AbstractController
                 $message->setSujet($sujet);
             }
         }
-        $message->setUser($this->getUser());
+        $user = $this->getUser();
+        if ($user instanceof User) {
+            $message->setUser($user);
+        }
 
         $form = $this->createFormBuilder($message)
             ->add('sujet', EntityType::class, [

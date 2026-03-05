@@ -117,7 +117,7 @@ class StatisticsService
         // Get registration data for last 12 months
         $registrations = $conn->executeQuery(
             "SELECT DATE_FORMAT(created_at, '%Y-%m') as month, COUNT(*) as count 
-             FROM user 
+             FROM users 
              WHERE created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
              GROUP BY DATE_FORMAT(created_at, '%Y-%m')
              ORDER BY month ASC"
