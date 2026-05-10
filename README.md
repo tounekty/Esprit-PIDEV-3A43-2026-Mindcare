@@ -29,25 +29,6 @@ Ce depot sert de base pour un atelier de developpement, de collaboration GitHub 
 - configurer des integrations externes (GA4, Zoom)
 - appliquer des bonnes pratiques GitHub (README, issues, PR, topics)
 
-## Topics GitHub recommandes
-
-Ajoutez ces topics dans les settings GitHub du repository:
-
-- symfony
-- php
-- twig
-- mysql
-- docker
-- healthcare
-- student-wellbeing
-- appointment-scheduling
-- zoom-api
-- openai-moderation
-- ga4
-- pi-project
-- esprit
-- webapp
-
 ## Stack technique
 
 - Backend: PHP 8.1+ / Symfony
