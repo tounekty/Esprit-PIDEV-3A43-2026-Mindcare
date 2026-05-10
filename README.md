@@ -1,14 +1,14 @@
-# PI_3A43 - MindCare Platform
+# 🧠 MindCare - Plateforme de Gestion Médicale
 
-Application web de suivi et d'accompagnement psychologique pour etudiants, construite avec Symfony.
+---
 
-## General Project Description
+## 📌 Description
 
-This project was developed as part of the PIDEV - 3rd Year Engineering Program at Esprit School of Engineering (Academic Year 2025-2026).
+MindCare est une application JavaFX desktop complète pour la gestion des rendez-vous médicaux, dossiers patients et ressources éducatives.
 
-PI_3A43 (MindCare Platform) is a web application designed to support student mental health follow-up through appointment management, patient files, AI-assisted moderation and insights, and online consultation integration.
+---
 
-## Description du projet
+## Description metier
 
 MindCare centralise les besoins d'un cabinet universitaire de psychologie:
 
@@ -16,26 +16,42 @@ MindCare centralise les besoins d'un cabinet universitaire de psychologie:
 - prise de rendez-vous (cabinet / en ligne)
 - suivi via dossier patient
 - moderation IA des commentaires
-- statistiques d'usage (Google Analytics 4)
+- statistiques d'usage
 - integration Zoom pour les rendez-vous en ligne
 
-Ce depot sert de base pour un atelier de developpement, de collaboration GitHub et de standardisation de livrables.
+---
 
-## Objectifs de l'atelier
+## 🚀 Technologies Utilisées
 
-- comprendre l'architecture d'un projet Symfony full-stack
-- executer le projet en local avec Docker ou environnement natif
-- manipuler les flux metier principaux (auth, rendez-vous, dossiers)
-- configurer des integrations externes (GA4, Zoom)
-- appliquer des bonnes pratiques GitHub (README, issues, PR, topics)
+- ☕ symfony
+- 🎨 docker
+- 🗄️ MySQL
+- 📦 twig
+- 🔐 BCrypt
+- 📧 SMTP
+- 🎥 Zoom API
+- 🤖 Ollama AI
 
-## Stack technique
+---
 
-- Backend: PHP 8.1+ / Symfony
-- Frontend: Twig, JS, CSS, Webpack Encore / Asset Mapper
-- Base de donnees: MySQL / MariaDB
-- Conteneurisation: Docker Compose
-- Services externes: Zoom API, Google Analytics Data API, OpenAI Moderation
+## 🎯 Fonctionnalités
+
+### 👤 Client
+- ✅ Prendre un rendez-vous
+- ✅ Voir ses rendez-vous
+- ✅ Gérer son dossier patient
+
+### 🏥 Psychologue
+- ✅ Accepter ou refuser des rendez-vous
+- ✅ Consulter les dossiers patients
+- ✅ Voir les statistiques
+
+### 🔑 Administrateur
+- ✅ Gestion des utilisateurs
+- ✅ Dashboard global
+- ✅ Gestion complète du système
+
+---
 
 ## Structure du depot
 
@@ -52,12 +68,14 @@ var/             Cache et logs
 vendor/          Dependances Composer
 ```
 
+---
+
 ## Installation rapide
 
 1. Cloner le depot
 
 ```bash
-git clone <repo_url>
+git clone https://github.com/tounekty/Esprit-PIDEV-3A43-2026-Mindcare.git
 cd PI_3A43
 ```
 
@@ -97,57 +115,43 @@ symfony serve -d
 
 Application disponible sur `http://127.0.0.1:8000/home`.
 
+---
+
 ## Donnees de test
 
 - Script de population: `populate_database.sql`
 - Guide: `DATABASE_IMPORT_GUIDE.md`
 
-## Documentation complementaire
+---
 
-- Installation detaillee: `README_INSTALL.md`
-- Zoom quick start: `ZOOM_QUICK_START.md`
-- Zoom integration guide: `ZOOM_INTEGRATION_GUIDE.md`
+## Equipe et contributions
 
-## Cas d'usage a demontrer pendant l'atelier
+- Tounekty Haythem
+- roles: Chef de projet
+- liens GitHub: https://github.com/tounekty
+- --------------------------
+- Ben Brahim Mohamed Aziz
+- roles: Dev backend / base de donnees
+- liens GitHub: https://github.com/aziz98798465
+- --------------------------
+- Ahmed Omri
+- roles: Dev frontend JavaFX / UI
+- liens GitHub: https://github.com/ahmedomridev
+- --------------------------
+- Abdellaoui Nader
+- roles: Dev services / integration API
+- liens GitHub: https://github.com/nader0abdellaoui
+- --------------------------
+- Nawress Hichri
+- roles:QA / tests et validation
+- liens GitHub: https://github.com/nawress01
+- --------------------------
+- Laarousi Sarah
+- roles: Documentation / support
+- liens GitHub: https://github.com/sarahlaroussi
 
-- inscription / connexion utilisateur
-- creation et validation d'un rendez-vous
-- affichage d'un dossier patient
-- generation d'insights IA
-- creation auto d'un lien Zoom sur un rendez-vous en ligne
-- visualisation des statistiques administrateur
+---
 
-## Standardisation GitHub (atelier)
+## 📜 Licence
 
-- Branches: `main`, `develop`, `feature/*`, `fix/*`
-- Commits: convention claire (ex: `feat:`, `fix:`, `docs:`)
-- Pull Requests: template avec contexte, captures, tests effectues
-- Issues: labels (`bug`, `enhancement`, `documentation`, `question`)
-- Protection de branche: review obligatoire + checks CI
-
-## Proposition de structure README (reference)
-
-1. Titre + slogan projet
-2. Description metier
-3. Objectifs
-4. Stack technique
-5. Architecture / arborescence
-6. Installation et configuration
-7. Utilisation (scenarios)
-8. Donnees de test
-9. Qualite (tests, lint, CI)
-10. Workflow GitHub
-11. Equipe et contributions
-12. Licence
-
-## Equipe
-
-Renseigner ici:
-
-- nom des membres
-- roles
-- liens GitHub
-
-## Licence
-
-A definir (MIT, Apache-2.0, ou licence ecole/interne).
+Projet académique ESPRIT — PIDEV 2026
