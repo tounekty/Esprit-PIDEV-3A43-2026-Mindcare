@@ -1,0 +1,83 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Sujet{% endblock %}
+{% block page_title %}Sujet{% endblock %}
+
+{% block body %}
+    <div class="container" style="max-width: 900px; margin: 2rem auto; font-family: Arial, sans-serif;">
+        <h1>{{ sujet.titre }}</h1>
+        {% if sujet.imageUrl %}
+            <div style="margin: 1rem 0;">
+                <img src="{{ sujet.imageUrl }}" alt="{{ sujet.titre }}" style="max-width: 100%; max-height: 400px; border-radius: 8px;">
+            </div>
+        {% endif %}
+        <p>{{ sujet.description }}</p>
+        <p><strong>Date:</strong> <span title="{{ sujet.dateCreation|date('Y-m-d H:i') }}">{{ sujet.dateCreation|ago(null, 'fr') }}</span></p>
+        <p><strong>User:</strong>
+            {% if sujet.user %}
+                {{ sujet.user.firstName }} {{ sujet.user.lastName }}
+            {% else %}
+                -
+            {% endif %}
+            {% if sujet.isAnonymous %}
+                <span class="badge bg-secondary ms-2">Anonyme</span>
+            {% endif %}
+        </p>
+        {% if sujet.category %}
+            <p><strong>Catégorie:</strong> <span class="badge bg-info">{{ sujet.category }}</span></p>
+        {% endif %}
+        {% if sujet.status %}
+            <p><strong>Statut:</strong> {{ sujet.status }}</p>
+        {% endif %}
+        {% if sujet.isPinned %}
+            <p><strong>📌</strong> Sujet épinglé</p>
+        {% endif %}
+        {% if sujet.attachmentPath %}
+            <p><strong>Pièce jointe:</strong> 
+                <a href="{{ sujet.attachmentPath }}" download class="btn btn-sm btn-outline-primary">
+                    📎 Télécharger ({{ (sujet.attachmentSize / 1024)|round(2) }} KB)
+                </a>
+            </p>
+        {% endif %}
+
+        <div style="margin: 1rem 0;">
+            <a href="{{ path('message_forum_new', {sujet: sujet.id}) }}" style="padding: .5rem 1rem; background: #2f6fed; color: #fff; text-decoration: none; border-radius: 4px;">Ajouter un message</a>
+            <a href="{{ path('sujet_forum_edit', {id: sujet.id}) }}" style="padding: .5rem 1rem; margin-left: .5rem; background: #6c757d; color: #fff; text-decoration: none; border-radius: 4px;">Modifier</a>
+        </div>
+
+        <h2>Messages</h2>
+        <ul>
+            {% for message in sujet.messages %}
+                <li>
+                    <div><strong>{{ message.dateMessage|date('Y-m-d H:i') }}</strong> - {{ message.contenu }}</div>
+                    <div>
+                        Utilisateur:
+                        {% if message.user %}
+                            {{ message.user.firstName }} {{ message.user.lastName }}
+                        {% else %}
+                            -
+                        {% endif %}
+                        {% if message.isAnonymous %}
+                            <span class="badge bg-secondary ms-2">Anonyme</span>
+                        {% endif %}
+                    </div>
+                    {% if message.attachmentPath %}
+                        <div style="margin-top: 8px;">
+                            <a href="{{ message.attachmentPath }}" download class="btn btn-sm btn-outline-secondary">
+                                📎 Télécharger pièce jointe ({{ (message.attachmentSize / 1024)|round(2) }} KB)
+                            </a>
+                        </div>
+                    {% endif %}
+                </li>
+            {% else %}
+                <li>Aucun message.</li>
+            {% endfor %}
+        </ul>
+
+        <form method="post" action="{{ path('sujet_forum_delete', {id: sujet.id}) }}" onsubmit="return confirm('Supprimer ce sujet ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete_sujet_' ~ sujet.id) }}">
+            <button type="submit" style="padding: .5rem 1rem; background: #dc3545; color: #fff; border: none; border-radius: 4px;">Supprimer</button>
+            <a href="{{ path('sujet_forum_index') }}" style="margin-left: .5rem;">Retour</a>
+        </form>
+    </div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Rendez-vous en attente{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Rendez-vous en attente</h5>
+                    <form method="GET" action="{{ path('admin_rdv_pending') }}" class="d-flex gap-2">
+                        <input type="text" name="search" class="form-control form-control-sm" placeholder="{{ is_granted('ROLE_ADMIN') ? 'Étudiant ou Psychologue...' : 'Nom de l\'étudiant...' }}" value="{{ currentSearch }}">
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <i class="feather-search"></i>
+                        </button>
+                        {% if currentSearch %}
+                            <a href="{{ path('admin_rdv_pending') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="feather-rotate-ccw"></i>
+                            </a>
+                        {% endif %}
+                    </form>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Étudiant</th>
+                                <th>
+                                    <a href="{{ path('admin_rdv_pending', {
+                                        'sort': 'date',
+                                        'order': (currentSort == 'date' and currentOrder == 'ASC') ? 'DESC' : 'ASC',
+                                        'search': currentSearch
+                                    }) }}" class="text-dark d-flex align-items-center gap-1">
+                                        Date
+                                        {% if currentSort == 'date' %}
+                                            <i class="feather-arrow-{{ currentOrder == 'ASC' ? 'up' : 'down' }} small"></i>
+                                        {% endif %}
+                                    </a>
+                                </th>
+                                <th>Lieu</th>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <th>Psychologue</th>
+                                {% endif %}
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if appointments|length > 0 %}
+                                {% for appointment in appointments %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ appointment.etudiant.firstName }} {{ appointment.etudiant.lastName }}</strong>
+                                        </td>
+                                        <td>
+                                            {{ appointment.date|date('d/m/Y H:i') }}
+                                        </td>
+                                        <td>
+                                            {% if appointment.location == 'in_office' %}
+                                                <span class="badge bg-primary">En cabinet</span>
+                                            {% else %}
+                                                <span class="badge bg-info">En ligne</span>
+                                            {% endif %}
+                                        </td>
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            <td>
+                                                <span class="text-muted">{{ appointment.psychologue.firstName }} {{ appointment.psychologue.lastName }}</span>
+                                            </td>
+                                        {% endif %}
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ path('admin_rdv_show', {'id': appointment.id}) }}" class="btn btn-sm btn-info">
+                                                    <i class="feather-eye"></i> Voir
+                                                </a>
+                                                <a href="{{ path('admin_patient_file_show', {'id': appointment.etudiant.id}) }}" class="btn btn-sm btn-secondary">
+                                                    <i class="feather-file-text"></i> Dossier
+                                                </a>
+                                                <form method="POST" action="{{ path('admin_rdv_accept', {'id': appointment.id}) }}" style="display: inline;">
+                                                    <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Accepter ce rendez-vous?')">
+                                                        <i class="feather-check"></i> Accepter
+                                                    </button>
+                                                </form>
+                                                <form method="POST" action="{{ path('admin_rdv_decline', {'id': appointment.id}) }}" style="display: inline;">
+                                                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Refuser ce rendez-vous?')">
+                                                        <i class="feather-x"></i> Refuser
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="{{ is_granted('ROLE_ADMIN') ? '5' : '4' }}" class="text-center text-muted">
+                                        Aucun rendez-vous en attente
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

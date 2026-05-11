@@ -1,0 +1,29 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Message{% endblock %}
+{% block page_title %}Message{% endblock %}
+
+{% block body %}
+    <div class="container" style="max-width: 900px; margin: 2rem auto; font-family: Arial, sans-serif;">
+        <h1>Message</h1>
+        <p><strong>Sujet:</strong> {{ message.sujet ? message.sujet.titre : '-' }}</p>
+        <p>{{ message.contenu }}</p>
+        <p><strong>Date:</strong> {{ message.dateMessage|date('Y-m-d H:i') }}</p>
+        <p><strong>User:</strong>
+            {% if message.user %}
+                {{ message.user.firstName }} {{ message.user.lastName }}
+            {% else %}
+                -
+            {% endif %}
+            {% if message.isAnonymous %}
+                <span class="badge bg-secondary ms-2">Anonyme</span>
+            {% endif %}
+        </p>
+        <form method="post" action="{{ path('message_forum_delete', {id: message.id}) }}" onsubmit="return confirm('Supprimer ce message ?');">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete_message_' ~ message.id) }}">
+            <button type="submit" style="padding: .5rem 1rem; background: #dc3545; color: #fff; border: none; border-radius: 4px;">Supprimer</button>
+            <a href="{{ path('message_forum_edit', {id: message.id}) }}" style="margin-left: .5rem;">Modifier</a>
+            <a href="{{ path('message_forum_index') }}" style="margin-left: .5rem;">Retour</a>
+        </form>
+    </div>
+{% endblock %}

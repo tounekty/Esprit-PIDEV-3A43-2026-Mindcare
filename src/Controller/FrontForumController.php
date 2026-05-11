@@ -1,0 +1,393 @@
+<?php
+
+namespace App\Controller;
+
+use App\Entity\LikeMessage;
+use App\Entity\MessageForum;
+use App\Entity\SujetForum;
+use App\Entity\User;
+use App\Repository\LikeMessageRepository;
+use App\Repository\MessageForumRepository;
+use App\Repository\SujetForumRepository;
+use App\Message\AnalyzeForumMessage;
+use App\Service\ForumReplyNotificationService;
+use App\Service\ForumTagNotificationService;
+use App\Service\OpenAiModerationService;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManagerInterface;
+use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Form\FormError;
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Routing\Annotation\Route;
+use App\Repository\UserRepository;
+
+class FrontForumController extends AbstractController
+{
+    private const MAX_REPLY_DEPTH = 3;
+
+    #[Route('/forum/messages/{id}/like', name: 'front_forum_message_like', methods: ['POST'])]
+    public function toggleMessageLike(MessageForum $message, Request $request, EntityManagerInterface $entityManager, LikeMessageRepository $likeRepository): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $user = $this->getUser();
+        if (!$user instanceof User) {
+            return $this->json(['error' => 'Utilisateur non autorisé.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $token = (string) $request->request->get('_token', '');
+        if (!$this->isCsrfTokenValid('like_message_' . $message->getId(), $token)) {
+            return $this->json(['error' => 'Token CSRF invalide.'], Response::HTTP_FORBIDDEN);
+        }
+
+        $existingLike = $likeRepository->findOneByUserAndMessage($user, $message);
+        $liked = false;
+
+        if ($existingLike instanceof LikeMessage) {
+            $entityManager->remove($existingLike);
+            $entityManager->flush();
+        } else {
+            $newLike = (new LikeMessage())
+                ->setUser($user)
+                ->setMessage($message);
+
+            $entityManager->persist($newLike);
+
+            try {
+                $entityManager->flush();
+                $liked = true;
+            } catch (UniqueConstraintViolationException) {
+                $liked = true;
+            }
+        }
+
+        $likesCount = $likeRepository->count(['message' => $message]);
+
+        return $this->json([
+            'liked' => $liked,
+            'likesCount' => $likesCount,
+        ]);
+    }
+
+    #[Route('/forum', name: 'front_forum_index', methods: ['GET'])]
+    public function index(Request $request, SujetForumRepository $repository, PaginatorInterface $paginator): Response
+    {
+        $query = trim((string) $request->query->get('q', ''));
+        $status = (string) $request->query->get('status', '');
+        if ($status === '' || !in_array($status, SujetForum::getStatusValues(), true)) {
+            $status = '';
+        }
+
+        $pagination = $paginator->paginate(
+            $repository->createSearchQueryBuilder($query !== '' ? $query : null, $status !== '' ? $status : null),
+            max(1, (int) $request->query->get('page', 1)),
+            5
+        );
+
+        return $this->render('front/forum/index.html.twig', [
+            'sujets' => $pagination,
+            'q' => $query,
+            'status' => $status,
+            'statusChoices' => SujetForum::getStatusChoices(),
+        ]);
+    }
+
+    #[Route('/forum/new', name: 'front_forum_new', methods: ['GET', 'POST'])]
+    public function new(Request $request, EntityManagerInterface $entityManager, ForumTagNotificationService $tagNotificationService, OpenAiModerationService $moderationService): Response
+    {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
+        $sujet = new SujetForum();
+        $sujet->setStatus(SujetForum::STATUS_VISIBLE);
+        $currentUser = $this->getUser();
+        if ($currentUser instanceof User) {
+            $sujet->setUser($currentUser);
+        }
+
+        $form = $this->createFormBuilder($sujet)
+            ->add('titre', TextType::class, [
+                'label' => 'Titre du sujet',
+            ])
+            ->add('description', TextareaType::class, [
+                'label' => 'Description',
+            ])
+            ->add('isAnonymous', ChoiceType::class, [
+                'label' => 'Publication anonyme',
+                'choices' => [
+                    'Normal' => false,
+                    'Anonyme' => true,
+                ],
+                'expanded' => true,
+                'multiple' => false,
+            ])
+            ->add('imageFile', FileType::class, [
+                'label' => 'Image du sujet',
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->add('isPinned', CheckboxType::class, [
+                'label' => 'Épingler le sujet',
+                'required' => false,
+            ])
+            ->add('category', TextType::class, [
+                'label' => 'Catégorie',
+                'required' => false,
+            ])
+            ->add('taggedPsychologues', EntityType::class, [
+                'class' => User::class,
+                'label' => 'Taguer des psychologues',
+                'required' => false,
+                'multiple' => true,
+                'choice_label' => static function (User $psychologue): string {
+                    return trim((string) $psychologue->getFirstName() . ' ' . (string) $psychologue->getLastName());
+                },
+                'query_builder' => static function (UserRepository $userRepository) {
+                    return $userRepository->createQueryBuilder('u')
+                        ->andWhere('u.role = :role')
+                        ->setParameter('role', 'psychologue')
+                        ->orderBy('u.firstName', 'ASC')
+                        ->addOrderBy('u.lastName', 'ASC');
+                },
+            ])
+            ->add('attachmentFile', FileType::class, [
+                'label' => 'Pièce jointe',
+                'mapped' => false,
+                'required' => false,
+            ])
+            ->getForm();
+
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            $moderation = $moderationService->moderate($sujet->getDescription());
+            $this->handleSujetUploads($form, $sujet);
+            $entityManager->persist($sujet);
+            $entityManager->flush();
+            $tagNotificationService->notifyTaggedPsychologuesOnTopicCreation($sujet);
+
+            if ($moderation['checked'] && $moderation['flagged']) {
+                $categories = $moderation['categories'] ?? [];
+                $details = $categories !== [] ? ' Categories detectees: ' . implode(', ', $categories) . '.' : '';
+                $form->get('description')->addError(new FormError('Commentaire refuse: contenu toxique ou spam detecte.' . $details));
+                $this->addFlash('danger', 'Commentaire refuse: contenu toxique ou spam detecte.');
+            } elseif (!$moderation['checked']) {
+                $form->addError(new FormError('Impossible de verifier le commentaire avec OpenAI pour le moment. Reessayez plus tard.'));
+            } else {
+                $this->handleSujetUploads($form, $sujet);
+                $entityManager->persist($sujet);
+                $entityManager->flush();
+                $tagNotificationService->notifyTaggedPsychologuesOnTopicCreation($sujet);
+
+                return $this->redirectToRoute('front_forum_index');
+            }
+        }
+
+        return $this->render('front/forum/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
+    }
+
+    #[Route('/forum/sujet/{id}', name: 'front_forum_show', methods: ['GET', 'POST'])]
+    public function show(Request $request, SujetForum $sujet, MessageForumRepository $messageRepository, LikeMessageRepository $likeMessageRepository, EntityManagerInterface $entityManager, PaginatorInterface $paginator, ForumReplyNotificationService $notificationService, MessageBusInterface $messageBus): Response
+    {
+        $message = new MessageForum();
+        $message->setSujet($sujet);
+
+         $user = $this->getUser();
+        if ($user instanceof User) {
+            $message->setUser($user);
+        } elseif ($request->isMethod('POST')) {
+            $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        }
+
+        $query = trim((string) $request->query->get('q', ''));
+        $messages = $paginator->paginate(
+            $messageRepository->createSujetRootSearchQueryBuilder($sujet, $query !== '' ? $query : null),
+            max(1, (int) $request->query->get('page', 1)),
+            5
+        );
+
+        $messageIds = [];
+        foreach ($messages as $messageItem) {
+            if ($messageItem instanceof MessageForum && $messageItem->getId() !== null) {
+                $messageIds[] = $messageItem->getId();
+            }
+        }
+
+        $topicChildren = $messageRepository->findChildrenForTopic($sujet);
+        $childrenByParent = [];
+        foreach ($topicChildren as $childMessage) {
+            $parent = $childMessage->getParentMessage();
+            if (!$parent instanceof MessageForum || $parent->getId() === null) {
+                continue;
+            }
+
+            $childrenByParent[$parent->getId()][] = $childMessage;
+            if ($childMessage->getId() !== null) {
+                $messageIds[] = $childMessage->getId();
+            }
+        }
+
+        $likeCounts = $likeMessageRepository->getLikeCountsByMessageIds($messageIds);
+        $likedMessageIds = [];
+        if ($user instanceof User) {
+            $likedMessageIds = $likeMessageRepository->findLikedMessageIdsForUserAndMessages($user, $messageIds);
+        }
+
+        $form = null;
+        if ($user) {
+            $form = $this->createFormBuilder($message)
+                ->add('contenu', TextareaType::class, [
+                    'label' => 'Votre message',
+                ])
+                ->add('isAnonymous', ChoiceType::class, [
+                    'label' => 'Publication anonyme',
+                    'choices' => [
+                        'Normal' => false,
+                        'Anonyme' => true,
+                    ],
+                    'expanded' => true,
+                    'multiple' => false,
+                ])
+                ->add('attachmentFile', FileType::class, [
+                    'label' => 'Pièce jointe',
+                    'mapped' => false,
+                    'required' => false,
+                ])
+                ->getForm();
+
+            $form->handleRequest($request);
+            if ($form->isSubmitted() && $form->isValid()) {
+                $parentId = (int) $request->request->get('parent_id', 0);
+                if ($parentId > 0) {
+                    $parentMessage = $messageRepository->findOneBy([
+                        'id' => $parentId,
+                        'sujet' => $sujet,
+                    ]);
+
+                    if (!$parentMessage instanceof MessageForum) {
+                        $this->addFlash('error', 'Le message parent est introuvable.');
+
+                        return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
+                    }
+
+                    if ($this->computeReplyDepth($parentMessage) >= self::MAX_REPLY_DEPTH) {
+                        $this->addFlash('error', 'Profondeur maximale des réponses atteinte (3 niveaux).');
+
+                        return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
+                    }
+
+                    $message->setParentMessage($parentMessage);
+                }
+
+                $this->handleMessageUploads($form, $message);
+                $entityManager->persist($message);
+                $entityManager->flush();
+                $notificationService->notifyTopicOwnerOnReply($message);
+                if ($message->getId() !== null) {
+                    $messageBus->dispatch(new AnalyzeForumMessage($message->getId()));
+                }
+
+                return $this->redirectToRoute('front_forum_show', ['id' => $sujet->getId()]);
+            }
+        }
+
+        return $this->render('front/forum/show.html.twig', [
+            'sujet' => $sujet,
+            'messages' => $messages,
+            'q' => $query,
+            'form' => $form ? $form->createView() : null,
+            'likeCounts' => $likeCounts,
+            'likedMessageIds' => $likedMessageIds,
+            'childrenByParent' => $childrenByParent,
+            'maxReplyDepth' => self::MAX_REPLY_DEPTH,
+        ]);
+    }
+
+    private function computeReplyDepth(MessageForum $message): int
+    {
+        $depth = 1;
+        $parent = $message->getParentMessage();
+
+        while ($parent instanceof MessageForum) {
+            ++$depth;
+            $parent = $parent->getParentMessage();
+        }
+
+        return $depth;
+    }
+
+    private function handleSujetUploads($form, SujetForum $sujet): void
+    {
+        $uploadRoot = rtrim($this->getParameter('uploads_dir'), DIRECTORY_SEPARATOR);
+
+        /** @var UploadedFile|null $imageFile */
+        $imageFile = $form->get('imageFile')->getData();
+        if ($imageFile instanceof UploadedFile) {
+            $imageDir = $uploadRoot . DIRECTORY_SEPARATOR . 'sujet-images';
+            if (!is_dir($imageDir)) {
+                mkdir($imageDir, 0775, true);
+            }
+
+            $filename = uniqid('sujet_img_', true) . '.' . $imageFile->guessExtension();
+            try {
+                $imageFile->move($imageDir, $filename);
+                $sujet->setImageUrl('/uploads/resources/sujet-images/' . $filename);
+            } catch (\Exception $e) {
+                // Skip upload on error - file will not be saved
+            }
+        }
+
+        /** @var UploadedFile|null $attachmentFile */
+        $attachmentFile = $form->get('attachmentFile')->getData();
+        if ($attachmentFile instanceof UploadedFile) {
+            $attachDir = $uploadRoot . DIRECTORY_SEPARATOR . 'sujet-attachments';
+            if (!is_dir($attachDir)) {
+                mkdir($attachDir, 0775, true);
+            }
+
+            $filename = uniqid('sujet_att_', true) . '.' . $attachmentFile->guessExtension();
+            try {
+                $attachmentFile->move($attachDir, $filename);
+                $sujet->setAttachmentPath('/uploads/resources/sujet-attachments/' . $filename);
+                $sujet->setAttachmentMimeType($attachmentFile->getMimeType());
+                $sujet->setAttachmentSize($attachmentFile->getSize());
+            } catch (\Exception $e) {
+                // Skip upload on error - file will not be saved
+            }
+        }
+    }
+
+    private function handleMessageUploads($form, MessageForum $message): void
+    {
+        $uploadRoot = rtrim($this->getParameter('uploads_dir'), DIRECTORY_SEPARATOR);
+
+        /** @var UploadedFile|null $attachmentFile */
+        $attachmentFile = $form->get('attachmentFile')->getData();
+        if ($attachmentFile instanceof UploadedFile) {
+            $attachDir = $uploadRoot . DIRECTORY_SEPARATOR . 'message-attachments';
+            if (!is_dir($attachDir)) {
+                mkdir($attachDir, 0775, true);
+            }
+
+            $filename = uniqid('message_att_', true) . '.' . $attachmentFile->guessExtension();
+            try {
+                $attachmentFile->move($attachDir, $filename);
+                $message->setAttachmentPath('/uploads/resources/message-attachments/' . $filename);
+                $message->setAttachmentMimeType($attachmentFile->getMimeType());
+                $message->setAttachmentSize($attachmentFile->getSize());
+            } catch (\Exception $e) {
+                // Skip upload on error - file will not be saved
+            }
+        }
+    }
+}

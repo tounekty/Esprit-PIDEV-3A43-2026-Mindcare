@@ -1,0 +1,185 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block page_title %}Modifier Ressource{% endblock %}
+
+{% block body %}
+<div class="card">
+    <div class="card-body">
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <div class="mb-3">
+            {{ form_label(form.title) }}
+            {{ form_widget(form.title, {'attr': {'class': 'form-control'}}) }}
+            {{ form_errors(form.title) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.description) }}
+            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4}}) }}
+            {{ form_errors(form.description) }}
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.type) }}
+            {{ form_widget(form.type, {'attr': {'class': 'form-select'}}) }}
+            {{ form_errors(form.type) }}
+        </div>
+
+        <div class="mb-3" id="video-url-group">
+            {{ form_label(form.videoUrl) }}
+            {{ form_widget(form.videoUrl, {'attr': {'class': 'form-control'}}) }}
+            <small class="text-muted">Obligatoire si type = Video YouTube</small>
+            <small class="text-muted d-block">Note: certaines videos YouTube (souvent clips musicaux) ne sont pas autorisees en integration.</small>
+            {{ form_errors(form.videoUrl) }}
+        </div>
+
+        <div class="mb-3" id="image-url-group">
+            <label class="form-label fw-semibold">Image de l'article</label>
+
+            {% set currentImageUrl = resource.imageUrl ?? '' %}
+            {% set isAiImage = 'pollinations.ai' in currentImageUrl %}
+
+            {# Mode selector #}
+            <div class="btn-group w-100 mb-3" role="group">
+                <input type="radio" class="btn-check" name="imageMode" id="modeManual" value="manual" autocomplete="off"
+                       {% if not isAiImage %}checked{% endif %}>
+                <label class="btn btn-outline-primary" for="modeManual">🔗 Fournir un lien</label>
+                <input type="radio" class="btn-check" name="imageMode" id="modeAI" value="ai" autocomplete="off"
+                       {% if isAiImage %}checked{% endif %}>
+                <label class="btn btn-outline-secondary" for="modeAI">✨ Générer avec l'IA</label>
+            </div>
+
+            {# Manual panel #}
+            <div id="panel-manual" {% if isAiImage %}style="display:none"{% endif %}>
+                {{ form_widget(form.imageUrl, {'attr': {'class': 'form-control'}}) }}
+                <small class="text-muted">URL directe vers l'image (obligatoire si type = Article).</small>
+                {{ form_errors(form.imageUrl) }}
+            </div>
+
+            {# AI panel #}
+            <div id="panel-ai" {% if not isAiImage %}style="display:none"{% endif %}>
+                <div class="input-group">
+                    <input type="text" id="ai-image-prompt" class="form-control"
+                           placeholder="Ex: serene forest meditation, calm blue tones, minimalist...">
+                    <button type="button" class="btn btn-primary" id="btn-generate-img">
+                        <span id="gen-spinner" class="spinner-border spinner-border-sm me-1" style="display:none" role="status"></span>
+                        ✨ Générer
+                    </button>
+                </div>
+                <small class="text-muted mt-1 d-block">Décrivez l'image en anglais pour de meilleurs résultats.</small>
+                <div id="ai-preview-wrap" class="mt-3" {% if not isAiImage %}style="display:none"{% endif %}>
+                    <div id="ai-loading-overlay" class="d-flex align-items-center justify-content-center bg-light border rounded" style="height:220px; display:none !important">
+                        <div class="text-center text-muted">
+                            <div class="spinner-border text-primary mb-2" role="status"></div>
+                            <div>Génération en cours... (30-90s)</div>
+                        </div>
+                    </div>
+                    <img id="ai-preview-img"
+                         src="{% if isAiImage %}{{ currentImageUrl }}{% endif %}"
+                         alt="Aperçu"
+                         class="img-fluid rounded border"
+                         style="max-height:220px; object-fit:cover; width:100%; {% if not isAiImage %}display:none{% endif %}">
+                    <div id="ai-success-bar" class="mt-2 d-flex align-items-center gap-2" {% if not isAiImage %}style="display:none"{% endif %}>
+                        <span class="text-success fw-semibold">✅ Image générée — sera utilisée comme image de l'article</span>
+                        <button type="button" class="btn btn-sm btn-outline-secondary ms-auto" id="btn-regen-img">↻ Regénérer</button>
+                    </div>
+                </div>
+                <div id="ai-error-msg" class="alert alert-danger mt-2 py-2" style="display:none"></div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            {{ form_label(form.filePath) }}
+            {{ form_widget(form.filePath, {'attr': {'class': 'form-control'}}) }}
+            {% if resource.filePath %}
+                <small class="text-muted d-block mt-1">Fichier actuel : {{ resource.filePath }}</small>
+            {% endif %}
+            {{ form_errors(form.filePath) }}
+        </div>
+
+        <div class="form-actions d-flex justify-content-end gap-2 mt-4">
+            <a href="{{ path('admin_resources_index') }}" class="btn btn-light">Annuler</a>
+            <button type="submit" class="btn btn-warning text-uppercase fw-semibold">
+                <i class="feather icon-edit me-2"></i>Mettre a jour
+            </button>
+        </div>
+
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<style>
+.form-actions .btn { min-width: 150px; }
+#panel-ai .input-group .btn { white-space: nowrap; }
+</style>
+<script>
+(function() {
+    const modeManual  = document.getElementById('modeManual');
+    const modeAI      = document.getElementById('modeAI');
+    const panelManual = document.getElementById('panel-manual');
+    const panelAI     = document.getElementById('panel-ai');
+    const imageUrlInput = document.querySelector('[name="resource[imageUrl]"]');
+
+    function switchMode(mode) {
+        panelManual.style.display = mode === 'manual' ? 'block' : 'none';
+        panelAI.style.display     = mode === 'ai'     ? 'block' : 'none';
+    }
+    modeManual.addEventListener('change', () => switchMode('manual'));
+    modeAI.addEventListener('change', () => switchMode('ai'));
+
+    function generateImage() {
+        const prompt = document.getElementById('ai-image-prompt').value.trim();
+        const errBox = document.getElementById('ai-error-msg');
+        if (!prompt) { errBox.textContent = 'Veuillez saisir un prompt.'; errBox.style.display = 'block'; return; }
+        errBox.style.display = 'none';
+
+        const previewWrap    = document.getElementById('ai-preview-wrap');
+        const loadingOverlay = document.getElementById('ai-loading-overlay');
+        const previewImg     = document.getElementById('ai-preview-img');
+        const successBar     = document.getElementById('ai-success-bar');
+
+        previewWrap.style.display = 'block';
+        loadingOverlay.style.cssText = 'display:flex!important';
+        previewImg.style.display = 'none';
+        successBar.style.display = 'none';
+        document.getElementById('gen-spinner').style.display = 'inline-block';
+        document.getElementById('btn-generate-img').disabled = true;
+
+        fetch('{{ path('admin_resources_generate_image') }}', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({prompt: prompt})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.error) throw new Error(data.error);
+
+            // PHP saved the image locally and returned the public path
+            loadingOverlay.style.cssText = 'display:none!important';
+            previewImg.src = data.url;
+            previewImg.style.display = 'block';
+            successBar.style.cssText = 'display:flex!important';
+            if (imageUrlInput) imageUrlInput.value = data.url;
+            document.getElementById('gen-spinner').style.display = 'none';
+            document.getElementById('btn-generate-img').disabled = false;
+
+            if (data.enhancedPrompt) {
+                document.getElementById('ai-image-prompt').title = 'Prompt utilisé: ' + data.enhancedPrompt;
+            }
+        })
+        .catch(err => {
+            previewWrap.style.display = 'none';
+            errBox.textContent = err.message || 'Erreur lors de la génération.';
+            errBox.style.display = 'block';
+            document.getElementById('gen-spinner').style.display = 'none';
+            document.getElementById('btn-generate-img').disabled = false;
+        });
+    }
+    document.getElementById('btn-generate-img').addEventListener('click', generateImage);
+    document.getElementById('btn-regen-img').addEventListener('click', generateImage);
+    document.getElementById('ai-image-prompt').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') { e.preventDefault(); generateImage(); }
+    });
+})();
+</script>
+{% endblock %}

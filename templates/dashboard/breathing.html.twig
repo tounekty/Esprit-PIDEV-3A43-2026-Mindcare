@@ -1,0 +1,74 @@
+{% extends 'base.html.twig' %}
+{% block title %}Exercices de Respiration{% endblock %}
+{% block body %}
+<div class="container mt-4">
+    <div class="breathing-entry-card mx-auto mb-5 p-4 p-md-5">
+        <div class="text-center mb-4">
+            <div class="breathing-illustration mb-3">
+                <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="40" cy="40" r="36" stroke="#10b981" stroke-width="5" fill="#e0f7fa" />
+                    <path d="M40 24c8 0 16 8 16 16s-8 16-16 16-16-8-16-16 8-16 16-16z" fill="#b2f5ea" />
+                    <path d="M40 32c4 0 8 4 8 8s-4 8-8 8-8-4-8-8 4-8 8-8z" fill="#10b981" />
+                </svg>
+            </div>
+            <h2 class="fw-bold text-success mb-2">Exercices de Respiration</h2>
+            <p class="lead text-muted">Améliorez votre bien-être en pratiquant ces exercices simples et efficaces.</p>
+        </div>
+        <ul class="breathing-entry-list mx-auto mb-4" style="max-width: 400px;">
+            <li><span class="fw-bold text-primary">Respiration carrée :</span> Inspirez 4s, retenez 4s, expirez 4s, retenez 4s.</li>
+            <li><span class="fw-bold text-info">Cohérence cardiaque :</span> Inspirez 5s, expirez 5s, pendant 5 minutes.</li>
+            <li><span class="fw-bold text-success">Respiration profonde :</span> Inspirez lentement par le nez, expirez doucement par la bouche.</li>
+        </ul>
+        <div class="text-center">
+            <a href="https://www.youtube.com/results?search_query=exercice+respiration" target="_blank" class="btn btn-success breathing-entry-btn px-4 py-2">
+                Voir une vidéo <i class="fas fa-play ms-1"></i>
+            </a>
+        </div>
+        <div class="text-center mt-3">
+            <a href="{{ path('app_dashboard') }}" class="btn btn-outline-success px-4 py-2">
+                Retour au Dashboard <i class="fas fa-arrow-left ms-1"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .breathing-entry-card {
+            background: linear-gradient(135deg, #e0f7fa 0%, #b2f5ea 100%);
+            border-radius: 22px;
+            box-shadow: 0 12px 32px rgba(16,185,129,0.12);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .breathing-entry-card:hover {
+            transform: translateY(-8px) scale(1.04);
+            box-shadow: 0 24px 48px rgba(16,185,129,0.18);
+        }
+        .breathing-illustration svg {
+            display: block;
+            margin: 0 auto;
+        }
+        .breathing-entry-list li {
+            margin-bottom: 0.8rem;
+            padding-left: 0.7rem;
+            border-left: 4px solid #10b981;
+            background: rgba(16,185,129,0.07);
+            border-radius: 8px;
+            font-size: 1.1rem;
+        }
+        .breathing-entry-btn {
+            background: #10b981;
+            color: #fff;
+            border-radius: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(16,185,129,0.12);
+            font-size: 1.1rem;
+        }
+        .breathing-entry-btn:hover {
+            background: #059669;
+            color: #fff;
+        }
+    </style>
+{% endblock %}

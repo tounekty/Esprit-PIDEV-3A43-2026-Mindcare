@@ -1,0 +1,289 @@
+<!-- header-start -->
+<header>
+    <div class="header-area">
+        <!-- Top Header -->
+        <div class="header-top_area">
+            <div class="container-fluid px-4 px-xl-5">
+                <div class="row">
+                    <div class="col-xl-6 col-md-6">
+                        <div class="social_media_links">
+                            <a href="#"><i class="fa fa-linkedin"></i></a>
+                            <a href="#"><i class="fa fa-facebook"></i></a>
+                            <a href="#"><i class="fa fa-google-plus"></i></a>
+                        </div>
+                    </div>
+                    <div class="col-xl-6 col-md-6">
+                        <div class="short_contact_list">
+                            <ul>
+                                <li><a href="#"><i class="fa fa-envelope"></i> MindcareStudents@gmail.com</a></li>
+                                <li><a href="#"><i class="fa fa-phone"></i> +21693213496</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Header -->
+        <div id="sticky-header" class="main-header-area">
+            <div class="container-fluid px-4 px-xl-5">
+                <div class="row align-items-center">
+                    <!-- Logo -->
+                    <div class="col-xl-3 col-lg-2">
+                        <div class="logo">
+                            <a href="{{ path('app_home') }}">
+                                <img src="{{ asset('front/img/logo.png') }}" alt="MindCare Logo">
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Main Menu -->
+                    <div class="col-xl-6 col-lg-7">
+                        <div class="main-menu d-none d-lg-block">
+                            <nav>
+                                <ul id="navigation">
+                                    <li><a class="active" href="{{ path('app_home') }}">Accueil</a></li>
+                                    <li>
+                                        <a href="javascript:void(0);" aria-haspopup="true" aria-expanded="false">Rendez-vous <i class="ti-angle-down"></i></a>
+                                        <ul class="submenu">
+                                            <li><a href="{{ path('app_reservation') }}">Prendre RDV</a></li>
+                                            <li><a href="{{ path('student_mes_rendezvous') }}">Mes RDV</a></li>
+                                        </ul>
+                                    </li>
+                                    <li><a href="{{ path('student_patient_file') }}">Mon dossier médical</a></li>
+                                    <li><a href="{{ path('resource_index') }}">Ressources</a></li>
+                                    <li>
+                                        <a href="javascript:void(0);" aria-haspopup="true" aria-expanded="false">Evenements <i class="ti-angle-down"></i></a>
+                                        <ul class="submenu">
+                                            <li><a href="{{ path('front_events_index') }}">Evenements</a></li>
+                                            {% if app.user %}
+                                                <li><a href="{{ path('front_my_reservations') }}">Mes réservations</a></li>
+                                            {% endif %}
+                                        </ul>
+                                    </li>
+                                    <li><a href="{{ path('front_forum_index') }}">Forum</a></li>
+                                    <li>
+                                        <a href="javascript:void(0);" aria-haspopup="true" aria-expanded="false">Journal <i class="ti-angle-down"></i></a>
+                                        <ul class="submenu">
+                                            <li><a href="{{ path('app_journal_emotionnel_index') }}">Journal</a></li>
+                                            <li><a href="{{ path('app_mood_index') }}">Mood</a></li>
+                                        </ul>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+
+                    <!-- Right Side: Appointment + User -->
+                    <div class="col-xl-3 col-lg-3 d-none d-lg-flex justify-content-end align-items-center gap-3">
+                        <!-- Appointment Button -->
+
+                        <!-- User Dropdown -->
+                        {% if app.user %}
+                            <div class="user-dropdown-wrapper">
+                                <div class="user-avatar-dropdown position-relative">
+                                    <button class="user-dropdown-toggle d-flex align-items-center gap-2 bg-transparent border-0 p-2 rounded-3" 
+                                            style="cursor:pointer; transition: all 0.3s ease;">
+                                        <div class="avatar-circle" style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                            {{ app.user.firstName|first|upper }}{{ app.user.lastName|first|upper }}
+                                        </div>
+                                        <div class="user-info d-flex flex-column align-items-start">
+                                            <span class="user-name fw-bold" style="font-size: 0.9rem; color: #333;">
+                                                {{ app.user.firstName }} {{ app.user.lastName|first }}.
+                                            </span>
+                                            <small class="user-role text-muted" style="font-size: 0.75rem;">
+                                                {% if app.user.role == 'admin' %}Admin
+                                                {% elseif app.user.role == 'psychologue' %}Psychologue
+                                                {% else %}Étudiant{% endif %}
+                                            </small>
+                                        </div>
+                                        <i class="fas fa-chevron-down text-muted" style="font-size: 0.8rem; margin-left: 5px;"></i>
+                                    </button>
+                                    
+                                    <div class="user-dropdown-menu shadow-lg border-0 rounded-3 p-2" 
+                                         style="display:none; position:absolute; right:0; top:calc(100% + 10px); background:#fff; min-width:240px; z-index:1050; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                                        <div class="dropdown-header p-3 border-bottom" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px 8px 0 0; margin: -8px -8px 10px -8px;">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="avatar-circle-large" style="width: 48px; height: 48px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; border: 2px solid white;">
+                                                    {{ app.user.firstName|first|upper }}{{ app.user.lastName|first|upper }}
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-0 text-white">{{ app.user.firstName }} {{ app.user.lastName }}</h6>
+                                                    <small class="text-white opacity-75">{{ app.user.email }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <ul class="list-unstyled mb-0">
+                                            <li>
+                                                <a href="{{ path('app_dashboard_stats') }}" 
+                                                   class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 rounded-2"
+                                                   style="transition: all 0.2s ease;">
+                                                    <i class="fas fa-star" style="color: #ffc107; width: 20px;"></i>
+                                                    <span>Tableau de Bord</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="{{ path('app_update_profile') }}" 
+                                                   class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 rounded-2"
+                                                   style="transition: all 0.2s ease;">
+                                                    <i class="fas fa-user-edit" style="color: #667eea; width: 20px;"></i>
+                                                    <span>Edit Profile</span>
+                                                </a>
+                                            </li>
+                                            
+                                            {# 🔵 PSYCHOLOGUE DASHBOARD - Only for psychologue role #}
+                                            {% if app.user.role == 'psychologue' %}
+                                            <li>
+                                                <a href="{{ path('app_admin') }}" 
+                                                   class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 rounded-2"
+                                                   style="transition: all 0.2s ease;">
+                                                    <i class="fas fa-chart-line" style="color: #4a6cf7; width: 20px;"></i>
+                                                    <span>Dashboard Psychologue</span>
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                            
+                                            {# 👑 ADMIN DASHBOARD - Only for admin role #}
+                                            {% if app.user.role == 'admin' %}
+                                            <li>
+                                                <a href="{{ path('admin_users_index') }}" 
+                                                   class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 rounded-2"
+                                                   style="transition: all 0.2s ease;">
+                                                    <i class="fas fa-users-cog" style="color: #764ba2; width: 20px;"></i>
+                                                    <span>Admin Panel</span>
+                                                </a>
+                                            </li>
+                                            {% endif %}
+                                            
+                                            <li class="border-top mt-2 pt-2">
+                                                <a href="{{ path('app_logout') }}" 
+                                                   class="dropdown-item d-flex align-items-center gap-2 py-2 px-3 rounded-2 text-danger"
+                                                   style="transition: all 0.2s ease;">
+                                                    <i class="fas fa-sign-out-alt" style="width: 20px;"></i>
+                                                    <span>Logout</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="auth-buttons d-flex gap-2">
+                                <a href="{{ path('app_login') }}" class="btn btn-outline-primary px-3" style="border-radius: 20px;">
+                                    Login
+                                </a>
+                                <a href="{{ path('app_login') }}" class="btn btn-primary px-3" style="border-radius: 20px;">
+                                    Sign Up
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Mobile Menu -->
+                    <div class="col-12">
+                        <div class="mobile_menu d-block d-lg-none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- header-end -->
+
+<style>
+    /* User Dropdown Styles */
+    .user-dropdown-toggle:hover {
+        background-color: #f8f9fa !important;
+    }
+    
+    .user-dropdown-menu {
+        animation: dropdownFadeIn 0.2s ease-out;
+    }
+    
+    @keyframes dropdownFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .dropdown-item:hover {
+        background-color: #f8f9fa !important;
+        transform: translateX(5px);
+    }
+    
+    .dropdown-item i {
+        font-size: 16px;
+    }
+    
+    /* Improve appointment button */
+    .book_btn a {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-block;
+        border: none;
+    }
+    
+    .book_btn a:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    
+    /* Mobile responsive adjustments */
+    @media (max-width: 992px) {
+        .user-info {
+            display: none !important;
+        }
+        
+        .user-dropdown-toggle {
+            padding: 5px !important;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const userDropdown = document.querySelector('.user-avatar-dropdown');
+    const toggleBtn = userDropdown?.querySelector('.user-dropdown-toggle');
+    const menu = userDropdown?.querySelector('.user-dropdown-menu');
+    
+    if (toggleBtn && menu) {
+        // Toggle dropdown
+        toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!userDropdown.contains(e.target)) {
+                menu.style.display = 'none';
+            }
+        });
+        
+        // Close dropdown on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                menu.style.display = 'none';
+            }
+        });
+        
+        // Close dropdown when clicking a menu item
+        menu.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                menu.style.display = 'none';
+            });
+        });
+    }
+});
+</script>

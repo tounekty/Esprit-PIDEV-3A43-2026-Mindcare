@@ -1,0 +1,169 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mood Enregistré | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+{% endblock %}
+
+{% block body %}
+<div class="page-container" style="max-width: 900px; margin: 0 auto; padding: 2rem 1rem;">
+    <!-- Success Message -->
+    <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 1.5rem; border-radius: 6px; margin-bottom: 2rem;">
+        <h2 style="margin: 0; color: #155724; display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-check-circle" style="font-size: 1.5rem;"></i>
+            Votre mood a été enregistré ! ✨
+        </h2>
+        <p style="margin: 0.5rem 0 0 0; color: #155724;">Humeur: <strong>{{ mood.humeur|upper }}</strong> (Intensité: {{ mood.intensite }}/5)</p>
+        {% set moodDiffSeconds = date().timestamp - (mood.datemood|date('U')) %}
+        {% if moodDiffSeconds < 0 %}{% set moodDiffSeconds = 0 %}{% endif %}
+        <p style="margin: 0.5rem 0 0 0; color: #155724;">
+            <i class="far fa-clock me-1"></i>
+            {% if moodDiffSeconds < 60 %}
+                a l'instant
+            {% elseif moodDiffSeconds < 3600 %}
+                il y a {{ (moodDiffSeconds / 60)|round(0, 'floor') }} min
+            {% elseif moodDiffSeconds < 86400 %}
+                il y a {{ (moodDiffSeconds / 3600)|round(0, 'floor') }} h
+            {% else %}
+                il y a {{ (moodDiffSeconds / 86400)|round(0, 'floor') }} j
+            {% endif %}
+        </p>
+    </div>
+
+    {% for message in app.flashes('mood_positive') %}
+    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem 1.25rem; border-radius: 6px; margin-bottom: 1.25rem; color: #664d03;">
+        <strong>Bonne continuation :</strong> {{ message }}
+    </div>
+    {% endfor %}
+
+    <!-- AI Analysis Section -->
+    {% if ai_analysis %}
+    <div style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem; margin-bottom: 2rem;">
+        <h3 style="display: flex; align-items: center; gap: 10px; margin-bottom: 1.5rem; color: #333;">
+            <i class="fas fa-robot" style="color: #007bff;"></i>
+            Conseils IA Basés sur Votre Mood
+        </h3>
+
+        <!-- Sentiment Card -->
+        {% set sentiment_colors = {
+            'triste': '#3498db',
+            'stressé': '#e74c3c',
+            'colère': '#c0392b',
+            'heureux': '#2ecc71',
+            'calme': '#9b59b6'
+        } %}
+        <div style="background: linear-gradient(135deg, {{ sentiment_colors[ai_analysis.sentiment] ?? '#95a5a6' }} 0%, rgba(255,255,255,0.9) 100%); padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid {{ sentiment_colors[ai_analysis.sentiment] ?? '#95a5a6' }};">
+            <h4 style="margin: 0 0 0.5rem 0; color: #333;">État Émotionnel Détecter</h4>
+            <p style="margin: 0; font-size: 1.2rem; font-weight: bold; color: #333;">
+                {{ ai_analysis.sentiment|upper }}
+                <span style="font-size: 1.5rem; margin-left: 0.5rem;">
+                    {% if ai_analysis.sentiment == 'triste' %}
+                        😢
+                    {% elseif ai_analysis.sentiment == 'stressé' %}
+                        😰
+                    {% elseif ai_analysis.sentiment == 'colère' %}
+                        😠
+                    {% elseif ai_analysis.sentiment == 'heureux' %}
+                        😊
+                    {% elseif ai_analysis.sentiment == 'calme' %}
+                        🧘
+                    {% else %}
+                        💭
+                    {% endif %}
+                </span>
+            </p>
+        </div>
+
+        <!-- AI Suggestions -->
+        <div style="background: #e8f4f8; padding: 1.5rem; border-radius: 6px; margin-bottom: 1.5rem; border-left: 4px solid #17a2b8;">
+            <h4 style="margin: 0 0 1rem 0; color: #333; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-lightbulb" style="color: #ffc107;"></i>
+                Suggestions IA pour vous
+            </h4>
+            <ul style="margin: 0; padding-left: 1.5rem; list-style: none;">
+                {% for suggestion in ai_analysis.suggestions %}
+                <li style="margin-bottom: 0.8rem; padding-left: 1.5rem; position: relative; line-height: 1.5;">
+                    <span style="position: absolute; left: 0;">→</span>
+                    {{ suggestion }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Wellness Tip -->
+        <div style="background: #fff3cd; padding: 1.5rem; border-radius: 6px; border-left: 4px solid #ffc107;">
+            <h4 style="margin: 0 0 0.5rem 0; color: #333; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-heart" style="color: #e74c3c;"></i>
+                Conseil bien-être du jour
+            </h4>
+            <p style="margin: 0; line-height: 1.6; color: #333;">
+                {{ ai_analysis.wellness_tip }}
+            </p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <a href="{{ path('app_mood_index') }}" 
+           style="background: #007bff; color: white; padding: 12px 24px; border-radius: 4px; text-decoration: none; display: inline-block; font-weight: bold; text-align: center;">
+            ← Retour à mes moods
+        </a>
+        <a href="{{ path('app_mood_new') }}" 
+           style="background: #28a745; color: white; padding: 12px 24px; border-radius: 4px; text-decoration: none; display: inline-block; font-weight: bold; text-align: center;">
+            ➕ Ajouter un mood
+        </a>
+    </div>
+
+    <!-- View Details & Download PDF -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem;">
+        <a href="{{ path('app_mood_show', {'id': mood.id}) }}" 
+           style="background: #17a2b8; color: white; padding: 12px 24px; border-radius: 4px; text-decoration: none; display: inline-block; font-weight: bold; text-align: center;">
+            👁️ Voir les détails
+        </a>
+        <button class="btn btn-warning" style="background: #ffc107; color: black; padding: 12px 24px; border-radius: 4px; border: none; font-weight: bold; cursor: not-allowed; opacity: 0.7;" disabled>
+            📄 PDF en cours de génération...
+        </button>
+    </div>
+
+    <!-- Related Action Cards -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <!-- Journal Card -->
+        <div style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem; text-align: center;">
+            <i class="fas fa-book" style="font-size: 2rem; color: #17a2b8; margin-bottom: 1rem;"></i>
+            <h4 style="margin: 0.5rem 0; color: #333;">Journaliser</h4>
+            <p style="margin: 0.5rem 0 1rem 0; color: #666; font-size: 0.9rem;">Exprimez vos sentiments en détail</p>
+            <a href="{{ path('app_journal_emotionnel_new') }}" 
+               style="background: #17a2b8; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; display: inline-block; font-size: 0.9rem;">
+                Écrire
+            </a>
+        </div>
+
+        <!-- Meditation Card -->
+        <div style="background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 1.5rem; text-align: center;">
+            <i class="fas fa-spa" style="font-size: 2rem; color: #9b59b6; margin-bottom: 1rem;"></i>
+            <h4 style="margin: 0.5rem 0; color: #333;">Méditation</h4>
+            <p style="margin: 0.5rem 0 1rem 0; color: #666; font-size: 0.9rem;">Trouvez la paix intérieure</p>
+            <a href="{{ path('app_mood_show', {'id': mood.id}) }}" 
+               style="background: #9b59b6; color: white; padding: 8px 16px; border-radius: 4px; text-decoration: none; display: inline-block; font-size: 0.9rem;">
+                Découvrir
+            </a>
+        </div>
+    </div>
+
+    <!-- Gamification -->
+    <div style="background: linear-gradient(135deg, #FFD89B 0%, #19547B 100%); color: white; border-radius: 8px; padding: 1.5rem; margin-top: 2rem; text-align: center;">
+        <h4 style="margin: 0 0 0.5rem 0; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <i class="fas fa-star"></i> Progression
+        </h4>
+        <p style="margin: 0; font-size: 1.1rem;">
+            <strong>+5 Points</strong> pour cet ajout de mood ! 🎉
+        </p>
+        <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.9;">
+            Continuez ainsi pour débloquer de nouveaux badges ! 🏆
+        </p>
+    </div>
+</div>
+{% endblock %}

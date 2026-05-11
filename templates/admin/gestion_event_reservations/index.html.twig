@@ -1,0 +1,144 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block page_title %}Reservations Evenements{% endblock %}
+
+{% block body %}
+<div class="card">
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="btn-group" role="group" aria-label="Status Filter">
+                    <a href="{{ path('admin_event_reservations_index', {status: 'all', search: currentSearch, sort: currentSort, order: currentOrder}) }}"
+                       class="btn btn-sm {{ currentStatus == 'all' ? 'btn-primary' : 'btn-outline-primary' }}">Tous</a>
+                    <a href="{{ path('admin_event_reservations_index', {status: 'pending', search: currentSearch, sort: currentSort, order: currentOrder}) }}"
+                       class="btn btn-sm {{ currentStatus == 'pending' ? 'btn-warning' : 'btn-outline-warning' }}">En attente</a>
+                    <a href="{{ path('admin_event_reservations_index', {status: 'accepted', search: currentSearch, sort: currentSort, order: currentOrder}) }}"
+                       class="btn btn-sm {{ currentStatus == 'accepted' ? 'btn-success' : 'btn-outline-success' }}">Acceptees</a>
+                    <a href="{{ path('admin_event_reservations_index', {status: 'refused', search: currentSearch, sort: currentSort, order: currentOrder}) }}"
+                       class="btn btn-sm {{ currentStatus == 'refused' ? 'btn-danger' : 'btn-outline-danger' }}">Refusees</a>
+                    <a href="{{ path('admin_event_reservations_index', {status: 'cancelled', search: currentSearch, sort: currentSort, order: currentOrder}) }}"
+                       class="btn btn-sm {{ currentStatus == 'cancelled' ? 'btn-secondary' : 'btn-outline-secondary' }}">Annulees</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex gap-2 justify-content-end">
+                    <form method="post" action="{{ path('admin_event_reservations_send_reminders') }}" style="display:inline-block;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('send_sms_reminders') }}">
+                        <button type="submit" class="btn btn-sm btn-info text-white" onclick="return confirm('Envoyer les rappels SMS pour les evenements dans les prochaines 24h ?')">
+                            <i class="fa fa-comment-dots"></i> Envoyer rappels SMS
+                        </button>
+                    </form>
+                    <form method="get" action="{{ path('admin_event_reservations_index') }}" class="flex-grow-1">
+                    <input type="hidden" name="status" value="{{ currentStatus }}">
+                    <input type="hidden" name="sort" value="{{ currentSort }}">
+                    <input type="hidden" name="order" value="{{ currentOrder }}">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control form-control-sm"
+                               placeholder="Rechercher (user, evenement)" value="{{ currentSearch }}">
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        {% if currentSearch %}
+                            <a href="{{ path('admin_event_reservations_index', {status: currentStatus, sort: currentSort, order: currentOrder}) }}"
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+
+        {% if reservations is empty %}
+            <div class="alert alert-info">Aucune reservation trouvee.</div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Evenement</th>
+                            <th>Utilisateur</th>
+                            <th>Nom</th>
+                            <th>Prenom</th>
+                            <th>Telephone</th>
+                            <th>Commentaire</th>
+                            <th>
+                                <a href="{{ path('admin_event_reservations_index', {
+                                    status: currentStatus,
+                                    search: currentSearch,
+                                    sort: 'dateReservation',
+                                    order: (currentSort == 'dateReservation' and currentOrder == 'ASC') ? 'DESC' : 'ASC'
+                                }) }}" class="text-decoration-none text-dark">
+                                    Date
+                                    {% if currentSort == 'dateReservation' %}
+                                        {% if currentOrder == 'ASC' %}
+                                            <i class="fa fa-arrow-up"></i>
+                                        {% else %}
+                                            <i class="fa fa-arrow-down"></i>
+                                        {% endif %}
+                                    {% else %}
+                                        <i class="fa fa-sort" style="opacity: 0.3;"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations %}
+                            <tr>
+                                <td>{{ reservation.id }}</td>
+                                <td>{{ reservation.event ? reservation.event.titre : '-' }}</td>
+                                <td>
+                                    {% if reservation.user %}
+                                        {{ reservation.user.firstName }} {{ reservation.user.lastName }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>{{ reservation.nom }}</td>
+                                <td>{{ reservation.prenom }}</td>
+                                <td>{{ reservation.telephone }}</td>
+                                <td>{{ reservation.commentaire ? (reservation.commentaire|length > 40 ? reservation.commentaire|slice(0, 40) ~ '...' : reservation.commentaire) : '-' }}</td>
+                                <td>{{ reservation.dateReservation ? reservation.dateReservation|date('d/m/Y H:i') : '' }}</td>
+                                <td>
+                                    {% if reservation.statut == 'pending' %}
+                                        <span class="badge bg-warning">En attente</span>
+                                    {% elseif reservation.statut == 'accepted' %}
+                                        <span class="badge bg-success">Acceptee</span>
+                                    {% elseif reservation.statut == 'refused' %}
+                                        <span class="badge bg-danger">Refusee</span>
+                                    {% elseif reservation.statut == 'cancelled' %}
+                                        <span class="badge bg-secondary">Annulee</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if reservation.statut == 'pending' %}
+                                        <form method="post" action="{{ path('admin_event_reservations_accept', {id: reservation.id}) }}" style="display:inline-block;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('event_reservation_accept_' ~ reservation.id) }}">
+                                            <button class="btn btn-sm btn-success">Accepter</button>
+                                        </form>
+                                        <form method="post" action="{{ path('admin_event_reservations_refuse', {id: reservation.id}) }}" style="display:inline-block;">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('event_reservation_refuse_' ~ reservation.id) }}">
+                                            <button class="btn btn-sm btn-danger">Refuser</button>
+                                        </form>
+                                    {% endif %}
+                                    {% if reservation.statut != 'cancelled' %}
+                                        <form method="post" action="{{ path('admin_event_reservations_cancel', {id: reservation.id}) }}" style="display:inline-block;" onsubmit="return confirm('Annuler cette reservation ?');">
+                                            <input type="hidden" name="_token" value="{{ csrf_token('event_reservation_cancel_' ~ reservation.id) }}">
+                                            <button class="btn btn-sm btn-secondary">Annuler</button>
+                                        </form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

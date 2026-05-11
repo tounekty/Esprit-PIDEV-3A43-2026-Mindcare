@@ -1,0 +1,442 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Prendre un rendez-vous{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+    <style>
+        .fc-timegrid-slot {
+            height: 3em !important;
+        }
+        .fc-event {
+            cursor: not-allowed !important;
+        }
+        .fc-timegrid-slot:hover {
+            background-color: #e8f5e9 !important;
+            cursor: pointer;
+        }
+        .selected-time-display {
+            padding: 15px;
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        #calendar {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .availability-legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 4px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-primary text-white py-4">
+                    <h2 class="mb-1">Prendre un rendez-vous</h2>
+                    <p class="mb-0">avec <strong>{{ psychologue.firstName }} {{ psychologue.lastName }}</strong></p>
+                </div>
+                <div class="card-body p-4">
+                    
+                    <!-- Flash Messages from Controller -->
+                    {% for type, messages in app.flashes %}
+                        {% if type == 'error' %}
+                            {% for message in messages %}
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <h5 class="alert-heading fw-bold mb-2">
+                                        <i class="fa fa-exclamation-circle me-2"></i>Attention
+                                    </h5>
+                                    <p class="mb-0">{{ message }}</p>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% elseif type == 'warning' %}
+                            {% for message in messages %}
+                                <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                                    <h5 class="alert-heading fw-bold mb-2">
+                                        <i class="fa fa-exclamation-triangle me-2"></i>Avertissement
+                                    </h5>
+                                    <p class="mb-0">{{ message }}</p>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% elseif type == 'success' %}
+                            {% for message in messages %}
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <h5 class="alert-heading fw-bold mb-2">
+                                        <i class="fa fa-check-circle me-2"></i>Succes
+                                    </h5>
+                                    <p class="mb-0">{{ message }}</p>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    <!-- Form-level Error Messages -->
+                    {% if form.vars.errors|length > 0 %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <h5 class="alert-heading fw-bold mb-3">
+                                <i class="fa fa-exclamation-circle me-2"></i>Erreur
+                            </h5>
+                            {% for error in form.vars.errors %}
+                                <div class="mb-2">{{ error.message }}</div>
+                            {% endfor %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endif %}
+
+                    <!-- Availability Legend -->
+                    <div class="availability-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #ef5350;"></div>
+                            <span>Non disponible</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #66bb6a;"></div>
+                            <span>Votre sélection</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #fff; border: 1px solid #ddd;"></div>
+                            <span>Disponible (cliquez pour sélectionner)</span>
+                        </div>
+                    </div>
+
+                    <!-- AI Suggestions Card -->
+                    <div class="card border-info mb-4">
+                        <div class="card-header bg-info bg-opacity-10 border-info">
+                            <h5 class="card-title mb-0">
+                                <i class="fa fa-magic me-2" style="color: #0dcaf0;"></i>
+                                <strong>Suggestions IA</strong> - Créneaux optimaux recommandés
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <button type="button" id="loadAISuggestions" class="btn btn-info btn-sm mb-3">
+                                <i class="fa fa-brain me-2"></i>Charger les suggestions IA
+                            </button>
+                            <div id="aiSuggestionsContainer" style="display: none;">
+                                <div id="aiLoading" class="text-center py-3" style="display: none;">
+                                    <div class="spinner-border spinner-border-sm text-info me-2" role="status">
+                                        <span class="visually-hidden">Chargement...</span>
+                                    </div>
+                                    <span class="text-muted">Analyse des patterns de rendez-vous...</span>
+                                </div>
+                                <div id="aiContent" style="display: none;">
+                                    <div class="alert alert-info border-info">
+                                        <p class="mb-0" style="white-space: pre-wrap;" id="aiSuggestionsText"></p>
+                                    </div>
+                                    <small class="text-muted d-block mt-2">
+                                        <i class="fa fa-info-circle me-1"></i>
+                                        Les suggestions sont basées sur l'analyse des rendez-vous confirmés de ce psychologue.
+                                    </small>
+                                </div>
+                                <div id="aiError" class="alert alert-warning" style="display: none;">
+                                    <i class="fa fa-exclamation-triangle me-2"></i>
+                                    <span id="aiErrorText"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calendar -->
+                    <div id="calendar"></div>
+                    {% if form.date.vars.errors|length > 0 %}
+                        <div class="alert alert-danger mt-2">
+                            {% for error in form.date.vars.errors %}
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-exclamation-triangle me-2"></i>
+                                    {{ error.message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Selected Time Display -->
+                    <div id="selectedTimeDisplay" class="selected-time-display" style="display: none;">
+                        <h5 class="mb-2"><i class="fa fa-calendar-check me-2"></i>Date et heure sélectionnées</h5>
+                        <p class="mb-0" id="selectedTimeText"></p>
+                    </div>
+
+                    <!-- Booking Form -->
+                    {{ form_start(form, {'attr': {'novalidate': true, 'id': 'appointmentForm'}}) }}
+                        
+                        <!-- Hidden datetime input -->
+                        <div style="display: none;">
+                            {{ form_widget(form.date) }}
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form_label(form.location, 'Type de consultation', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.location, {'attr': {
+                                'class': 'form-select form-select-lg' ~ (form.location.vars.errors|length > 0 ? ' is-invalid' : '')
+                            }}) }}
+                            {% if form.location.vars.errors|length > 0 %}
+                                <div class="invalid-feedback d-block mt-2">
+                                    {% for error in form.location.vars.errors %}
+                                        <div><i class="fa fa-exclamation-circle me-1"></i>{{ error.message }}</div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-4">
+                            {{ form_label(form.description, 'Notes / Détails', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': 4, 'placeholder': 'Décrivez votre demande...'}}) }}
+                            <small class="text-muted">Optionnel</small>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex mt-5">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1" id="submitBtn" disabled>
+                                <i class="fa fa-check me-2"></i>Confirmer
+                            </button>
+                            <a href="{{ path('app_reservation') }}" class="btn btn-outline-secondary btn-lg flex-grow-1">
+                                <i class="fa fa-arrow-left me-2"></i>Retour
+                            </a>
+                        </div>
+
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const psychologueId = {{ psychologue.id }};
+            // Find the actual datetime input generated by Symfony (try multiple fallbacks)
+            const hiddenDateInput = document.querySelector('input[type="datetime-local"], input[type="datetime"], input[name$="[date]"]');
+            const selectedTimeDisplay = document.getElementById('selectedTimeDisplay');
+            const selectedTimeText = document.getElementById('selectedTimeText');
+            const submitBtn = document.getElementById('submitBtn');
+            let busySlots = [];
+            let selectedEvent = null;
+
+            if (!hiddenDateInput) {
+                console.error('Could not find datetime input field');
+                // Allow form submission so server-side validation can report errors
+                if (submitBtn) submitBtn.disabled = false;
+                // Continue to initialize calendar UI without binding to the hidden input
+            }
+
+            // Fetch busy slots from API
+            fetch(`/api/psychologue/${psychologueId}/availability`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Busy slots received:', data); // Debug log
+                    busySlots = data;
+                    initCalendar();
+                })
+                .catch(error => {
+                    console.error('Error fetching availability:', error);
+                    initCalendar();
+                });
+
+            function initCalendar() {
+                console.log('Initializing calendar with', busySlots.length, 'busy slots'); // Debug log
+                
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'timeGridWeek',
+                    locale: 'fr',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'timeGridWeek,timeGridDay'
+                    },
+                    slotMinTime: '09:00:00',
+                    slotMaxTime: '18:00:00',
+                    allDaySlot: false,
+                    slotDuration: '01:00:00',
+                    height: 'auto',
+                    nowIndicator: true,
+                    eventDisplay: 'block',
+                    events: busySlots.map(slot => {
+                        console.log('Adding busy slot:', slot.start, 'to', slot.end); // Debug log
+                        return {
+                            start: slot.start,
+                            end: slot.end,
+                            display: 'background',
+                            backgroundColor: '#ef5350',
+                            borderColor: '#ef5350',
+                            editable: false,
+                            overlap: false
+                        };
+                    }),
+                    dateClick: function(info) {
+                        const clickedTime = new Date(info.dateStr);
+                        const now = new Date();
+                        const minTime = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+
+                        // Check if time is in the past or too soon
+                        if (clickedTime < minTime) {
+                            alert('Veuillez sélectionner une date au moins 1 heure à l\'avenir.');
+                            return;
+                        }
+
+                        // Check if slot is busy
+                        const isBusy = busySlots.some(slot => {
+                            const slotStart = new Date(slot.start);
+                            const slotEnd = new Date(slot.end);
+                            return clickedTime >= slotStart && clickedTime < slotEnd;
+                        });
+
+                        if (isBusy) {
+                            alert('Ce créneau n\'est pas disponible. Veuillez choisir un autre horaire.');
+                            return;
+                        }
+
+                        // Check business hours (9 AM - 6 PM)
+                        const hours = clickedTime.getHours();
+                        if (hours < 9 || hours >= 18) {
+                            alert('Veuillez sélectionner un horaire entre 9h00 et 18h00.');
+                            return;
+                        }
+
+                        // Remove previous selection
+                        if (selectedEvent) {
+                            selectedEvent.remove();
+                        }
+
+                        // Add new selection
+                        const endTime = new Date(clickedTime.getTime() + 60 * 60 * 1000);
+                        selectedEvent = calendar.addEvent({
+                            start: clickedTime,
+                            end: endTime,
+                            display: 'background',
+                            backgroundColor: '#66bb6a',
+                            borderColor: '#66bb6a'
+                        });
+
+                        // Update form
+                        updateSelectedTime(clickedTime);
+                    }
+                });
+
+                calendar.render();
+
+                // If date is already set (e.g. after form error), enable button and show display
+                if (hiddenDateInput && hiddenDateInput.value) {
+                    const savedDate = new Date(hiddenDateInput.value);
+                    if (savedDate > new Date()) {
+                        submitBtn.disabled = false;
+                        selectedTimeDisplay.style.display = 'block';
+                        selectedTimeText.textContent = savedDate.toLocaleDateString('fr-FR', {
+                            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                        });
+                    }
+                }
+            }
+
+            function updateSelectedTime(dateTime) {
+                // Format for display
+                const options = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                const formattedDate = dateTime.toLocaleDateString('fr-FR', options);
+                
+                // Update display
+                selectedTimeText.textContent = formattedDate;
+                selectedTimeDisplay.style.display = 'block';
+                submitBtn.disabled = false;
+
+                // Update hidden input (format: YYYY-MM-DDTHH:mm)
+                const year = dateTime.getFullYear();
+                const month = String(dateTime.getMonth() + 1).padStart(2, '0');
+                const day = String(dateTime.getDate()).padStart(2, '0');
+                const hours = String(dateTime.getHours()).padStart(2, '0');
+                const minutes = String(dateTime.getMinutes()).padStart(2, '0');
+                
+                const formattedValue = `${year}-${month}-${day}T${hours}:${minutes}`;
+                hiddenDateInput.value = formattedValue;
+                
+                console.log('Date set to:', formattedValue); // Debug log
+            }
+
+            // Prevent form submission if no date selected
+            document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+                if (!hiddenDateInput.value) {
+                    e.preventDefault();
+                    alert('Veuillez sélectionner une date et une heure sur le calendrier.');
+                    return false;
+                }
+                console.log('Submitting with date:', hiddenDateInput.value); // Debug log
+            });
+
+            // AI Suggestions Handler
+            document.getElementById('loadAISuggestions')?.addEventListener('click', function() {
+                const btn = this;
+                const container = document.getElementById('aiSuggestionsContainer');
+                const loading = document.getElementById('aiLoading');
+                const content = document.getElementById('aiContent');
+                const error = document.getElementById('aiError');
+                const psyId = {{ psychologue.id }};
+
+                btn.disabled = true;
+                container.style.display = 'block';
+                loading.style.display = 'block';
+                content.style.display = 'none';
+                error.style.display = 'none';
+
+                fetch(`/api/psychologue/${psyId}/ai-suggest-times`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    loading.style.display = 'none';
+                    if (data.suggestions) {
+                        document.getElementById('aiSuggestionsText').textContent = data.suggestions;
+                        content.style.display = 'block';
+                    } else if (data.error) {
+                        document.getElementById('aiErrorText').textContent = data.error;
+                        error.style.display = 'block';
+                        btn.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    loading.style.display = 'none';
+                    document.getElementById('aiErrorText').textContent = 'Erreur: ' + err.message;
+                    error.style.display = 'block';
+                    btn.disabled = false;
+                });
+            });
+        });
+    </script>
+{% endblock %}

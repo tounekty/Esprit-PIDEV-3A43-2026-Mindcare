@@ -1,0 +1,44 @@
+framework:
+    workflows:
+        appointment_workflow:
+            type: 'state_machine'
+            marking_store:
+                type: 'method'
+                property: 'status'
+            supports:
+                - App\Entity\Appointment
+            initial_marking: pending
+            places:
+                - pending
+                - accepted
+                - refused
+                - cancelled
+                - in_progress
+                - completed
+                - absent
+                - archived
+            transitions:
+                accept:
+                    from: pending
+                    to: accepted
+                refuse:
+                    from: pending
+                    to: refused
+                cancel:
+                    from: [pending, accepted]
+                    to: cancelled
+                start:
+                    from: accepted
+                    to: in_progress
+                complete:
+                    from: in_progress
+                    to: completed
+                mark_absent:
+                    from: [in_progress, completed]
+                    to: absent
+                undo_absent:
+                    from: absent
+                    to: completed
+                archive:
+                    from: completed
+                    to: archived

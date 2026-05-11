@@ -1,0 +1,235 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block page_title %}Gestion Commentaires{% endblock %}
+
+{% block body %}
+<div class="row g-3 mb-4">
+    <div class="col-xl-3 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Commentaires</small>
+                <h4 id="commentStatTotal" class="mb-0">{{ stats.totalComments }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Note moyenne</small>
+                <h4 id="commentStatAvg" class="mb-0">{{ stats.averageRating is not null ? stats.averageRating ~ ' / 5' : '-' }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Ajoutes aujourd'hui</small>
+                <h4 id="commentStatToday" class="mb-0">{{ stats.commentsToday }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Ressources commentees</small>
+                <h4 id="commentStatResources" class="mb-0">{{ stats.resourcesWithComments }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">Liste des Commentaires</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-2 mb-3">
+            <div class="col-lg-5">
+                <input
+                    id="commentSearch"
+                    type="text"
+                    class="form-control"
+                    placeholder="Rechercher auteur, email, contenu, ressource..."
+                    value="{{ filters.query }}"
+                >
+            </div>
+            <div class="col-lg-2">
+                <select id="commentMinRating" class="form-select">
+                    <option value="0" {{ filters.minRating == 0 ? 'selected' : '' }}>Toutes les notes</option>
+                    <option value="5" {{ filters.minRating == 5 ? 'selected' : '' }}>5 etoiles</option>
+                    <option value="4" {{ filters.minRating == 4 ? 'selected' : '' }}>4+ etoiles</option>
+                    <option value="3" {{ filters.minRating == 3 ? 'selected' : '' }}>3+ etoiles</option>
+                    <option value="2" {{ filters.minRating == 2 ? 'selected' : '' }}>2+ etoiles</option>
+                    <option value="1" {{ filters.minRating == 1 ? 'selected' : '' }}>1+ etoiles</option>
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <select id="commentSort" class="form-select">
+                    {% set currentSort = filters.sort ~ '_' ~ filters.direction|lower %}
+                    <option value="createdAt_desc" {{ currentSort == 'createdAt_desc' ? 'selected' : '' }}>Plus recents</option>
+                    <option value="createdAt_asc" {{ currentSort == 'createdAt_asc' ? 'selected' : '' }}>Plus anciens</option>
+                    <option value="rating_desc" {{ currentSort == 'rating_desc' ? 'selected' : '' }}>Note max</option>
+                    <option value="rating_asc" {{ currentSort == 'rating_asc' ? 'selected' : '' }}>Note min</option>
+                    <option value="author_asc" {{ currentSort == 'author_asc' ? 'selected' : '' }}>Auteur A-Z</option>
+                    <option value="author_desc" {{ currentSort == 'author_desc' ? 'selected' : '' }}>Auteur Z-A</option>
+                </select>
+            </div>
+            <div class="col-lg-2 d-grid">
+                <button id="commentReset" type="button" class="btn btn-light toolbar-btn">Reset</button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Ressource</th>
+                        <th>Auteur</th>
+                        <th>Email</th>
+                        <th>Note</th>
+                        <th>Cree le</th>
+                        <th>Contenu</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="commentsTableBody">
+                    {% include 'admin/gestion_commentaires/_rows.html.twig' with {commentaires: commentaires} %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="text-end mt-2">
+            <small class="text-muted">Resultats affiches: <span id="commentVisibleCount">{{ visible_count }}</span></small>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-stars {
+    color: #f5b301;
+    letter-spacing: 1px;
+}
+
+.table-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.table-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 112px;
+    justify-content: center;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: all 0.18s ease;
+}
+
+.table-action-btn i {
+    font-size: 14px;
+}
+
+.table-action-delete {
+    background: #fff0f1;
+    color: #c72f3a;
+    border-color: #ffc2c8;
+}
+
+.table-action-delete:hover {
+    background: #ffdfe3;
+    color: #a31f2a;
+}
+
+.toolbar-btn {
+    min-width: 110px;
+    border-radius: 6px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('commentSearch');
+    const minRatingSelect = document.getElementById('commentMinRating');
+    const sortSelect = document.getElementById('commentSort');
+    const resetBtn = document.getElementById('commentReset');
+    const tableBody = document.getElementById('commentsTableBody');
+    const visibleCountEl = document.getElementById('commentVisibleCount');
+    const ajaxUrl = '{{ path('admin_comments_ajax') }}';
+
+    let debounceTimer;
+
+    const updateStats = (stats) => {
+        const set = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+            }
+        };
+
+        set('commentStatTotal', stats.totalComments ?? 0);
+        set('commentStatAvg', stats.averageRating !== null && stats.averageRating !== undefined ? `${Number(stats.averageRating).toFixed(2)} / 5` : '-');
+        set('commentStatToday', stats.commentsToday ?? 0);
+        set('commentStatResources', stats.resourcesWithComments ?? 0);
+    };
+
+    const loadComments = async () => {
+        if (!tableBody) {
+            return;
+        }
+
+        const [sort, direction] = (sortSelect.value || 'createdAt_desc').split('_');
+
+        const params = new URLSearchParams({
+            q: searchInput.value.trim(),
+            minRating: minRatingSelect.value,
+            sort: sort,
+            direction: (direction || 'desc').toUpperCase(),
+        });
+
+        tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Chargement...</td></tr>';
+
+        try {
+            const response = await fetch(`${ajaxUrl}?${params.toString()}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur de chargement');
+            }
+
+            const data = await response.json();
+            tableBody.innerHTML = data.rowsHtml;
+            updateStats(data.stats || {});
+
+            if (visibleCountEl) {
+                visibleCountEl.textContent = data.visibleCount ?? 0;
+            }
+        } catch (error) {
+            tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-4">Impossible de charger les donnees.</td></tr>';
+        }
+    };
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(loadComments, 300);
+    });
+
+    minRatingSelect.addEventListener('change', loadComments);
+    sortSelect.addEventListener('change', loadComments);
+
+    resetBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        minRatingSelect.value = '0';
+        sortSelect.value = 'createdAt_desc';
+        loadComments();
+    });
+});
+</script>
+{% endblock %}

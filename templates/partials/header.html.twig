@@ -1,0 +1,58 @@
+<header class="nxl-header">
+    <div class="header-wrapper">
+        <div class="header-left d-flex align-items-center gap-4">
+            <a href="javascript:void(0);" class="nxl-head-mobile-toggler" id="mobile-collapse">
+                <div class="hamburger hamburger--arrowturn">
+                    <div class="hamburger-box">
+                        <div class="hamburger-inner"></div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="header-right ms-auto">
+            <div class="d-flex align-items-center">
+                <div class="dropdown nxl-h-item nxl-header-search">
+                    <a href="javascript:void(0);" class="nxl-head-link me-0" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                        <i class="feather-search"></i>
+                    </a>
+                </div>
+
+                {# 🔵 PSYCHOLOGUE DASHBOARD BUTTON - Only for psychologue role #}
+                {% if is_granted('ROLE_PSYCHOLOGUE') %}
+                <div class="dropdown nxl-h-item ms-2">
+                    <a href="{{ path('app_admin') }}" class="nxl-head-link d-flex align-items-center justify-content-center" style="width:36px; height:36px;">
+                        <i class="feather-grid text-primary" style="font-size: 20px;"></i>
+                    </a>
+                </div>
+                {% endif %}
+
+                {# 👤 USER MENU DROPDOWN #}
+                <div class="dropdown nxl-h-item ms-2">
+                    <a href="javascript:void(0);" class="nxl-head-link d-flex align-items-center justify-content-center" data-bs-toggle="dropdown" style="width:36px; height:36px;">
+                        <i class="feather-user text-white bg-primary rounded-circle p-2" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown">
+                        <a href="{{ path('app_update_profile') }}" class="dropdown-item">
+                            <i class="feather-user"></i>
+                            <span>Mon profil</span>
+                        </a>
+
+                        {# ✅ PSYCHOLOGUE DASHBOARD IN DROPDOWN (alternative access) #}
+                        {% if is_granted('ROLE_PSYCHOLOGUE') %}
+                        <a href="{{ path('app_admin') }}" class="dropdown-item">
+                            <i class="feather-grid"></i>
+                            <span>Dashboard Psychologue</span>
+                        </a>
+                        {% endif %}
+
+                        <div class="dropdown-divider"></div>
+                        <a href="{{ path('app_logout') }}" class="dropdown-item text-danger">
+                            <i class="feather-log-out"></i>
+                            <span>Déconnexion</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

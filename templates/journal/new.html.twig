@@ -1,0 +1,825 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Entrée Journal | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+    <style>
+        body {
+            background: #f8fafc;
+        }
+
+        .page-wrapper {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header Section */
+        .header-section {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(127, 191, 255, 0.2);
+        }
+
+        .header-section h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-section p {
+            font-size: 1rem;
+            opacity: 0.95;
+            margin: 0;
+        }
+
+        /* Main Content Layout */
+        .form-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+
+        /* Form Card */
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .form-card-header {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.1) 0%, rgba(168, 216, 255, 0.1) 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #E2F0FF;
+        }
+
+        .form-card-header h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin: 0;
+        }
+
+        .form-card-body {
+            padding: 2rem;
+        }
+
+        /* Form Groups */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-label i {
+            color: #7FBFFF;
+            font-size: 1.1rem;
+        }
+
+        .form-text {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 0.4rem;
+            display: block;
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #E2F0FF !important;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #7FBFFF !important;
+            box-shadow: 0 0 0 3px rgba(127, 191, 255, 0.1) !important;
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 300px;
+        }
+
+        /* Sidebar Card */
+        .sidebar-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .sidebar-card-header {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.1) 0%, rgba(168, 216, 255, 0.1) 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid #E2F0FF;
+        }
+
+        .sidebar-card-header h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin: 0;
+        }
+
+        .sidebar-card-body {
+            padding: 1.5rem;
+        }
+
+        /* Statistics Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.05) 0%, rgba(168, 216, 255, 0.05) 100%);
+            border-radius: 8px;
+            border: 1px solid #E2F0FF;
+        }
+
+        .stat-number {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #7FBFFF;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0.25rem;
+        }
+
+        /* Therapeutic coach */
+        .coach-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .coach-item {
+            border: 1px solid #D4E8FF;
+            border-radius: 10px;
+            padding: 0.9rem;
+            background: #f8fcff;
+        }
+
+        .coach-item-text {
+            font-size: 0.92rem;
+            color: #1a365d;
+            margin-bottom: 0.6rem;
+            line-height: 1.45;
+        }
+
+        .coach-use-btn {
+            border: 1px solid #7FBFFF;
+            background: #ffffff;
+            color: #3e84c7;
+            border-radius: 8px;
+            padding: 0.4rem 0.7rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .coach-use-btn:hover {
+            background: #edf6ff;
+        }
+
+        /* Quick Buttons */
+        .quick-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .quick-btn {
+            background: white;
+            color: #7FBFFF;
+            border: 2px solid #D4E8FF;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-btn:hover {
+            background: #f0f7ff;
+            border-color: #7FBFFF;
+            transform: translateY(-1px);
+        }
+
+        .quick-btn i {
+            font-size: 0.75rem;
+        }
+
+        /* Form Actions */
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #E2F0FF;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #7FBFFF;
+            border: 2px solid #D4E8FF;
+        }
+
+        .btn-secondary:hover {
+            background: #f0f7ff;
+            border-color: #7FBFFF;
+        }
+
+        /* Mood Field Styling */
+        .mood-select-group {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.05) 0%, rgba(168, 216, 255, 0.05) 100%);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #E2F0FF;
+        }
+
+        .form-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%237FBFFF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            padding-right: 2.5rem;
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+
+        /* Mood Buttons */
+        .mood-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .mood-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            border: 2px solid #D4E8FF;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1a365d;
+        }
+
+        .mood-btn:hover {
+            border-color: #7FBFFF;
+            background: #f0f7ff;
+            transform: translateY(-2px);
+        }
+
+        .mood-btn.active {
+            border-color: #7FBFFF;
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.2) 0%, rgba(168, 216, 255, 0.2) 100%);
+            box-shadow: 0 4px 12px rgba(127, 191, 255, 0.2);
+        }
+
+        .mood-emoji {
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        /* Errors */
+        .alert {
+            border-radius: 8px;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-danger {
+            background: #FEF2F2;
+            color: #7F1D1D;
+            border-left: 4px solid #DC2626;
+        }
+
+        .alert-danger .alert-heading {
+            color: #991B1B;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .alert-danger ul {
+            margin: 0;
+            padding-left: 1.5rem;
+        }
+
+        .alert-danger li {
+            margin-bottom: 0.5rem;
+        }
+
+        .text-danger {
+            color: #DC2626;
+        }
+
+        .text-danger small {
+            display: block;
+            margin-top: 0.5rem;
+        }
+
+        .text-danger div {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="page-wrapper">
+    <!-- Header -->
+    <div class="header-section">
+        <h1><i class="fas fa-book-open me-2"></i>Nouvelle Entrée Journal</h1>
+        <p>Enregistrez vos pensées et émotions</p>
+    </div>
+
+    <!-- Main Layout -->
+    <div class="form-layout">
+        <!-- Start Form -->
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <!-- Initialize Mood Map for JavaScript -->
+        <script>
+            // Initialize the mood map from server (maps mood name to mood ID)
+            window.moodMap = {{ mood_map|json_encode|raw }};
+            // Therapeutic writing prompts by mood
+            window.therapyPromptMap = {{ prompt_map|json_encode|raw }};
+        </script>
+
+        <!-- Content Card -->
+        <div>
+            <div class="form-card">
+                <div class="form-card-header">
+                    <h2><i class="fas fa-pen-fancy me-2"></i>Votre Réflexion</h2>
+                </div>
+                <div class="form-card-body">
+                    <!-- Error Messages -->
+                    {% if form.vars.errors|length > 0 %}
+                        <div class="alert alert-danger">
+                            <h4 class="alert-heading">
+                                <i class="fas fa-exclamation-circle me-2"></i>Erreurs à corriger
+                            </h4>
+                            <ul>
+                                {% for error in form.vars.errors %}
+                                    <li>{{ error.message }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+
+                    <!-- Content Field -->
+                    <div class="form-group">
+                        <label class="form-label" for="journal_contenu">
+                            <i class="fas fa-pen-fancy"></i>Écrivez vos pensées
+                        </label>
+                        {{ form_widget(form.contenu, {
+                            'attr': {
+                                'class': 'form-control',
+                                'placeholder': 'Partagez vos réflexions, émotions, préoccupations...',
+                                'id': 'journal_contenu',
+                                'oninput': 'updateStats()'
+                            }
+                        }) }}
+                        {% if form.contenu.vars.errors|length > 0 %}
+                            <div class="text-danger small" style="margin-top: 0.75rem;">
+                                {% for error in form.contenu.vars.errors %}
+                                    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                        <i class="fas fa-times-circle"></i>
+                                        <span>{{ error.message }}</span>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        <span class="form-text"><i class="fas fa-lock me-1"></i>Votre journal est privé et confidentiel</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics Card -->
+        <div>
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h3><i class="fas fa-chart-bar me-2"></i>Statistiques</h3>
+                </div>
+                <div class="sidebar-card-body">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="wordCount">0</div>
+                            <div class="stat-label">Mots</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="charCount">0</div>
+                            <div class="stat-label">Caractères</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="readingTime">0</div>
+                            <div class="stat-label">Min Lecture</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Therapeutic Writing Coach -->
+        <div>
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h3><i class="fas fa-lightbulb me-2"></i>Coach d'ecriture therapeutique</h3>
+                </div>
+                <div class="sidebar-card-body">
+                    <p class="form-text" style="margin-bottom: 0.9rem;">Choisissez un prompt et utilisez-le comme point de depart.</p>
+                    <ul class="coach-list" id="coachPromptList">
+                        {% for prompt in therapeutic_prompts %}
+                            <li class="coach-item">
+                                <div class="coach-item-text">{{ prompt }}</div>
+                                <button type="button" class="coach-use-btn" data-prompt="{{ prompt|e('html_attr') }}" onclick="usePrompt(this.dataset.prompt)">
+                                    Utiliser ce prompt
+                                </button>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metadata Card -->
+        <div>
+            <div class="sidebar-card">
+                <div class="sidebar-card-header">
+                    <h3><i class="fas fa-info-circle me-2"></i>Métadonnées</h3>
+                </div>
+                <div class="sidebar-card-body">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                        <!-- Date Field -->
+                        <div>
+                            <div class="form-group">
+                                <label class="form-label" for="journal_dateecriture">
+                                    <i class="fas fa-calendar-alt"></i>Date et Heure
+                                </label>
+                                {{ form_widget(form.dateecriture, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'id': 'journal_dateecriture',
+                                        'lang': 'fr'
+                                    }
+                                }) }}
+                                <div class="quick-buttons">
+                                    <button type="button" class="quick-btn" onclick="setDate('yesterday')">
+                                        <i class="fas fa-undo"></i> Hier
+                                    </button>
+                                    <button type="button" class="quick-btn" onclick="setDate('today')">
+                                        <i class="fas fa-calendar-check"></i> Aujourd'hui
+                                    </button>
+                                    <button type="button" class="quick-btn" onclick="setDate('now')">
+                                        <i class="fas fa-clock"></i> Maintenant
+                                    </button>
+                                </div>
+                                {% if form.dateecriture.vars.errors|length > 0 %}
+                                    <div class="text-danger small" style="margin-top: 0.75rem;">
+                                        {% for error in form.dateecriture.vars.errors %}
+                                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                                <i class="fas fa-times-circle"></i>
+                                                <span>{{ error.message }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Mood Field -->
+                        <div>
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fas fa-smile"></i>Humeur Associée
+                                </label>
+                                <span class="form-text">Sélectionnez votre humeur</span>
+                                
+                                <!-- Hidden input for Symfony form (rendered by form_widget) -->
+                                <div style="position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden;">
+                                    {{ form_widget(form.mood) }}
+                                </div>
+
+                                <!-- Visual Mood Buttons -->
+                                <div class="mood-buttons">
+                                    <button type="button" class="mood-btn" data-mood="heureux" onclick="selectMood('heureux', this)">
+                                        <span class="mood-emoji">😊</span>
+                                        <span>Heureux</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="triste" onclick="selectMood('triste', this)">
+                                        <span class="mood-emoji">😢</span>
+                                        <span>Triste</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="colere" onclick="selectMood('colere', this)">
+                                        <span class="mood-emoji">😠</span>
+                                        <span>Colère</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="stresse" onclick="selectMood('stresse', this)">
+                                        <span class="mood-emoji">😰</span>
+                                        <span>Stressé</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="neutre" onclick="selectMood('neutre', this)">
+                                        <span class="mood-emoji">😐</span>
+                                        <span>Neutre</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="calme" onclick="selectMood('calme', this)">
+                                        <span class="mood-emoji">😌</span>
+                                        <span>Calme</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="fatigue" onclick="selectMood('fatigue', this)">
+                                        <span class="mood-emoji">😴</span>
+                                        <span>Fatigué</span>
+                                    </button>
+                                    <button type="button" class="mood-btn" data-mood="excite" onclick="selectMood('excite', this)">
+                                        <span class="mood-emoji">😃</span>
+                                        <span>Excité</span>
+                                    </button>
+                                </div>
+
+                                {% if form.mood.vars.errors|length > 0 %}
+                                    <div class="text-danger small" style="margin-top: 0.75rem;">
+                                        {% for error in form.mood.vars.errors %}
+                                            <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                                                <i class="fas fa-times-circle"></i>
+                                                <span>{{ error.message }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Card -->
+        <div>
+            <div class="sidebar-card">
+                <div class="sidebar-card-body">
+                    <div class="form-actions" style="flex-direction: row; gap: 1rem; border: none; margin: 0; padding: 0;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">
+                            <i class="fas fa-save me-2"></i> Enregistrer l'Entrée
+                        </button>
+                        <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-secondary" style="flex: 1;">
+                            <i class="fas fa-times me-2"></i> Annuler
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- End Form -->
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<script>
+    function renderCoachPrompts(moodValue) {
+        const list = document.getElementById('coachPromptList');
+        if (!list) return;
+
+        const map = window.therapyPromptMap || {};
+        const prompts = map[moodValue] || map.neutre || [];
+        list.innerHTML = '';
+
+        prompts.forEach(prompt => {
+            const li = document.createElement('li');
+            li.className = 'coach-item';
+            li.innerHTML = `
+                <div class="coach-item-text">${prompt}</div>
+                <button type="button" class="coach-use-btn" data-prompt="${prompt.replace(/"/g, '&quot;')}" onclick="usePrompt(this.dataset.prompt)">Utiliser ce prompt</button>
+            `;
+            list.appendChild(li);
+        });
+
+        bindCoachButtons();
+    }
+
+    function usePrompt(promptText) {
+        const textarea =
+            document.getElementById('journal_contenu') ||
+            document.getElementById('journal_emotionnel_contenu') ||
+            document.querySelector('textarea[name="journal_emotionnel[contenu]"]');
+        if (!textarea) return;
+
+        const prefix = textarea.value.trim() === '' ? '' : '\n\n';
+        textarea.value = `${textarea.value}${prefix}${promptText}\n`;
+        textarea.focus();
+        textarea.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    function bindCoachButtons() {
+        // Inline onclick on buttons handles prompt insertion.
+    }
+
+    function selectMood(moodValue, buttonElement) {
+        // Mise à jour du select caché avec l'ID de la Mood (via the mood_map)
+        const select = document.getElementById('journal_emotionnel_mood');
+        if (select && window.moodMap) {
+            const moodId = window.moodMap[moodValue];
+            if (moodId) {
+                select.value = moodId;
+                // trigger change so Symfony form processors see the selection
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+            } else {
+                select.value = '';
+                select.dispatchEvent(new Event('change', { bubbles: true }));
+                console.warn(`Aucune humeur existante trouvée en base pour: ${moodValue}`);
+            }
+        }
+
+        // Mise à jour du style des boutons
+        const buttons = document.querySelectorAll('.mood-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        if (buttonElement) buttonElement.classList.add('active');
+        renderCoachPrompts(moodValue);
+    }
+
+    function formatDateTimeLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+    function setMaxDate() {
+        const input = document.getElementById('journal_dateecriture');
+        if (!input) return;
+        
+        // Permettre jusqu'à la fin d'aujourd'hui
+        const today = new Date();
+        today.setHours(23);
+        today.setMinutes(59);
+        input.max = formatDateTimeLocal(today);
+    }
+    
+    function setDate(type) {
+        const input = document.getElementById('journal_dateecriture');
+        if (!input) return;
+        
+        const now = new Date();
+        let date = new Date();
+        
+        if (type === 'yesterday') {
+            date.setDate(now.getDate() - 1);
+            date.setHours(12, 0, 0, 0);
+        } else if (type === 'today') {
+            date.setHours(12, 0, 0, 0);
+        }
+        // type === 'now' - keep current date/time
+        
+        input.value = formatDateTimeLocal(date);
+    }
+    
+    function updateStats() {
+        const textarea = document.getElementById('journal_contenu');
+        if (!textarea) return;
+        
+        const text = textarea.value;
+        const chars = text.length;
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const minutes = Math.ceil(words / 200) || 0;
+        
+        document.getElementById('wordCount').textContent = words;
+        document.getElementById('charCount').textContent = chars;
+        document.getElementById('readingTime').textContent = minutes;
+    }
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        bindCoachButtons();
+        // Check if there's a template from sessionStorage
+        const template = sessionStorage.getItem('journalTemplate');
+        const textarea = document.getElementById('journal_contenu');
+        
+        if (template && textarea) {
+            textarea.value = template + '\n\n';
+            updateStats();
+            // Clear the template from sessionStorage
+            sessionStorage.removeItem('journalTemplate');
+        }
+        
+        // Set up date input
+        const dateInput = document.getElementById('journal_dateecriture');
+        if (dateInput) {
+            setMaxDate();
+            setDate('now');
+        }
+        
+        // Set up text area stats
+        if (textarea) {
+            updateStats();
+            textarea.addEventListener('input', updateStats);
+        }
+        
+        // Set initial mood selection if one exists
+        const moodSelect = document.getElementById('journal_emotionnel_mood');
+        const buttons = document.querySelectorAll('.mood-btn');
+        if (moodSelect && moodSelect.value) {
+            const selectedId = parseInt(moodSelect.value);
+            // Find the mood name from the map by reverse lookup
+            for (const [moodName, moodId] of Object.entries(window.moodMap || {})) {
+                if (moodId === selectedId) {
+                    // Find the button with this mood
+                    buttons.forEach(btn => {
+                        if (btn.dataset.mood === moodName) {
+                            btn.classList.add('active');
+                        }
+                    });
+                    renderCoachPrompts(moodName);
+                    break;
+                }
+            }
+        } else if (moodSelect && buttons.length > 0) {
+            const neutralButton = document.querySelector('.mood-btn[data-mood="neutre"]');
+            if (neutralButton) {
+                selectMood('neutre', neutralButton);
+            }
+        }
+
+        if (!document.querySelector('.mood-btn.active')) {
+            renderCoachPrompts('neutre');
+        }
+    });
+</script>
+{% endblock %}
+
+
+

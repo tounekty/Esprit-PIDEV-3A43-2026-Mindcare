@@ -1,0 +1,496 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Humeur | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+    <style>
+        .mood-detail-card {
+            border-left: 5px solid #7FBFFF;
+            border-radius: 12px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 12px rgba(127, 191, 255, 0.15);
+        }
+        
+        .mood-heureux { border-color: #68D391; background-color: rgba(104, 211, 145, 0.05); }
+        .mood-triste { border-color: #7FBFFF; background-color: rgba(127, 191, 255, 0.05); }
+        .mood-colere { border-color: #F56565; background-color: rgba(245, 101, 101, 0.05); }
+        .mood-stresse { border-color: #FBD38D; background-color: rgba(251, 211, 141, 0.05); }
+        .mood-neutre { border-color: #A8D8FF; background-color: rgba(168, 216, 255, 0.05); }
+        
+        .mood-emoji {
+            font-size: 4rem;
+            display: block;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card {
+            border-radius: 10px;
+            transition: all 0.3s;
+            border: 1px solid #D4E8FF;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(127, 191, 255, 0.15);
+        }
+        
+        .intensity-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #7FBFFF, #A8D8FF);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <!-- En-tête avec navigation -->
+    <div class="container my-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ path('app_dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ path('app_mood_index') }}">Mes Humeurs</a></li>
+                <li class="breadcrumb-item active">Détails</li>
+            </ol>
+        </nav>
+
+        <!-- En-tête Principal -->
+        <div class="card shadow-lg border-0 mb-4 overflow-hidden">
+            <div style="background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%); padding: 30px;">
+                <div class="row align-items-center">
+                    <div class="col-md-2 text-center">
+                        <div style="font-size: 60px;">
+                            {% if mood.humeur == 'heureux' %} 😊
+                            {% elseif mood.humeur == 'triste' %} 😢
+                            {% elseif mood.humeur == 'colere' %} 😠
+                            {% elseif mood.humeur == 'stresse' %} 😰
+                            {% elseif mood.humeur == 'neutre' %} 😐
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <h1 class="h2 text-white mb-1">Entrée d'Humeur #{{ mood.id }}</h1>
+                        <p class="text-white mb-0" style="opacity: 0.9;">
+                            <i class="far fa-calendar me-2"></i>{{ mood.datemood|date('d F Y \\à H:i') }}
+                        </p>
+                        <p class="text-white mb-0" style="opacity: 0.9;">
+                            <i class="fas fa-smile me-2"></i>
+                            {% if mood.humeur == 'heureux' %} Heureux(euse)
+                            {% elseif mood.humeur == 'triste' %} Triste
+                            {% elseif mood.humeur == 'colere' %} En colère
+                            {% elseif mood.humeur == 'stresse' %} Stressé(e)
+                            {% elseif mood.humeur == 'neutre' %} Neutre
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h5 class="text-muted">Intensité</h5>
+                            <div style="font-size: 2.5rem; font-weight: bold; color: #7FBFFF;">{{ mood.intensite }}<span style="font-size: 1.5rem;">/5</span></div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h5 class="text-muted">Barre d'Intensité</h5>
+                            <div class="progress" style="height: 12px;">
+                                <div class="progress-bar" style="width: {{ mood.intensite * 20 }}%; background: linear-gradient(90deg, #7FBFFF, #A8D8FF);"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h5 class="text-muted">Type d'Humeur</h5>
+                            <span class="badge" style="background: 
+                                {% if mood.humeur == 'heureux' %} #C6F6D5; color: #22543D;
+                                {% elseif mood.humeur == 'triste' %} #FED7D7; color: #742A2A;
+                                {% elseif mood.humeur == 'colere' %} #FEEBC8; color: #7C2D12;
+                                {% elseif mood.humeur == 'stresse' %} #E6FFFA; color: #234E52;
+                                {% else %} #DBEAFE; color: #1e3a8a;
+                                {% endif %}
+                                font-size: 0.95rem; padding: 0.5rem 1rem;">
+                                {{ mood.humeur|capitalize }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center">
+                            <h5 class="text-muted">Journaux Liés</h5>
+                            <div style="font-size: 2rem; font-weight: bold; color: #7FBFFF;">{{ mood.journals|length }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contenu Principal -->
+        <div class="row g-4">
+                                    <p class="text-muted mb-0">
+                                        <i class="far fa-calendar me-1"></i>
+                                        Enregistrée le {{ mood.datemood|date('d/m/Y') }}
+                                    </p>
+                                </div>
+                                <span class="badge bg-light text-dark fs-6">
+                                    <i class="fas fa-clock me-1"></i>
+                                    {{ mood.datemood|date('H:i') }}
+                                </span>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <h5 class="mb-2">Intensité</h5>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-grow-1 me-3">
+                                        <div class="progress" style="height: 20px; border-radius: 10px;">
+                                            <div class="progress-bar" 
+                                                 style="width: {{ mood.intensite * 20 }}%;
+                                                        background: linear-gradient(90deg, #667eea, #764ba2);
+                                                        border-radius: 10px;">
+                                                <span class="fw-bold">{{ mood.intensite }}/5</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="intensity-circle">
+                                        {{ mood.intensite }}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Informations supplémentaires -->
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="stat-card card border-0 bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-chart-line fa-2x text-primary mb-2"></i>
+                                            <h6 class="mb-1">Niveau d'intensité</h6>
+                                            <div class="display-6 fw-bold">{{ mood.intensite }}</div>
+                                            <small class="text-muted">sur 5</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="stat-card card border-0 bg-light">
+                                        <div class="card-body text-center">
+                                            <i class="fas fa-calendar-alt fa-2x text-success mb-2"></i>
+                                            <h6 class="mb-1">Date</h6>
+                                            <div class="h5 fw-bold">{{ mood.datemood|date('d/m/Y') }}</div>
+                                            <small class="text-muted">{{ mood.datemood|date('l')|trans }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {# SUPPRIMEZ OU COMMENTER CETTE SECTION #}
+            {#
+            <!-- Notes associées (si vous avez des journaux liés) -->
+            {% if mood.journalEmotionnels|length > 0 %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-book me-2"></i>Journaux associés
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% for journal in mood.journalEmotionnels|slice(0, 3) %}
+                            <div class="card border mb-3">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <h6 class="mb-0">Journal #{{ journal.id }}</h6>
+                                        <small class="text-muted">{{ journal.dateecriture|date('d/m/Y H:i') }}</small>
+                                    </div>
+                                    <p class="mb-0">{{ journal.contenu|slice(0, 150) }}...</p>
+                                    <div class="mt-2">
+                                        <a href="{{ path('app_journal_show', {'id': journal.id}) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye me-1"></i> Lire
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                        
+                        {% if mood.journalEmotionnels|length > 3 %}
+                            <div class="text-center mt-3">
+                                <a href="{{ path('app_journal_index') }}" class="btn btn-outline-secondary">
+                                    Voir tous les journaux ({{ mood.journalEmotionnels|length }})
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+            #}
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Actions -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('app_mood_index') }}" 
+                           class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i> Retour à la liste
+                        </a>
+                        
+                        <a href="{{ path('app_dashboard') }}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-home me-2"></i> Retour au dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques rapides -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>Statistiques
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Intensité moyenne</span>
+                            <span class="badge bg-primary rounded-pill">3.8/5</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Humeurs ce mois</span>
+                            <span class="badge bg-success rounded-pill">12</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Jours consécutifs</span>
+                            <span class="badge bg-info rounded-pill">7</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>Progression</span>
+                            <span class="badge bg-warning rounded-pill">+15%</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Conseils basés sur l'humeur -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>Conseils
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if mood.humeur == 'heureux' %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-smile me-2"></i>
+                            <strong>Excellent !</strong> Profitez de cette énergie positive. C'est le moment idéal pour pratiquer une activité que vous aimez.
+                        </div>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-check text-success me-2"></i> Partagez votre bonne humeur</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Pratiquez la gratitude</li>
+                            <li><i class="fas fa-check text-success me-2"></i> Engagez-vous dans un projet créatif</li>
+                        </ul>
+                    {% elseif mood.humeur == 'triste' %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-hands-helping me-2"></i>
+                            <strong>Prenez soin de vous.</strong> Il est normal de se sentir triste parfois. Accordez-vous du temps pour vous reposer.
+                        </div>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-heart text-info me-2"></i> Parlez à un ami proche</li>
+                            <li><i class="fas fa-heart text-info me-2"></i> Écoutez de la musique apaisante</li>
+                            <li><i class="fas fa-heart text-info me-2"></i> Prenez une douche chaude relaxante</li>
+                        </ul>
+                    {% elseif mood.humeur == 'stresse' %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-spa me-2"></i>
+                            <strong>Respirez profondément.</strong> Le stress est temporaire. Essayez des techniques de relaxation.
+                        </div>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-wind text-warning me-2"></i> Pratiquez la respiration 4-7-8</li>
+                            <li><i class="fas fa-wind text-warning me-2"></i> Faites une pause de 5 minutes</li>
+                            <li><i class="fas fa-wind text-warning me-2"></i> Écrivez ce qui vous stresse</li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Méditations Recommandées -->
+    <div class="container mt-5 mb-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-lg border-0 overflow-hidden">
+                    <div class="card-header" style="background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);">
+                        <h4 class="mb-0 text-white">
+                            <i class="fas fa-spa me-2"></i>Méditations Recommandées
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <p class="text-muted mb-4">
+                            Basé sur votre humeur actuelle, voici des méditations qui pourraient vous aider:
+                        </p>
+                        <div class="row g-3">
+                            {% for meditation in meditations %}
+                                <div class="col-md-6">
+                                    <div class="card border-left border-4" style="border-left-color: #7FBFFF;">
+                                        <div class="card-body">
+                                            <h6 class="card-title fw-bold mb-2">
+                                                <i class="fas fa-play-circle text-primary me-2"></i>{{ meditation.title }}
+                                            </h6>
+                                            <p class="card-text text-muted small mb-2">
+                                                {{ meditation.description }}
+                                            </p>
+                                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                                <span class="badge bg-info">
+                                                    <i class="far fa-clock me-1"></i>{{ meditation.duration }}
+                                                </span>
+                                            </div>
+                                            <div class="mb-3">
+                                                <small class="d-block mb-2 fw-semibold">Bénéfices:</small>
+                                                {% for benefit in meditation.benefits %}
+                                                    <span class="badge bg-light text-dark me-1 mb-1">
+                                                        {{ benefit }}
+                                                    </span>
+                                                {% endfor %}
+                                            </div>
+                                            <a href="https://www.youtube.com/embed/{{ meditation.youtubeId }}" 
+                                               class="btn btn-sm btn-primary w-100"
+                                               data-bs-toggle="modal" 
+                                               data-bs-target="#meditationModal{{ loop.index }}">
+                                                <i class="fab fa-youtube me-1"></i> Regarder la méditation
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Affirmations Positives -->
+                <div class="card shadow-sm mb-4 border-0">
+                    <div class="card-header bg-success text-white">
+                        <h6 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Affirmation du Jour
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-light p-3" style="border-left: 4px solid #7FBFFF;">
+                            <p class="mb-0 fst-italic fw-light">
+                                <i class="fas fa-quote-left me-2 text-primary"></i>
+                                {{ random(affirmations) }}
+                                <i class="fas fa-quote-right text-primary"></i>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercices de Respiration -->
+                <div class="card shadow-sm border-0">
+                    <div class="card-header" style="background-color: #A8D8FF;">
+                        <h6 class="mb-0">
+                            <i class="fas fa-wind me-2"></i>Exercices de Respiration
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        {% for exercise in breathing_exercises %}
+                            <div class="mb-3 pb-3 border-bottom" {% if loop.last %}style="border-bottom: none !important;"{% endif %}>
+                                <h6 class="fw-bold mb-1">{{ exercise.name }}</h6>
+                                <p class="text-muted small mb-2">{{ exercise.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="badge bg-light text-dark">
+                                        <i class="far fa-clock me-1"></i>{{ exercise.duration }}
+                                    </small>
+                                    <small>
+                                        {% for benefit in exercise.benefits %}
+                                            <span class="badge bg-info bg-opacity-75 small">{{ benefit }}</span>
+                                        {% endfor %}
+                                    </small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modales pour les vidéos YouTube -->
+    {% for meditation in meditations %}
+        <div class="modal fade" id="meditationModal{{ loop.index }}" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);">
+                        <h5 class="modal-title text-white">
+                            <i class="fas fa-spa me-2"></i>{{ meditation.title }}
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-0">
+                        <div style="padding-bottom: 56.25%; position: relative;">
+                            <iframe 
+                                width="100%" 
+                                height="100%" 
+                                src="https://www.youtube.com/embed/{{ meditation.youtubeId }}" 
+                                style="position: absolute; top: 0; left: 0;"
+                                allowfullscreen 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                            </iframe>
+                        </div>
+                    </div>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation pour la carte principale
+        const mainCard = document.querySelector('.mood-detail-card');
+        mainCard.style.opacity = '0';
+        mainCard.style.transform = 'translateY(20px)';
+        
+        setTimeout(() => {
+            mainCard.style.transition = 'all 0.5s ease-out';
+            mainCard.style.opacity = '1';
+            mainCard.style.transform = 'translateY(0)';
+        }, 100);
+        
+        // Gestion du modal de suppression
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('shown.bs.modal', function () {
+                console.log('Modal de suppression ouvert');
+            });
+        }
+    });
+</script>
+{% endblock %}

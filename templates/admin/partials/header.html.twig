@@ -1,0 +1,82 @@
+<header class="nxl-header">
+    <div class="header-wrapper">
+        <div class="header-left d-flex align-items-center gap-4">
+            <a href="javascript:void(0);" class="nxl-head-mobile-toggler" id="mobile-collapse">
+                <div class="hamburger hamburger--arrowturn">
+                    <div class="hamburger-box">
+                        <div class="hamburger-inner"></div>
+                    </div>
+                </div>
+            </a>
+            <div class="nxl-navigation-toggle">
+                <a href="javascript:void(0);" id="menu-mini-button">
+                    <i class="feather-align-left"></i>
+                </a>
+                <a href="javascript:void(0);" id="menu-expend-button" style="display: none">
+                    <i class="feather-arrow-right"></i>
+                </a>
+            </div>
+            <div class="nxl-lavel-mega-menu-toggle d-flex d-lg-none">
+                <a href="javascript:void(0);" id="nxl-lavel-mega-menu-open">
+                    <i class="feather-align-left"></i>
+                </a>
+            </div>
+        </div>
+        <div class="header-right ms-auto">
+            <div class="d-flex align-items-center">
+                <div class="dropdown nxl-h-item nxl-header-search">
+                    <a href="javascript:void(0);" class="nxl-head-link me-0" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                        <i class="feather-search"></i>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Search..." />
+                            <button class="btn btn-primary" type="button">
+                                <i class="feather-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown nxl-h-item">
+                    <a href="javascript:void(0);" class="nxl-head-link" data-bs-toggle="dropdown" data-bs-auto-close="outside">
+                        <i class="feather-bell"></i>
+                        <span class="badge bg-danger nxl-h-badge">3</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown">
+                        <div class="dropdown-header">Notifications</div>
+                        <div class="dropdown-body">
+                            <div class="dropdown-item text-muted">
+                                Aucune notification
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dropdown nxl-h-item">
+                    <a href="javascript:void(0);" class="nxl-head-link d-flex align-items-center justify-content-center" data-bs-toggle="dropdown" style="width:36px; height:36px;">
+                        <!-- User icon centered -->
+                        <i class="feather-user text-white bg-primary rounded-circle p-2" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center;"></i>
+                    </a>
+
+                    <div class="dropdown-menu dropdown-menu-end nxl-h-dropdown">
+                        <!-- ✅ UPDATE PROFILE -->
+                        <a href="{{ path('app_update_profile') }}" class="dropdown-item">
+                            <i class="feather-user"></i>
+                            <span>Mon profil</span>
+                        </a>
+
+
+                        <div class="dropdown-divider"></div>
+
+                        <!-- ✅ LOGOUT -->
+                        <a href="{{ path('app_logout') }}" class="dropdown-item text-danger">
+                            <i class="feather-log-out"></i>
+                            <span>Déconnexion</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</header>

@@ -1,0 +1,270 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier Humeur | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+    <style>
+        .edit-wrap {
+            max-width: 980px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .edit-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: #fff;
+            border-radius: 14px;
+            padding: 1.5rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .edit-header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .edit-card {
+            background: #fff;
+            border: 1px solid #D4E8FF;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(127, 191, 255, 0.12);
+            overflow: hidden;
+        }
+
+        .edit-card-head {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.1), rgba(168, 216, 255, 0.1));
+            border-bottom: 1px solid #D4E8FF;
+            padding: 1rem 1.25rem;
+            font-weight: 700;
+            color: #1a365d;
+        }
+
+        .edit-card-body {
+            padding: 1.25rem;
+        }
+
+        .field-block {
+            margin-bottom: 1.25rem;
+        }
+
+        .field-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            color: #1a365d;
+        }
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .mood-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .mood-item {
+            border: 1px solid #D4E8FF;
+            border-radius: 10px;
+            background: #f8fcff;
+            padding: 0.75rem 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mood-item:hover {
+            border-color: #7FBFFF;
+            background: #f0f8ff;
+        }
+
+        .mood-item.is-active {
+            border-color: #7FBFFF;
+            background: #eaf5ff;
+            box-shadow: 0 0 0 2px rgba(127, 191, 255, 0.2) inset;
+        }
+
+        .mood-item input[type="radio"] {
+            margin: 0;
+            flex: 0 0 auto;
+        }
+
+        .mood-item .mood-text {
+            line-height: 1.2;
+            color: #1a365d;
+            font-weight: 600;
+        }
+
+        .form-range {
+            width: 100%;
+        }
+
+        .intensity-line {
+            height: 8px;
+            background: #e7efff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 0.55rem;
+        }
+
+        .intensity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7FBFFF, #A8D8FF);
+            width: 20%;
+            transition: width 0.2s ease;
+        }
+
+        .edit-actions {
+            border-top: 1px solid #E2F0FF;
+            margin-top: 1.25rem;
+            padding-top: 1rem;
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .edit-actions .btn {
+            min-height: 44px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        .btn-primary {
+            margin-left: auto;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="edit-wrap">
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_mood_index') }}" class="text-decoration-none">Mes Humeurs</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_mood_show', {'id': mood.id}) }}" class="text-decoration-none">Humeur #{{ mood.id }}</a></li>
+            <li class="breadcrumb-item active">Modifier</li>
+        </ol>
+    </nav>
+
+    <div class="edit-header">
+        <div>
+            <h1><i class="fas fa-edit me-2"></i>Modifier Humeur #{{ mood.id }}</h1>
+            <div style="opacity: 0.9;">Date actuelle: {{ mood.datemood|date('d/m/Y') }} | Intensite: {{ mood.intensite }}/5</div>
+        </div>
+        <a href="{{ path('app_mood_show', {'id': mood.id}) }}" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left me-1"></i>Retour
+        </a>
+    </div>
+
+    <div class="edit-card">
+        <div class="edit-card-head">
+            <i class="fas fa-sliders-h me-2"></i>Parametres
+        </div>
+        <div class="edit-card-body">
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+            {% if form.vars.errors|length > 0 %}
+                <div class="alert alert-danger">
+                    {% for error in form.vars.errors %}
+                        <div>{{ error.message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <div class="field-block">
+                <label class="field-label"><i class="fas fa-smile me-1"></i>Humeur</label>
+                <div class="mood-grid" id="moodGrid">
+                    {% for choice in form.humeur %}
+                        <label class="mood-item {{ choice.vars.checked ? 'is-active' : '' }}">
+                            {{ form_widget(choice) }}
+                            <span class="mood-text">{{ choice.vars.label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+                {% if form.humeur.vars.errors|length > 0 %}
+                    <div class="text-danger small mt-2">
+                        {% for error in form.humeur.vars.errors %}<div>{{ error.message }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="field-block">
+                <label class="field-label"><i class="fas fa-tachometer-alt me-1"></i>Intensite</label>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small>Faible</small>
+                    <strong id="intensityValue">{{ mood.intensite }}/5</strong>
+                    <small>Forte</small>
+                </div>
+                {{ form_widget(form.intensite, {
+                    'attr': {
+                        'class': 'form-range',
+                        'oninput': 'updateIntensity(this.value)'
+                    }
+                }) }}
+                <div class="intensity-line"><div class="intensity-fill" id="intensityFill"></div></div>
+                {% if form.intensite.vars.errors|length > 0 %}
+                    <div class="text-danger small mt-2">
+                        {% for error in form.intensite.vars.errors %}<div>{{ error.message }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="field-block">
+                <label class="field-label"><i class="far fa-calendar-alt me-1"></i>Date</label>
+                {{ form_widget(form.datemood, {'attr': {'class': 'form-control'}}) }}
+                {% if form.datemood.vars.errors|length > 0 %}
+                    <div class="text-danger small mt-2">
+                        {% for error in form.datemood.vars.errors %}<div>{{ error.message }}</div>{% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="edit-actions">
+                <a href="{{ path('app_mood_show', {'id': mood.id}) }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>Annuler
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save me-1"></i>Enregistrer
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateIntensity(value) {
+        const numeric = Number(value || 1);
+        const label = document.getElementById('intensityValue');
+        const fill = document.getElementById('intensityFill');
+        if (label) label.textContent = numeric + '/5';
+        if (fill) fill.style.width = (numeric * 20) + '%';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const slider = document.querySelector('input[name="mood[intensite]"]');
+        if (slider) updateIntensity(slider.value);
+
+        const cards = document.querySelectorAll('#moodGrid .mood-item');
+        cards.forEach((card) => {
+            const input = card.querySelector('input[type="radio"]');
+            if (!input) return;
+            input.addEventListener('change', () => {
+                cards.forEach((c) => c.classList.remove('is-active'));
+                card.classList.add('is-active');
+            });
+        });
+    });
+</script>
+{% endblock %}

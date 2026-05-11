@@ -1,0 +1,55 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Modifier sujet{% endblock %}
+{% block page_title %}Modifier sujet{% endblock %}
+
+{% block body %}
+    <div class="container" style="max-width: 700px; margin: 2rem auto; font-family: Arial, sans-serif;">
+        <h1>Modifier sujet</h1>
+
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="mb-3">
+                {{ form_label(form.titre) }}
+                {{ form_widget(form.titre) }}
+                {{ form_errors(form.titre) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.description) }}
+                {{ form_widget(form.description) }}
+                {{ form_errors(form.description) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.isAnonymous) }}
+                {{ form_widget(form.isAnonymous) }}
+                {{ form_errors(form.isAnonymous) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.imageFile) }}
+                {{ form_widget(form.imageFile) }}
+                {{ form_errors(form.imageFile) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.isPinned) }}
+                {{ form_widget(form.isPinned) }}
+                {{ form_errors(form.isPinned) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.status) }}
+                {{ form_widget(form.status) }}
+                {{ form_errors(form.status) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.category) }}
+                {{ form_widget(form.category) }}
+                {{ form_errors(form.category) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.attachmentFile) }}
+                {{ form_widget(form.attachmentFile) }}
+                {{ form_errors(form.attachmentFile) }}
+            </div>
+            <button type="submit" style="padding: .5rem 1rem; background: #2f6fed; color: #fff; border: none; border-radius: 4px;">Mettre à jour</button>
+            <a href="{{ path('sujet_forum_index') }}" style="margin-left: .5rem;">Retour</a>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

@@ -1,0 +1,329 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Gestion Rendez-vous{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css' rel='stylesheet' />
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <h1 class="mb-4">Gestion Rendez-vous</h1>
+
+        <!-- Dashboard Statistics -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <div class="card border-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">En Attente</h5>
+                        <p class="card-text display-4 text-warning">{{ pendingCount }}</p>
+                        {% if isPsychologue %}
+                            <a href="{{ path('admin_rdv_pending') }}" class="btn btn-warning btn-sm">Voir</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-success">
+                    <div class="card-body">
+                        <h5 class="card-title">Acceptés</h5>
+                        <p class="card-text display-4 text-success">{{ acceptedCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-danger">
+                    <div class="card-body">
+                        <h5 class="card-title">Refusés</h5>
+                        <p class="card-text display-4 text-danger">{{ refusedCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-secondary">
+                    <div class="card-body">
+                        <h5 class="card-title">Annulés</h5>
+                        <p class="card-text display-4 text-secondary">{{ cancelledCount }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Additional Statistics Row -->
+        <div class="row mb-5">
+            <div class="col-md-3">
+                <div class="card border-primary">
+                    <div class="card-body">
+                        <h5 class="card-title">En Cours</h5>
+                        <p class="card-text display-4 text-primary">{{ inProgressCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-info">
+                    <div class="card-body">
+                        <h5 class="card-title">Terminés</h5>
+                        <p class="card-text display-4 text-info">{{ completedCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-warning">
+                    <div class="card-body">
+                        <h5 class="card-title">Patients Absents</h5>
+                        <p class="card-text display-4 text-warning">{{ absentCount }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-dark">
+                    <div class="card-body">
+                        <h5 class="card-title">Archivés</h5>
+                        <p class="card-text display-4 text-dark">{{ archivedCount }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar for Psychologues -->
+        {% if isPsychologue %}
+            <div class="row mb-5">
+                <div class="col-md-12">
+                    <h3 class="mb-3">Calendrier des Rendez-vous Acceptés</h3>
+                    <div id="calendar" style="background: white; padding: 20px; border-radius: 5px; border: 1px solid #ddd;"></div>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <div class="card-body">
+                {# Support search/filters for both psychologists and admins #}
+                {% if isPsychologue or is_granted('ROLE_ADMIN') %}
+                    <!-- Filter and Search Controls -->
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="btn-group" role="group" aria-label="Status Filter">
+                                <a href="{{ path('admin_rdv_index', {status: 'all', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'all' ? 'btn-primary' : 'btn-outline-primary' }}">
+                                    Tous
+                                </a>
+                                <a href="{{ path('admin_rdv_index', {status: 'pending', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'pending' ? 'btn-warning' : 'btn-outline-warning' }}">
+                                    En Attente
+                                </a>
+                                <a href="{{ path('admin_rdv_index', {status: 'accepted', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'accepted' ? 'btn-success' : 'btn-outline-success' }}">
+                                    Acceptés
+                                </a>
+                                <a href="{{ path('admin_rdv_index', {status: 'refused', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'refused' ? 'btn-danger' : 'btn-outline-danger' }}">
+                                    Refusés
+                                </a>
+                                <a href="{{ path('admin_rdv_index', {status: 'cancelled', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'cancelled' ? 'btn-secondary' : 'btn-outline-secondary' }}">
+                                    Annulés
+                                </a>
+                                <a href="{{ path('admin_rdv_index', {status: 'in_progress', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'in_progress' ? 'btn-primary' : 'btn-outline-primary' }}">
+                                    En cours
+                                </a>
+                                <a href="{{ path('admin_rdv_index', {status: 'completed', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'completed' ? 'btn-info' : 'btn-outline-info' }}">
+                                    Terminés
+                                </a>
+                                <a href="{{ path('admin_rdv_index', {status: 'absent', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                                   class="btn btn-sm {{ currentStatus == 'absent' ? 'btn-warning' : 'btn-outline-warning' }}">
+                                    Absents
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <form method="get" action="{{ path('admin_rdv_index') }}" id="searchForm">
+                                <input type="hidden" name="status" value="{{ currentStatus }}">
+                                <input type="hidden" name="sort" value="{{ currentSort }}">
+                                <input type="hidden" name="order" value="{{ currentOrder }}">
+                                <div class="input-group">
+                                    <input type="text" name="search" class="form-control form-control-sm" 
+                                           placeholder="Rechercher (étudiant, psy)..." 
+                                           value="{{ currentSearch }}">
+                                    <button class="btn btn-sm btn-outline-secondary" type="submit">
+                                        <i class="fa fa-search"></i>
+                                    </button>
+                                    {% if currentSearch %}
+                                        <a href="{{ path('admin_rdv_index', {status: currentStatus, sort: currentSort, order: currentOrder}) }}" 
+                                           class="btn btn-sm btn-outline-danger">
+                                            <i class="fa fa-times"></i>
+                                        </a>
+                                    {% endif %}
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+                
+                {% if is_granted('ROLE_ADMIN') %}
+                    <div class="mb-3">
+                        <a href="{{ path('admin_rdv_new') }}" class="btn btn-primary btn-sm">Créer un rendez-vous</a>
+                    </div>
+                {% endif %}
+                {% if appointments is empty %}
+                    <div class="alert alert-info">Aucun rendez-vous trouvé.</div>
+                {% else %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Étudiant</th>
+                                    {% if is_granted('ROLE_ADMIN') and not is_granted('ROLE_PSYCHOLOGUE') %}
+                                        <th>Psychologue</th>
+                                    {% endif %}
+                                    {# Enable date sorting for both psychologists and admins #}
+                                    {% if isPsychologue or is_granted('ROLE_ADMIN') %}
+                                        <th style="cursor: pointer;">
+                                            <a href="{{ path('admin_rdv_index', {
+                                                status: currentStatus, 
+                                                search: currentSearch, 
+                                                sort: 'date', 
+                                                order: (currentSort == 'date' and currentOrder == 'ASC') ? 'DESC' : 'ASC'
+                                            }) }}" class="text-decoration-none text-dark">
+                                                Date
+                                                {% if currentSort == 'date' %}
+                                                    {% if currentOrder == 'ASC' %}
+                                                        <i class="fa fa-arrow-up"></i>
+                                                    {% else %}
+                                                        <i class="fa fa-arrow-down"></i>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <i class="fa fa-sort" style="opacity: 0.3;"></i>
+                                                {% endif %}
+                                            </a>
+                                        </th>
+                                    {% else %}
+                                        <th>Date</th>
+                                    {% endif %}
+                                    <th>Mode</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for appointment in appointments %}
+                                    <tr>
+                                        <td>{{ appointment.getId() }}</td>
+                                        <td>{{ appointment.getEtudiant() ? appointment.getEtudiant().getFirstName() ~ ' ' ~ appointment.getEtudiant().getLastName() : '-' }}</td>
+                                        {% if is_granted('ROLE_ADMIN') and not is_granted('ROLE_PSYCHOLOGUE') %}
+                                            <td>{{ appointment.getPsychologue() ? appointment.getPsychologue().getFirstName() ~ ' ' ~ appointment.getPsychologue().getLastName() : '-' }}</td>
+                                        {% endif %}
+                                        <td>{{ appointment.getDate() ? appointment.getDate().format('d/m/Y H:i') : '' }}</td>
+                                        <td>
+                                            {% if appointment.getLocation() == 'in_office' %}
+                                                <span class="badge bg-primary">Cabinet</span>
+                                            {% else %}
+                                                <span class="badge bg-info">En ligne</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if appointment.getStatus() == 'pending' %}
+                                                <span class="badge bg-warning">Attente</span>
+                                            {% elseif appointment.getStatus() == 'accepted' %}
+                                                <span class="badge bg-success">Accepté</span>
+                                            {% elseif appointment.getStatus() == 'refused' %}
+                                                <span class="badge bg-danger">Refusé</span>
+                                            {% elseif appointment.getStatus() == 'cancelled' %}
+                                                <span class="badge bg-secondary">Annulé</span>
+                                            {% elseif appointment.getStatus() == 'in_progress' %}
+                                                <span class="badge bg-primary">En cours</span>
+                                            {% elseif appointment.getStatus() == 'completed' %}
+                                                <span class="badge bg-info">Terminé</span>
+                                            {% elseif appointment.getStatus() == 'absent' %}
+                                                <span class="badge bg-warning">Absent</span>
+                                            {% elseif appointment.getStatus() == 'archived' %}
+                                                <span class="badge bg-dark">Archivé</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <a href="{{ path('admin_rdv_show', {'id': appointment.getId()}) }}" class="btn btn-sm btn-primary">Voir</a>
+                                            {% if appointment.getEtudiant() %}
+                                                <a href="{{ path('admin_patient_file_show', {'id': appointment.getEtudiant().getId()}) }}" class="btn btn-sm btn-info">
+                                                    <i class="fa fa-file-medical"></i> Dossier
+                                                </a>
+                                            {% endif %}
+                                            {% if is_granted('ROLE_ADMIN') and not is_granted('ROLE_PSYCHOLOGUE') %}
+                                                <a href="{{ path('admin_rdv_edit', {'id': appointment.getId()}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                                                <form method="post" action="{{ path('admin_rdv_delete', {'id': appointment.getId()}) }}" style="display:inline-block;" onsubmit="return confirm('Supprimer ce rendez-vous ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ appointment.getId()) }}">
+                                                    <button class="btn btn-sm btn-danger">Supprimer</button>
+                                                </form>
+                                            {% elseif is_granted('ROLE_PSYCHOLOGUE') and not is_granted('ROLE_ADMIN') %}
+                                                <a href="{{ path('admin_rdv_edit', {'id': appointment.getId()}) }}" class="btn btn-sm btn-warning">Modifier</a>
+                                                <form method="post" action="{{ path('admin_rdv_delete', {'id': appointment.getId()}) }}" style="display:inline-block;" onsubmit="return confirm('Supprimer ce rendez-vous ?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ appointment.getId()) }}">
+                                                    <button class="btn btn-sm btn-danger">Supprimer</button>
+                                                </form>
+                                                {# Add mark absent / undo absent buttons for psychologue #}
+                                                {% if appointment.getStatus() in ['in_progress', 'completed'] %}
+                                                    <form method="post" action="{{ path('admin_rdv_mark_absent', {'id': appointment.getId()}) }}" style="display:inline-block;" onsubmit="return confirm('Marquer ce patient comme absent ?');">
+                                                        <button class="btn btn-sm btn-outline-warning" title="Marquer absent">
+                                                            <i class="fa fa-user-times"></i> Absent
+                                                        </button>
+                                                    </form>
+                                                {% elseif appointment.getStatus() == 'absent' %}
+                                                    <form method="post" action="{{ path('admin_rdv_undo_absent', {'id': appointment.getId()}) }}" style="display:inline-block;">
+                                                        <button class="btn btn-sm btn-outline-success" title="Annuler absence">
+                                                            <i class="fa fa-undo"></i> Annuler
+                                                        </button>
+                                                    </form>
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if isPsychologue %}
+        <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                var calendarEl = document.getElementById('calendar');
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'fr',
+                    headerToolbar: {
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    },
+                    events: [
+                        {% for appointment in acceptedAppointments %}
+                            {
+                                id: {{ appointment.getId() }},
+                                title: '{{ appointment.getEtudiant().getFirstName() }} {{ appointment.getEtudiant().getLastName() }} - {% if appointment.getLocation() == "in_office" %}En cabinet{% else %}En ligne{% endif %}',
+                                start: '{{ appointment.getDate().format('Y-m-d\\TH:i:s') }}',
+                                backgroundColor: 'green',
+                                borderColor: 'green',
+                                extendedProps: {
+                                    location: '{{ appointment.getLocation() }}',
+                                    description: '{{ appointment.getDescription() ?: '-' }}'
+                                }
+                            }{{ not loop.last ? ',' : '' }}
+                        {% endfor %}
+                    ],
+                    eventClick: function (info) {
+                        var event = info.event;
+                        var location = event.extendedProps.location == 'in_office' ? 'En cabinet' : 'En ligne';
+                        alert('Rendez-vous avec: ' + event.title + '\nLieu: ' + location + '\nDétails: ' + event.extendedProps.description);
+                    }
+                });
+                calendar.render();
+            });
+        </script>
+    {% endif %}
+{% endblock %}

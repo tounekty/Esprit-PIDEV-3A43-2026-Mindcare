@@ -1,0 +1,140 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détail Alerte Psychologique | MindCare Admin{% endblock %}
+
+{% block body %}
+<div class="page-container" style="max-width: 900px; margin: 0 auto; padding: 2rem 1rem;">
+    <a href="{{ path('admin_psychological_alerts_index') }}" style="color: #007bff; text-decoration: none; margin-bottom: 1rem; display: inline-block;">
+        ← Retour aux alertes
+    </a>
+
+    <div style="background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-top: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 2rem;">
+            <div>
+                <h1 style="margin: 0; color: #d32f2f; display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {% if alert.alertType == 'consecutive_negative_moods' %}
+                        Humeur négative consécutive
+                    {% elseif alert.alertType == 'dangerous_keywords' %}
+                        Mots clés dangereux détectés
+                    {% endif %}
+                </h1>
+            </div>
+            <div style="text-align: right;">
+                {% if alert.resolved %}
+                    <span style="background: #d4edda; color: #155724; padding: 8px 16px; border-radius: 4px; font-weight: bold;">
+                        ✓ Résolu
+                    </span>
+                {% else %}
+                    <span style="background: #f8d7da; color: #721c24; padding: 8px 16px; border-radius: 4px; font-weight: bold;">
+                        ⚠ En attente
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- User Information -->
+        <div style="background: #f9f9f9; padding: 1.5rem; border-radius: 6px; margin-bottom: 2rem; border-left: 4px solid #007bff;">
+            <h3 style="margin-top: 0;">Informations de l'utilisateur</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold; width: 150px; color: #666;">Nom d'utilisateur:</td>
+                    <td style="padding: 8px 0;">{{ alert.user.firstName }} {{ alert.user.lastName }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold; color: #666;">Email:</td>
+                    <td style="padding: 8px 0;">{{ alert.user.email }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold; color: #666;">Rôle:</td>
+                    <td style="padding: 8px 0;">{{ alert.user.roles|join(', ')|replace({'ROLE_': ''}) }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Alert Details -->
+        <div style="background: #f9f9f9; padding: 1.5rem; border-radius: 6px; margin-bottom: 2rem; border-left: 4px solid #d32f2f;">
+            <h3 style="margin-top: 0;">Détails de l'alerte</h3>
+            <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold; width: 150px; color: #666;">Type:</td>
+                    <td style="padding: 8px 0;">
+                        {% if alert.alertType == 'consecutive_negative_moods' %}
+                            Humeur négative pendant 5 jours consécutifs
+                        {% elseif alert.alertType == 'dangerous_keywords' %}
+                            Mots clés dangereux détectés dans un commentaire
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold; color: #666;">Date d'alerte:</td>
+                    <td style="padding: 8px 0;">{{ alert.createdAt.format('d/m/Y H:i:s') }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold; color: #666;">Description:</td>
+                    <td style="padding: 8px 0;">{{ alert.description }}</td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px 0; font-weight: bold; color: #666; vertical-align: top;">Détails:</td>
+                    <td style="padding: 8px 0;">{{ alert.details }}</td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Notifications Status -->
+        <div style="background: #f9f9f9; padding: 1.5rem; border-radius: 6px; margin-bottom: 2rem; border-left: 4px solid #ffc107;">
+            <h3 style="margin-top: 0;">Notifications envoyées</h3>
+            <p>
+                {% if alert.notifiedAdmin %}
+                    <i class="fas fa-check" style="color: #28a745;"></i> Admin notifié le {{ alert.createdAt.format('d/m/Y H:i') }}
+                {% else %}
+                    <i class="fas fa-times" style="color: #d32f2f;"></i> Admin non notifié
+                {% endif %}
+            </p>
+            <p>
+                {% if alert.notifiedPsychologist %}
+                    <i class="fas fa-check" style="color: #28a745;"></i> Psychologue notifié le {{ alert.createdAt.format('d/m/Y H:i') }}
+                {% else %}
+                    <i class="fas fa-times" style="color: #d32f2f;"></i> Psychologue non notifié
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Resolution -->
+        {% if alert.resolved %}
+        <div style="background: #d4edda; padding: 1.5rem; border-radius: 6px; margin-bottom: 2rem; border-left: 4px solid #28a745;">
+            <h3 style="margin-top: 0; color: #155724;">Alerte résolue</h3>
+            <p style="margin-bottom: 8px; color: #155724;">
+                <strong>Date de résolution:</strong> {{ alert.resolvedAt.format('d/m/Y H:i:s') }}
+            </p>
+            {% if alert.adminNotes %}
+            <p style="margin-bottom: 0; color: #155724;">
+                <strong>Notes de l'admin:</strong><br>
+                {{ alert.adminNotes }}
+            </p>
+            {% endif %}
+        </div>
+        {% else %}
+        <div style="background: white; padding: 1.5rem; border-radius: 6px; border: 2px solid #d32f2f;">
+            <h3 style="margin-top: 0; color: #d32f2f;">Resoudre l'alerte</h3>
+            <form method="POST" action="{{ path('admin_psychological_alert_resolve', {id: alert.id}) }}">
+                <div style="margin-bottom: 1rem;">
+                    <label for="admin_notes" style="display: block; font-weight: bold; margin-bottom: 0.5rem;">Notes (optionnel):</label>
+                    <textarea name="admin_notes" id="admin_notes" style="width: 100%; min-height: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-family: Arial, sans-serif;" placeholder="Entrez les notes pour la résolution de cette alerte..."></textarea>
+                </div>
+                <button type="submit" style="background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                    <i class="fas fa-check"></i> Marquer comme résolu
+                </button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Actions -->
+    <div style="margin-top: 2rem; text-align: center;">
+        <a href="{{ path('admin_psychological_alerts_index') }}" style="background: #6c757d; color: white; padding: 10px 20px; text-decoration: none; border-radius: 4px; display: inline-block;">
+            Retour aux alertes
+        </a>
+    </div>
+</div>
+{% endblock %}

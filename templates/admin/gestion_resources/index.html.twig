@@ -1,0 +1,303 @@
+﻿{% extends 'admin/base_admin.html.twig' %}
+
+{% block page_title %}Gestion Ressources{% endblock %}
+
+{% block body %}
+<div class="row g-3 mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Ressources</small>
+                <h4 id="statTotalResources" class="mb-0">{{ stats.totalResources }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Videos</small>
+                <h4 id="statTotalVideos" class="mb-0">{{ stats.totalVideos }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Articles</small>
+                <h4 id="statTotalArticles" class="mb-0">{{ stats.totalArticles }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Commentaires</small>
+                <h4 id="statTotalComments" class="mb-0">{{ stats.totalComments }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Note moyenne</small>
+                <h4 id="statAverageRating" class="mb-0">{{ stats.averageRating is not null ? stats.averageRating ~ ' / 5' : '-' }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Resultats affiches</small>
+                <h4 id="statVisible" class="mb-0">{{ visible_count }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0">Liste des Ressources</h5>
+        <div class="d-flex align-items-center gap-2">
+            <button id="resourceExportPdfBtn" type="button" class="btn btn-outline-secondary btn-sm text-uppercase fw-semibold px-3 toolbar-btn">
+                Exporter PDF
+            </button>
+            <a href="{{ path('admin_resources_stats') }}" class="btn btn-outline-info btn-sm text-uppercase fw-semibold px-3 toolbar-btn">Stats Charts</a>
+            <a href="{{ path('admin_resources_new') }}" class="btn btn-primary btn-sm text-uppercase fw-semibold px-3 toolbar-btn">Ajouter ressource</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row g-2 mb-3">
+            <div class="col-lg-5">
+                <input
+                    id="resourceSearch"
+                    type="text"
+                    class="form-control"
+                    placeholder="Rechercher par titre ou description..."
+                    value="{{ filters.query }}"
+                >
+            </div>
+            <div class="col-lg-3">
+                <select id="resourceTypeFilter" class="form-select">
+                    <option value="all" {{ filters.type == 'all' ? 'selected' : '' }}>Tous les types</option>
+                    <option value="article" {{ filters.type == 'article' ? 'selected' : '' }}>Article</option>
+                    <option value="video" {{ filters.type == 'video' ? 'selected' : '' }}>Video</option>
+                </select>
+            </div>
+            <div class="col-lg-3">
+                <select id="resourceSort" class="form-select">
+                    {% set currentSort = filters.sort ~ '_' ~ filters.direction|lower %}
+                    <option value="createdAt_desc" {{ currentSort == 'createdAt_desc' ? 'selected' : '' }}>Plus recentes</option>
+                    <option value="createdAt_asc" {{ currentSort == 'createdAt_asc' ? 'selected' : '' }}>Plus anciennes</option>
+                    <option value="title_asc" {{ currentSort == 'title_asc' ? 'selected' : '' }}>Titre A-Z</option>
+                    <option value="title_desc" {{ currentSort == 'title_desc' ? 'selected' : '' }}>Titre Z-A</option>
+                    <option value="comments_desc" {{ currentSort == 'comments_desc' ? 'selected' : '' }}>Commentaires max</option>
+                    <option value="comments_asc" {{ currentSort == 'comments_asc' ? 'selected' : '' }}>Commentaires min</option>
+                </select>
+            </div>
+            <div class="col-lg-1 d-grid">
+                <button id="resourceReset" type="button" class="btn btn-light toolbar-btn">Reset</button>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Titre</th>
+                        <th>Type</th>
+                        <th>Coms.</th>
+                        <th>Media</th>
+                        <th>Description</th>
+                        <th>Cree le</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="resourcesTableBody">
+                    {% include 'admin/gestion_resources/_rows.html.twig' with {rows: rows} %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.table-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.table-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 112px;
+    justify-content: center;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    transition: all 0.18s ease;
+}
+
+.table-action-btn i {
+    font-size: 14px;
+}
+
+.table-action-edit {
+    background: #fff7e8;
+    color: #b96a00;
+    border-color: #ffd79b;
+}
+
+.table-action-edit:hover {
+    background: #ffeac2;
+    color: #8f5200;
+}
+
+.table-action-delete {
+    background: #fff0f1;
+    color: #c72f3a;
+    border-color: #ffc2c8;
+}
+
+.table-action-delete:hover {
+    background: #ffdfe3;
+    color: #a31f2a;
+}
+
+.toolbar-btn {
+    min-width: 110px;
+    border-radius: 6px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const searchInput = document.getElementById('resourceSearch');
+    const typeFilter = document.getElementById('resourceTypeFilter');
+    const sortSelect = document.getElementById('resourceSort');
+    const resetBtn = document.getElementById('resourceReset');
+    const exportPdfBtn = document.getElementById('resourceExportPdfBtn');
+    const tableBody = document.getElementById('resourcesTableBody');
+    const ajaxUrl = '{{ path('admin_resources_ajax') }}';
+    const exportPdfUrl = '{{ path('admin_resources_export_pdf') }}';
+
+    let debounceTimer;
+
+    const updateStats = (stats, visibleCount) => {
+        const set = (id, value) => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = value;
+            }
+        };
+
+        set('statTotalResources', stats.totalResources ?? 0);
+        set('statTotalVideos', stats.totalVideos ?? 0);
+        set('statTotalArticles', stats.totalArticles ?? 0);
+        set('statTotalComments', stats.totalComments ?? 0);
+        set('statAverageRating', stats.averageRating !== null && stats.averageRating !== undefined ? `${Number(stats.averageRating).toFixed(2)} / 5` : '-');
+        set('statVisible', visibleCount ?? 0);
+    };
+
+    const loadResources = async () => {
+        if (!tableBody) {
+            return;
+        }
+
+        const [sort, direction] = (sortSelect.value || 'createdAt_desc').split('_');
+
+        const params = new URLSearchParams({
+            q: searchInput.value.trim(),
+            type: typeFilter.value,
+            sort: sort,
+            direction: (direction || 'desc').toUpperCase(),
+        });
+
+        tableBody.innerHTML = '<tr><td colspan="8" class="text-center py-4">Chargement...</td></tr>';
+
+        try {
+            const response = await fetch(`${ajaxUrl}?${params.toString()}`, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Erreur de chargement');
+            }
+
+            const data = await response.json();
+            tableBody.innerHTML = data.rowsHtml;
+            updateStats(data.stats || {}, data.visibleCount || 0);
+        } catch (error) {
+            tableBody.innerHTML = '<tr><td colspan="8" class="text-center text-danger py-4">Impossible de charger les donnees.</td></tr>';
+        }
+    };
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(loadResources, 300);
+    });
+
+    typeFilter.addEventListener('change', loadResources);
+    sortSelect.addEventListener('change', loadResources);
+
+    resetBtn.addEventListener('click', function () {
+        searchInput.value = '';
+        typeFilter.value = 'all';
+        sortSelect.value = 'createdAt_desc';
+        loadResources();
+    });
+
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', async function () {
+            const [sort, direction] = (sortSelect.value || 'createdAt_desc').split('_');
+            const params = new URLSearchParams({
+                q: searchInput.value.trim(),
+                type: typeFilter.value,
+                sort: sort,
+                direction: (direction || 'desc').toUpperCase(),
+            });
+
+            const initialLabel = exportPdfBtn.textContent;
+            exportPdfBtn.disabled = true;
+            exportPdfBtn.textContent = 'Export...';
+
+            try {
+                const response = await fetch(`${exportPdfUrl}?${params.toString()}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Export PDF impossible');
+                }
+
+                const blob = await response.blob();
+                const contentDisposition = response.headers.get('Content-Disposition') || '';
+                const fileMatch = contentDisposition.match(/filename=\"?([^\";]+)\"?/i);
+                const fileName = fileMatch ? fileMatch[1] : 'resources_export.pdf';
+
+                const blobUrl = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(blobUrl);
+            } catch (error) {
+                alert('Erreur lors de l export PDF.');
+            } finally {
+                exportPdfBtn.disabled = false;
+                exportPdfBtn.textContent = initialLabel;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

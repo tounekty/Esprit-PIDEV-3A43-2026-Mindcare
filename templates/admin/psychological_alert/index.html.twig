@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Alertes Psychologiques | MindCare Admin{% endblock %}
+
+{% block body %}
+<div class="page-container" style="max-width: 1200px; margin: 0 auto; padding: 2rem 1rem;">
+    <h1 style="display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; color: #d32f2f;">
+        <i class="fas fa-exclamation-triangle"></i> Alertes Psychologiques
+    </h1>
+
+    <!-- Filters -->
+    <div style="margin-bottom: 2rem; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+        <a href="{{ path('admin_psychological_alerts_index', {filter: 'unresolved'}) }}" 
+           class="btn" style="background: {% if filter == 'unresolved' %}#d32f2f{% else %}#e0e0e0{% endif %}; color: {% if filter == 'unresolved' %}white{% else %}#333{% endif %}; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer; margin-right: 10px;">
+            Non résolu
+        </a>
+        <a href="{{ path('admin_psychological_alerts_index', {filter: 'all'}) }}" 
+           class="btn" style="background: {% if filter == 'all' %}#d32f2f{% else %}#e0e0e0{% endif %}; color: {% if filter == 'all' %}white{% else %}#333{% endif %}; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">
+            Tous
+        </a>
+        <span style="float: right; color: #666;">Total: <strong>{{ totalAlerts }}</strong></span>
+    </div>
+
+    <!-- Alerts Table -->
+    {% if alerts|length > 0 %}
+        <div style="background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f5f5f5;">
+                    <tr>
+                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Utilisateur</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Type d'alerte</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Date</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Statut</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 1px solid #ddd;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alert in alerts %}
+                    <tr style="border-bottom: 1px solid #eee; hover-background: #f9f9f9;">
+                        <td style="padding: 12px;">
+                            <strong>{{ alert.user.firstName }} {{ alert.user.lastName }}</strong><br>
+                            <small style="color: #999;">{{ alert.user.email }}</small>
+                        </td>
+                        <td style="padding: 12px;">
+                            {% if alert.alertType == 'consecutive_negative_moods' %}
+                                <span style="background: #fff3cd; color: #856404; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                                    Humeur négative (5j)
+                                </span>
+                            {% elseif alert.alertType == 'dangerous_keywords' %}
+                                <span style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                                    Mots clés dangereux
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 12px; color: #666;">{{ alert.createdAt.format('d/m/Y H:i') }}</td>
+                        <td style="padding: 12px;">
+                            {% if alert.resolved %}
+                                <span style="background: #d4edda; color: #155724; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                                    ✓ Résolu
+                                </span>
+                            {% else %}
+                                <span style="background: #f8d7da; color: #721c24; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
+                                    ⚠ En attente
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 12px;">
+                            <a href="{{ path('admin_psychological_alert_show', {id: alert.id}) }}" 
+                               style="color: #007bff; text-decoration: none; margin-right: 10px;">Voir</a>
+                            {% if not alert.resolved %}
+                                <form method="POST" action="{{ path('admin_psychological_alert_resolve', {id: alert.id}) }}" style="display: inline;">
+                                    <button type="submit" style="background: none; border: none; color: #28a745; cursor: pointer; text-decoration: underline;">
+                                        Résoudre
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if totalPages > 1 %}
+            <div style="margin-top: 2rem; text-align: center;">
+                {% for p in 1..totalPages %}
+                    <a href="{{ path('admin_psychological_alerts_index', {filter: filter, page: p}) }}" 
+                       style="display: inline-block; padding: 8px 12px; margin: 0 4px; background: {% if p == page %}#d32f2f{% else %}#e0e0e0{% endif %}; color: {% if p == page %}white{% else %}#333{% endif %}; text-decoration: none; border-radius: 4px;">
+                        {{ p }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div style="background: white; padding: 3rem; text-align: center; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+            <i class="fas fa-check-circle" style="font-size: 3rem; color: #28a745; margin-bottom: 1rem;"></i>
+            <h3 style="color: #333;">Aucune alerte</h3>
+            <p style="color: #666;">Tous les utilisateurs sont en bonne santé.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

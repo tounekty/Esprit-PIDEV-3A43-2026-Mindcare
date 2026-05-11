@@ -1,0 +1,73 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouveau sujet{% endblock %}
+
+{% block body %}
+    <div class="bradcam_area bradcam_bg_1">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="bradcam_text">
+                        <h3>Nouveau sujet</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="welcome_docmed_area">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-8 offset-xl-2">
+                    <div class="welcome_docmed_info">
+                        <h2>Créer un sujet</h2>
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                            <div class="mb-3">
+                                {{ form_label(form.titre) }}
+                                {{ form_widget(form.titre) }}
+                                {{ form_errors(form.titre) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.description) }}
+                                {{ form_widget(form.description) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.isAnonymous) }}
+                                {{ form_widget(form.isAnonymous) }}
+                                {{ form_errors(form.isAnonymous) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.imageFile) }}
+                                {{ form_widget(form.imageFile) }}
+                                {{ form_errors(form.imageFile) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.isPinned) }}
+                                {{ form_widget(form.isPinned) }}
+                                {{ form_errors(form.isPinned) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.category) }}
+                                {{ form_widget(form.category) }}
+                                {{ form_errors(form.category) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.taggedPsychologues) }}
+                                {{ form_widget(form.taggedPsychologues) }}
+                                {{ form_errors(form.taggedPsychologues) }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form_label(form.attachmentFile) }}
+                                {{ form_widget(form.attachmentFile) }}
+                                {{ form_errors(form.attachmentFile) }}
+                            </div>
+                            <button type="submit" class="boxed-btn3">Publier</button>
+                            <a href="{{ path('front_forum_index') }}" class="boxed-btn3-white" style="margin-left: 10px;">Retour</a>
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

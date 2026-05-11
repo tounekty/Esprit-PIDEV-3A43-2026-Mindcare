@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zxx">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="" />
+    <meta name="keyword" content="" />
+    <meta name="author" content="flexilecode" />
+    <title>{% block title %}Duralux || Dashboard{% endblock %}</title>
+    <base href="{{ asset('back/') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="assets/images/favicon.ico" />
+
+    {% block stylesheets %}
+        <link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="assets/vendors/css/vendors.min.css" />
+        <link rel="stylesheet" type="text/css" href="assets/vendors/css/daterangepicker.min.css" />
+        <link rel="stylesheet" type="text/css" href="assets/css/theme.min.css" />
+    {% endblock %}
+</head>
+
+<body>
+
+    {% include 'admin/partials/sidebar.html.twig' %}
+
+    {% include 'admin/partials/header.html.twig' %}
+
+    <main class="nxl-container">
+        <div class="nxl-content">
+            {% block page_header %}
+                <div class="page-header">
+                    <div class="page-header-left d-flex align-items-center">
+                    </div>
+                   
+                </div>
+            {% endblock %}
+
+            <div class="main-content">
+                {% block body %}{% endblock %}
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p class="fs-11 text-muted fw-medium text-uppercase font-monospace mb-0">Copyright © 2026 MindCare. All rights reserved.</p>
+        </footer>
+    </main>
+
+    {% block javascripts %}
+        <script src="assets/vendors/js/vendors.min.js"></script>
+        <script src="assets/vendors/js/daterangepicker.min.js"></script>
+        <script src="assets/vendors/js/apexcharts.min.js"></script>
+        <script src="assets/vendors/js/circle-progress.min.js"></script>
+        <script src="assets/js/common-init.min.js"></script>
+        {# Only include dashboard-init.min.js on specific pages that need it #}
+        <script src="assets/js/theme-customizer-init.min.js"></script>
+    {% endblock %}
+</body>
+
+</html>

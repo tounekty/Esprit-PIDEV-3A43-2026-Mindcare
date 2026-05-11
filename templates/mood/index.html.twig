@@ -1,0 +1,782 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Suivi des Humeurs | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+    <style>
+        body {
+            background: #f8fafc;
+        }
+
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header */
+        .header-hero {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(127, 191, 255, 0.2);
+        }
+
+        .header-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-hero p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .hero-metrics {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(130px, 1fr));
+            gap: 0.8rem;
+            margin: 1rem auto 0;
+            max-width: 640px;
+        }
+
+        .hero-metric {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+        }
+
+        .hero-metric-label {
+            display: block;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.92;
+        }
+
+        .hero-metric-value {
+            display: block;
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-top: 0.2rem;
+            color: #fff;
+        }
+
+        .hero-badges {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 0.9rem;
+        }
+
+        .hero-badge {
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            border-radius: 999px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #fff;
+            max-width: 260px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Controls Card */
+        .controls-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .controls-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 1rem;
+        }
+
+        .search-sort-row {
+            display: grid;
+            grid-template-columns: 1fr 150px 150px;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .search-sort-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #E2F0FF !important;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #7FBFFF !important;
+            box-shadow: 0 0 0 3px rgba(127, 191, 255, 0.1) !important;
+        }
+
+        .input-group-text {
+            border: 2px solid #E2F0FF !important;
+            border-right: none !important;
+            background: white;
+        }
+
+        .input-group .form-control {
+            border-left: none !important;
+        }
+
+        .btn-apply {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #E2F0FF;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(127, 191, 255, 0.15);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #7FBFFF;
+        }
+
+        /* Distribution Section */
+        .distribution-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .distribution-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 1.5rem;
+        }
+
+        .mood-distribution {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .mood-box {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #E2F0FF;
+            transition: all 0.3s;
+        }
+
+        .mood-box:hover {
+            background: white;
+            border-color: #7FBFFF;
+            transform: translateY(-2px);
+        }
+
+        .mood-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mood-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1a365d;
+            text-transform: capitalize;
+            margin-bottom: 0.5rem;
+        }
+
+        .mood-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #7FBFFF;
+        }
+
+        .mood-percent {
+            font-size: 0.75rem;
+            color: #A0AEC0;
+            margin-top: 0.25rem;
+        }
+
+        /* Content Section */
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a365d;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Navigation Buttons */
+        .header-nav {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 0.6rem 1.3rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            background: white;
+            color: #7FBFFF;
+        }
+
+        .nav-btn.active {
+            background: white;
+            color: #7FBFFF;
+        }
+
+        /* Mood Grid */
+        .moods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .mood-card {
+            background: white;
+            border: 1px solid #E2F0FF;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mood-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(127, 191, 255, 0.15);
+        }
+
+        .mood-card-header {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.1) 0%, rgba(168, 216, 255, 0.1) 100%);
+            padding: 1.5rem;
+            border-bottom: 1px solid #E2F0FF;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .mood-emoji-large {
+            font-size: 2.5rem;
+        }
+
+        .mood-header-text h5 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin: 0 0 0.25rem 0;
+        }
+
+        .mood-header-text p {
+            font-size: 0.85rem;
+            color: #718096;
+            margin: 0;
+        }
+
+        .intensity-badge {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .mood-card-body {
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        .mood-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: #718096;
+            margin-bottom: 1rem;
+        }
+
+        .mood-info i {
+            color: #7FBFFF;
+        }
+
+        .intensity-bar {
+            background: #E8F0FF;
+            border-radius: 10px;
+            height: 6px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+
+        .intensity-fill {
+            background: linear-gradient(90deg, #7FBFFF, #A8D8FF);
+            height: 100%;
+            transition: width 0.3s;
+        }
+
+        .journal-count {
+            font-size: 0.85rem;
+            color: #718096;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #E2F0FF;
+        }
+
+        .mood-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #E2F0FF;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(127, 191, 255, 0.3);
+        }
+
+        .btn-edit {
+            background: white;
+            color: #7FBFFF;
+            border: 1px solid #D4E8FF;
+        }
+
+        .btn-edit:hover {
+            background: #f0f7ff;
+            border-color: #7FBFFF;
+        }
+
+        .btn-delete {
+            background: white;
+            color: #F56565;
+            border: 1px solid #FBD5D5;
+        }
+
+        .btn-delete:hover {
+            background: #FFF5F5;
+            border-color: #F56565;
+        }
+
+        .mood-actions form {
+            display: inline;
+            margin: 0;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #CBD5E0;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: #4A5568;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #A0AEC0;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Metiers Avancée */
+        .metiers-avancee {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 30px;
+        }
+
+        .metiers-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #1565c0;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .metiers-description {
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .tips-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tip-item {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+
+        .tip-item i {
+            color: #28a745;
+            margin-right: 10px;
+        }
+
+        .metiers-cta .btn {
+            margin-top: 15px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="page-container">
+    <!-- Header -->
+    <div class="header-hero">
+        <h1>Suivi des Humeurs</h1>
+        <div class="hero-metrics">
+            <div class="hero-metric">
+                <span class="hero-metric-label">Points</span>
+                <span class="hero-metric-value">{{ gamification.points ?? points }}</span>
+            </div>
+            <div class="hero-metric">
+                <span class="hero-metric-label">Entrées</span>
+                <span class="hero-metric-value">{{ gamification.entries ?? 0 }}</span>
+            </div>
+            <div class="hero-metric">
+                <span class="hero-metric-label">Série</span>
+                <span class="hero-metric-value">{{ gamification.streak ?? 0 }} j</span>
+            </div>
+        </div>
+        <div class="hero-badges">
+            {% for badge in badges|slice(0, 5) %}
+                <span class="hero-badge" title="{{ badge }}">{{ badge }}</span>
+            {% endfor %}
+        </div>
+        <div class="header-nav">
+            <a href="{{ path('app_mood_index') }}" class="nav-btn active">
+                <i class="fas fa-heart"></i> Humeurs
+            </a>
+            <a href="{{ path('app_mood_heatmap') }}" class="nav-btn">
+                <i class="fas fa-fire"></i> Heatmap
+            </a>
+            <a href="{{ path('app_journal_emotionnel_index') }}" class="nav-btn">
+                <i class="fas fa-book"></i> Journal
+            </a>
+        </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-card">
+        <div class="controls-header"><i class="fas fa-filter me-2"></i>Recherche et Filtres</div>
+        <form method="GET" class="w-100">
+            <div class="search-sort-row">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher par humeur..." value="{{ search }}">
+                </div>
+                <select name="sort" class="form-select">
+                    <option value="datemood" {{ sort == 'datemood' ? 'selected' : '' }}>Date</option>
+                    <option value="humeur" {{ sort == 'humeur' ? 'selected' : '' }}>Humeur</option>
+                    <option value="intensite" {{ sort == 'intensite' ? 'selected' : '' }}>Intensité</option>
+                </select>
+                <select name="direction" class="form-select">
+                    <option value="desc" {{ direction == 'desc' ? 'selected' : '' }}>Décroissant</option>
+                    <option value="asc" {{ direction == 'asc' ? 'selected' : '' }}>Croissant</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-apply w-100"><i class="fas fa-check me-2"></i>Appliquer</button>
+        </form>
+    </div>
+
+    <!-- Statistics -->
+    {% if stats is defined %}
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-list me-1"></i>Total</div>
+                <div class="stat-value">{{ stats.total }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-average me-1"></i>Intensité Moy.</div>
+                <div class="stat-value">{{ stats.averageIntensity }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-chart-bar me-1"></i>Plage</div>
+                <div class="stat-value">{{ stats.minIntensity }}-{{ stats.maxIntensity }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mood Distribution -->
+    {% if stats is defined and stats and stats.total > 0 %}
+    <div class="distribution-card">
+        <div class="distribution-title"><i class="fas fa-pie-chart me-2"></i>Distribution des Humeurs</div>
+        <div class="mood-distribution">
+            {% for mood, count in stats.moodCounts %}
+            <div class="mood-box">
+                <div class="mood-emoji">
+                    {% if mood == 'heureux' %} 😊
+                    {% elseif mood == 'triste' %} 😢
+                    {% elseif mood == 'colere' %} 😠
+                    {% elseif mood == 'stresse' %} 😰
+                    {% elseif mood == 'calme' %} 😌
+                    {% elseif mood == 'fatigue' %} 😴
+                    {% elseif mood == 'excite' %} 😃
+                    {% else %} 😐
+                    {% endif %}
+                </div>
+                <div class="mood-name">{{ mood }}</div>
+                <div class="mood-count">{{ count }}</div>
+                <div class="mood-percent">{{ (stats.moodPercentages[mood] ?? 0) }}%</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- Moods Content -->
+    <div class="content-header">
+        <h2 class="content-title"><i class="fas fa-list me-2"></i>Mes Humeurs</h2>
+        <a href="{{ path('app_mood_new') }}" class="add-btn">
+            <i class="fas fa-plus-circle"></i>Nouvelle Humeur
+        </a>
+    </div>
+
+    {% if moods|length > 0 %}
+        <div class="moods-grid">
+            {% for mood in moods %}
+            <div class="mood-card">
+                <div class="mood-card-header">
+                    <div class="d-flex align-items-center gap-2" style="flex: 1;">
+                        <div class="mood-emoji-large">
+                            {% if mood.humeur == 'heureux' %} 😊
+                            {% elseif mood.humeur == 'triste' %} 😢
+                            {% elseif mood.humeur == 'colere' %} 😠
+                            {% elseif mood.humeur == 'stresse' %} 😰
+                            {% elseif mood.humeur == 'calme' %} 😌
+                            {% elseif mood.humeur == 'fatigue' %} 😴
+                            {% elseif mood.humeur == 'excite' %} 😃
+                            {% else %} 😐
+                            {% endif %}
+                        </div>
+                        <div class="mood-header-text">
+                            <h5>{% if mood.humeur == 'heureux' %}Heureux{% elseif mood.humeur == 'triste' %}Triste{% elseif mood.humeur == 'colere' %}En colère{% elseif mood.humeur == 'stresse' %}Stressé{% elseif mood.humeur == 'calme' %}Calme{% elseif mood.humeur == 'fatigue' %}Fatigué{% elseif mood.humeur == 'excite' %}Excité{% else %}Neutre{% endif %}</h5>
+                            <p><i class="far fa-calendar me-1"></i>{{ mood.datemood|date('d/m/Y H:i') }}</p>
+                            {% set moodDiffSeconds = date().timestamp - (mood.datemood|date('U')) %}
+                            {% if moodDiffSeconds < 0 %}{% set moodDiffSeconds = 0 %}{% endif %}
+                            <p><i class="far fa-clock me-1"></i>
+                                {% if moodDiffSeconds < 60 %}
+                                    a l'instant
+                                {% elseif moodDiffSeconds < 3600 %}
+                                    il y a {{ (moodDiffSeconds / 60)|round(0, 'floor') }} min
+                                {% elseif moodDiffSeconds < 86400 %}
+                                    il y a {{ (moodDiffSeconds / 3600)|round(0, 'floor') }} h
+                                {% else %}
+                                    il y a {{ (moodDiffSeconds / 86400)|round(0, 'floor') }} j
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="intensity-badge">{{ mood.intensite }}/5</div>
+                </div>
+                <div class="mood-card-body">
+                    <div class="mood-info">
+                        <i class="fas fa-gauge"></i>
+                        <span>Intensité</span>
+                    </div>
+                    <div class="intensity-bar">
+                        <div class="intensity-fill" style="width: {{ mood.intensite * 20 }}%;"></div>
+                    </div>
+                    {% if mood.journals|length > 0 %}
+                    <div class="journal-count">
+                        <i class="fas fa-book me-1"></i>{{ mood.journals|length }} entrée{{ mood.journals|length > 1 ? 's' : '' }}
+                    </div>
+                    {% endif %}
+                    <div class="mood-actions">
+                        <a href="{{ path('app_mood_show', {'id': mood.id}) }}" class="btn-sm btn-view">
+                            <i class="fas fa-eye me-1"></i> Voir
+                        </a>
+                        <a href="{{ path('app_mood_edit', {'id': mood.id}) }}" class="btn-sm btn-edit">
+                            <i class="fas fa-edit me-1"></i> Éditer
+                        </a>
+                        {% include 'mood/_delete_form.html.twig' %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="mt-4 d-flex justify-content-center">
+            {{ knp_pagination_render(moods) }}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-heartbeat"></i>
+            <h3>Aucune humeur enregistrée</h3>
+            <p>Commencez à suivre votre bien-être émotionnel dès aujourd'hui!</p>
+            <a href="{{ path('app_mood_new') }}" class="add-btn">
+                <i class="fas fa-plus-circle"></i>Créer une Humeur
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Charts Section -->
+    {% if moodDistributionChart is defined or intensityChart is defined %}
+    <div class="row mt-5 mb-5">
+        {% if moodDistributionChart is defined %}
+        <div class="col-lg-6 mb-4">
+            <div class="card" style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: none; border-radius: 12px; min-height: 400px;">
+                <div class="card-body" style="padding: 2rem;">
+                    {{ render_chart(moodDistributionChart) }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        {% if intensityChart is defined %}
+        <div class="col-lg-6 mb-4">
+            <div class="card" style="box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); border: none; border-radius: 12px; min-height: 400px;">
+                <div class="card-body" style="padding: 2rem;">
+                    {{ render_chart(intensityChart) }}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    {{ importmap('app') }}
+{% endblock %}

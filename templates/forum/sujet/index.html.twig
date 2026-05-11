@@ -1,0 +1,140 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Sujets Forum{% endblock %}
+{% block page_title %}Sujets Forum{% endblock %}
+
+{% block body %}
+<div class="row g-3 mb-4">
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Total</small>
+                <h4 id="statTotal" class="mb-0">{{ stats.total }}</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Epingles</small>
+                <h4 id="statPinned" class="mb-0">{{ stats.pinned }}</h4>
+            </div>
+        </div>
+    </div>
+    {% for label, value in statusChoices %}
+        <div class="col-xl-2 col-md-4 col-6">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body">
+                    <small class="text-muted d-block mb-1">{{ label|split(' -> ')|first }}</small>
+                    <h4 class="mb-0" id="statStatus{{ value }}">{{ stats.byStatus[value] ?? 0 }}</h4>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+    <div class="col-xl-2 col-md-4 col-6">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <small class="text-muted d-block mb-1">Resultats affiches</small>
+                <h4 id="statVisible" class="mb-0">{{ visible_count }}</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <h5 class="mb-0">Liste des sujets</h5>
+        <div class="d-flex align-items-center gap-2">
+            <a href="{{ path('sujet_forum_new') }}" class="btn btn-primary btn-sm text-uppercase fw-semibold px-3 toolbar-btn">Nouveau sujet</a>
+            <a href="{{ path('message_forum_index') }}" class="btn btn-outline-secondary btn-sm text-uppercase fw-semibold px-3 toolbar-btn">Voir messages</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <form method="get" action="{{ path('sujet_forum_index') }}" class="row g-2 mb-3">
+            <div class="col-lg-5">
+                <input
+                    id="sujetSearch"
+                    name="q"
+                    type="text"
+                    class="form-control"
+                    placeholder="Rechercher par titre ou description..."
+                    value="{{ filters.query }}"
+                >
+            </div>
+            <div class="col-lg-3">
+                <select id="sujetStatusFilter" name="status" class="form-select">
+                    <option value="all" {{ filters.status == 'all' ? 'selected' : '' }}>Tous les statuts</option>
+                    {% for label, value in statusChoices %}
+                        <option value="{{ value }}" {{ filters.status == value ? 'selected' : '' }}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-lg-3">
+                {% set currentSort = filters.sort ~ '_' ~ filters.direction|lower %}
+                <select id="sujetSort" name="sort_direction" class="form-select">
+                    <option value="date_desc" {{ currentSort == 'date_desc' ? 'selected' : '' }}>Plus recents</option>
+                    <option value="date_asc" {{ currentSort == 'date_asc' ? 'selected' : '' }}>Plus anciens</option>
+                    <option value="title_asc" {{ currentSort == 'title_asc' ? 'selected' : '' }}>Titre A-Z</option>
+                    <option value="title_desc" {{ currentSort == 'title_desc' ? 'selected' : '' }}>Titre Z-A</option>
+                    <option value="status_asc" {{ currentSort == 'status_asc' ? 'selected' : '' }}>Statut A-Z</option>
+                    <option value="status_desc" {{ currentSort == 'status_desc' ? 'selected' : '' }}>Statut Z-A</option>
+                </select>
+                <input type="hidden" name="sort" value="{{ filters.sort }}" id="sortFieldInput">
+                <input type="hidden" name="direction" value="{{ filters.direction }}" id="sortDirectionInput">
+            </div>
+            <div class="col-lg-1 d-grid">
+                <a href="{{ path('sujet_forum_index') }}" class="btn btn-light toolbar-btn">Reset</a>
+            </div>
+        </form>
+
+        <div class="table-responsive">
+            <table class="table table-striped align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Description</th>
+                        <th>Date</th>
+                        <th>User</th>
+                        <th>Image</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="sujetsTableBody">
+                    {% include 'forum/sujet/_rows.html.twig' with {sujets: sujets} %}
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-3 d-flex justify-content-center">
+            {{ knp_pagination_render(sujets) }}
+        </div>
+    </div>
+</div>
+
+<style>
+.toolbar-btn {
+    min-width: 110px;
+    border-radius: 6px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const sortSelect = document.getElementById('sujetSort');
+    const sortFieldInput = document.getElementById('sortFieldInput');
+    const sortDirectionInput = document.getElementById('sortDirectionInput');
+    if (!sortSelect || !sortFieldInput || !sortDirectionInput) {
+        return;
+    }
+
+    const applySortValues = () => {
+        const [sort, direction] = (sortSelect.value || 'date_desc').split('_');
+        sortFieldInput.value = sort || 'date';
+        sortDirectionInput.value = (direction || 'desc').toUpperCase();
+    };
+
+    applySortValues();
+    sortSelect.addEventListener('change', applySortValues);
+});
+</script>
+{% endblock %}

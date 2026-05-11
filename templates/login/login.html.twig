@@ -1,0 +1,206 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<div class="wrapper">
+    <div class="title-text">
+        <div class="title login">Login</div>
+        <div class="title signup">Sign Up</div>
+    </div>
+    
+    <div class="form-container">
+        <div class="slide-controls">
+            <input type="radio" name="slide" id="login" checked>
+            <input type="radio" name="slide" id="signup">
+            
+            <label for="login" class="slide login">Login</label>
+            <label for="signup" class="slide signup">Sign Up</label>
+            
+            <div class="slider-tab"></div>
+        </div>
+
+        <div class="form-inner" id="formInner">
+            {# ================= LOGIN FORM ================= #}
+            <form method="post" action="{{ path('app_login') }}" class="login">
+                {% if error %}
+                    <div class="alert alert-danger">
+                        {{ error.messageKey|trans(error.messageData, 'security') }}
+                    </div>
+                {% endif %}
+
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+                
+                {% for message in app.flashes('success') %}
+                    <div class="alert alert-success">{{ message }}</div>
+                {% endfor %}
+
+                <div class="field">
+                    <input type="email" name="email" placeholder="Email Address" value="{{ last_username }}" required>
+                </div>
+
+                <div class="field">
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+
+                <div class="field">
+                    <div class="g-recaptcha" data-sitekey="{{ recaptcha_site_key }}"></div>
+                </div>
+
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                {# LOGIN BUTTON - Full width #}
+                <div class="field btn">
+                    <div class="btn-layer"></div>
+                    <input type="submit" value="Login">
+                </div>
+
+                <div class="field">
+                    <button type="button" id="faceLoginToggle" class="btn btn-outline-primary w-100">
+                        Login with Face ID
+                    </button>
+                </div>
+
+                <div id="faceLoginPanel" style="display: none;">
+                    <video id="faceLoginVideo" class="w-100 border rounded" autoplay playsinline></video>
+                    <button type="button" id="faceLoginCapture" class="btn btn-success w-100 mt-2">
+                        Scan Face
+                    </button>
+                    <div id="faceLoginMessage" class="alert alert-info mt-2 d-none"></div>
+                </div>
+
+                {# FORGOT PASSWORD - Separated and bottom right #}
+                <div class="forgot-link-container">
+                    <a href="{{ path('app_forgot_password') }}" class="forgot-link">Forgot Password?</a>
+                </div>
+            </form>
+
+            {# ================= SIGNUP FORM ================= #}
+            <form method="post" action="{{ path('app_register') }}" class="signup">
+                {% for message in app.flashes('error') %}
+                    <div class="alert alert-danger">{{ message }}</div>
+                {% endfor %}
+
+                <div class="field">
+                    <input type="text" name="firstName" placeholder="First Name" required>
+                </div>
+
+                <div class="field">
+                    <input type="text" name="lastName" placeholder="Last Name" required>
+                </div>
+
+                <div class="field">
+                    <input type="email" name="email" placeholder="Email Address" required>
+                </div>
+
+                <div class="field">
+                    <input type="password" name="password" placeholder="Password" required>
+                </div>
+
+                <div class="field">
+                    <input type="password" name="confirmPassword" placeholder="Confirm Password" required>
+                </div>
+
+                <div class="field btn">
+                    <div class="btn-layer"></div>
+                    <input type="submit" value="Sign Up">
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.getElementById('faceLoginToggle');
+    const panel = document.getElementById('faceLoginPanel');
+    const captureBtn = document.getElementById('faceLoginCapture');
+    const video = document.getElementById('faceLoginVideo');
+    const message = document.getElementById('faceLoginMessage');
+    const csrfToken = '{{ csrf_token('face_login') }}';
+
+    // Safety check
+    if (!toggleBtn || !panel || !captureBtn || !video || !message) {
+        console.error('Face login elements not found in DOM');
+        return;
+    }
+
+    let stream = null;
+
+    function setMessage(text, type) {
+        message.textContent = text;
+        message.classList.remove('d-none', 'alert-info', 'alert-danger', 'alert-success');
+        message.classList.add(type || 'alert-info');
+    }
+
+    function resetMessage() {
+        message.textContent = '';
+        message.classList.add('d-none');
+    }
+
+    async function startCamera() {
+        stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        video.srcObject = stream;
+    }
+
+    function stopCamera() {
+        if (stream) {
+            stream.getTracks().forEach((track) => track.stop());
+            stream = null;
+        }
+    }
+
+    function captureBase64() {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL('image/jpeg');
+    }
+
+    toggleBtn.addEventListener('click', async () => {
+        resetMessage();
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+            try {
+                await startCamera();
+            } catch (error) {
+                setMessage('Camera access was denied.', 'alert-danger');
+            }
+        } else {
+            panel.style.display = 'none';
+            stopCamera();
+        }
+    });
+
+    captureBtn.addEventListener('click', async () => {
+        resetMessage();
+        setMessage('Scanning face...', 'alert-info');
+        const image = captureBase64();
+
+        try {
+            const response = await fetch('/login/face', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image, _token: csrfToken })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                setMessage(data.error || 'Face login failed.', 'alert-danger');
+                return;
+            }
+
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            }
+        } catch (error) {
+            console.error('Face login error:', error);
+            setMessage('Network error. Please try again.', 'alert-danger');
+        }
+    });
+});
+</script>
+{% endblock %}

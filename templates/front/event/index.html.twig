@@ -1,0 +1,835 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Evenements{% endblock %}
+
+{% block body %}
+    <style>
+        /* Light Blue Theme - Bleu Ciel */
+        :root {
+            --color-sky-light: #e0f2fe;
+            --color-sky-medium: #7dd3fc;
+            --color-sky-dark: #0284c7;
+            --color-sky-darker: #0369a1;
+        }
+
+        .event-hero {
+            background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 50%, #06b6d4 100%);
+            padding: 100px 0;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .event-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            transform: translate(100px, -50px);
+        }
+
+        .event-filter-bar {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(2, 132, 199, 0.15);
+            padding: 20px 24px;
+            margin-top: -60px;
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 1px solid #cffafe;
+            backdrop-filter: blur(10px);
+        }
+
+        .event-filter-bar input {
+            border: none;
+            background: transparent;
+            padding: 12px 0;
+            font-size: 15px;
+            color: #0c4a6e;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 200px;
+            font-weight: 500;
+        }
+
+        .event-filter-bar input::placeholder {
+            color: #7dd3fc;
+        }
+
+        .event-filter-bar input:focus {
+            outline: none;
+            color: #0284c7;
+        }
+
+        .event-filter-bar select {
+            border: 1px solid #cffafe;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            padding: 8px 12px;
+            font-size: 14px;
+            color: #0284c7;
+            cursor: pointer;
+            min-width: 140px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .event-filter-bar select:focus {
+            outline: none;
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+        }
+
+        .event-filter-bar select option {
+            color: #0c4a6e;
+            background: white;
+        }
+
+        .event-filter-bar button {
+            background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 16px;
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.3);
+        }
+
+        .event-filter-bar button:hover {
+            background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(2, 132, 199, 0.4);
+        }
+
+        .event-filter-bar form {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .event-filter-bar form > div {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .event-filter-bar form label {
+            display: none;
+        }
+
+        .event-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(2, 132, 199, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #cffafe;
+        }
+
+        .event-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 45px rgba(2, 132, 199, 0.2);
+            border-color: #7dd3fc;
+        }
+
+        .event-card-header {
+            background: linear-gradient(135deg, #e0f2fe 0%, #cffafe 100%);
+            padding: 24px 20px;
+            border-bottom: 2px solid #bae6fd;
+        }
+
+        .event-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0369a1;
+            margin: 0 0 12px 0;
+        }
+
+        .event-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            color: #0284c7;
+            flex-wrap: wrap;
+            font-weight: 500;
+        }
+
+        .event-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .event-desc {
+            color: #164e63;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .event-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px solid #cffafe;
+            font-size: 13px;
+            color: #0284c7;
+            font-weight: 500;
+        }
+
+        .event-cta {
+            background: linear-gradient(135deg, #0284c7 0%, #0ea5e9 100%);
+            color: white;
+            padding: 10px 22px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s ease;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+
+        .event-cta:hover {
+            color: white;
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #0369a1 0%, #0284c7 100%);
+        }
+
+        .event-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge-open {
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.15) 0%, rgba(7, 165, 233, 0.15) 100%);
+            color: #0369a1;
+        }
+
+        .badge-full {
+            background: rgba(239, 68, 68, 0.15);
+            color: #b91c1c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-radius: 16px;
+            border: 1px solid #cffafe;
+            box-shadow: 0 6px 20px rgba(2, 132, 199, 0.1);
+        }
+
+        /* Calendar Modal */
+        .calendar-modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .calendar-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .calendar-modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 95%;
+            max-width: 1200px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        .calendar-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .calendar-modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e3a8a;
+            margin: 0;
+        }
+
+        .calendar-close-btn {
+            font-size: 28px;
+            font-weight: bold;
+            color: #a0aec0;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .calendar-close-btn:hover {
+            color: #0284c7;
+        }
+
+        .calendar-grid {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .calendar-month {
+            flex: 0 0 auto;
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            min-width: fit-content;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .calendar-month-title {
+            grid-column: 1 / -1;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 700;
+            color: #0284c7;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #06b6d4;
+        }
+
+        .calendar-day-header {
+            text-align: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #0284c7;
+            text-transform: uppercase;
+            padding: 8px 0;
+        }
+
+        .calendar-day-empty {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #cbd5e1;
+            font-weight: 500;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 8px;
+            text-align: center;
+            background: white;
+        }
+
+        .calendar-day:hover {
+            border-color: #0284c7;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .calendar-day-number {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1e3a8a;
+        }
+
+        .calendar-day-options {
+            font-size: 11px;
+            color: #0284c7;
+            margin-top: 2px;
+            font-weight: 600;
+        }
+
+        .calendar-day-underline {
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            margin-top: 2px;
+        }
+
+        .calendar-day.available-high .calendar-day-underline {
+            background-color: #06b6d4;
+        }
+
+        .calendar-day.available-low .calendar-day-underline {
+            background-color: #f59e0b;
+        }
+
+        .calendar-day.reserved {
+            border: 2px solid #10b981 !important;
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%) !important;
+            position: relative;
+        }
+
+        .calendar-day.reserved .calendar-day-number {
+            color: #065f46 !important;
+        }
+
+        .calendar-day.reserved .calendar-day-options {
+            color: #059669 !important;
+        }
+
+        .reserved-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 0 2px white;
+        }
+
+        .calendar-day.today {
+            background: #1e3a8a;
+            border-color: #1e3a8a;
+            color: white;
+        }
+
+        .calendar-day.today .calendar-day-number,
+        .calendar-day.today .calendar-day-options {
+            color: white;
+        }
+
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px 0;
+            border-top: 1px solid #e2e8f0;
+            font-size: 13px;
+            color: #0284c7;
+            font-weight: 500;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+        }
+    </style>
+
+    <div class="event-hero">
+        <div class="container">
+            <h1 style="font-size: 54px; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px;">
+                <i class="ti-calendar" style="margin-right: 12px; opacity: 0.9;"></i>Événements 2026
+            </h1>
+            <p style="font-size: 18px; opacity: 0.95; max-width: 650px; margin: 0 auto; font-weight: 300;">
+                Rejoignez notre communauté MindCare pour des événements enrichissants et bienveillants.
+            </p>
+        </div>
+    </div>
+
+    <div class="container" style="padding: 80px 0;">
+        <div class="event-filter-bar">
+            <form method="get" action="{{ path('front_events_index') }}">
+                <i class="ti-search" style="color: #a0aec0; font-size: 18px;"></i>
+                <input id="event-search" type="text" name="q" value="{{ q }}" placeholder="Rechercher...">
+                
+                <div style="border-left: 1px solid #e2e8f0; height: 24px;"></div>
+                
+                <div>
+                    <i class="ti-menu-alt" style="color: #a0aec0;"></i>
+                    <select name="category" style="min-width: 130px;">
+                        <option value="">Catégorie</option>
+                        <option value="wellness" {% if category == 'wellness' %}selected{% endif %}>Bien-être</option>
+                        <option value="sport" {% if category == 'sport' %}selected{% endif %}>Sport</option>
+                        <option value="workshop" {% if category == 'workshop' %}selected{% endif %}>Atelier</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <i class="ti-arrow-up" style="color: #a0aec0;"></i>
+                    <select id="event-sort" name="sort">
+                        <option value="date" {% if sortBy == 'date' %}selected{% endif %}>Ascendant</option>
+                        <option value="date_desc" {% if sortBy == 'date_desc' %}selected{% endif %}>Descendant</option>
+                        <option value="lieu" {% if sortBy == 'lieu' %}selected{% endif %}>Lieu (A-Z)</option>
+                    </select>
+                </div>
+                
+                <button type="submit" title="Rechercher">
+                    <i class="ti-search"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Calendar Section -->
+        <div style="background: white; border-radius: 12px; padding: 24px; margin-top: 40px; margin-bottom: 40px; border: 1px solid #e2e8f0;">
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h3 style="font-weight: 700; color: #1e3a8a; font-size: 18px; margin: 0 0 8px 0;">Vérifiez les disponibilités</h3>
+                    {% if date %}<p style="font-size: 13px; color: #0284c7; margin: 0;"><i class="ti-calendar"></i> Filtrée pour le {{ date|date('d M Y') }}</p>{% endif %}
+                </div>
+                <button onclick="document.getElementById('event-search').value=''; clearDateFilter(); document.querySelector('form').submit();" 
+                        style="background: none; border: none; color: #0284c7; font-weight: 600; cursor: pointer; font-size: 13px; text-decoration: underline;">
+                    Effacer
+                </button>
+            </div>
+
+            <!-- Calendar Cards Horizontal -->
+            <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 12px;">
+                <div style="display: flex; gap: 12px; min-width: fit-content;">
+                    {% set displayedDates = 0 %}
+                    {% set today = 'now'|date('Y-m-d') %}
+                    
+                    {% for dateKey, data in calendarData %}
+                        {% if displayedDates < 15 %}
+                            {% set availabilityPercent = data.total > 0 ? (data.available / data.total * 100)|round : 0 %}
+                            {% set isToday = (dateKey == today) %}
+                            {% set isReserved = dateKey in userReservedDates %}
+                            {% set dayName = data.date|date('l') %}
+                            
+                            <!-- Determine day label -->
+                            {% if isToday %}
+                                {% set dayLabel = 'AUJOURD\'HUI' %}
+                            {% else %}
+                                {% if dayName == 'Monday' %}{% set dayLabel = 'LUN.' %}
+                                {% elseif dayName == 'Tuesday' %}{% set dayLabel = 'MAR.' %}
+                                {% elseif dayName == 'Wednesday' %}{% set dayLabel = 'MER.' %}
+                                {% elseif dayName == 'Thursday' %}{% set dayLabel = 'JEU.' %}
+                                {% elseif dayName == 'Friday' %}{% set dayLabel = 'VEN.' %}
+                                {% elseif dayName == 'Saturday' %}{% set dayLabel = 'SAM.' %}
+                                {% elseif dayName == 'Sunday' %}{% set dayLabel = 'DIM.' %}
+                                {% endif %}
+                            {% endif %}
+
+                            <!-- Determine colors -->
+                            {% if isToday %}
+                                {% set bgColor = '#1e3a8a' %}
+                                {% set textColor = 'white' %}
+                                {% set underlineColor = 'white' %}
+                                {% set borderColor = '#1e3a8a' %}
+                            {% else %}
+                                {% set bgColor = 'white' %}
+                                {% set textColor = '#1e3a8a' %}
+                                {% set borderColor = '#e5e7eb' %}
+                                {% if availabilityPercent > 50 %}
+                                    {% set underlineColor = '#06b6d4' %}
+                                {% else %}
+                                    {% set underlineColor = '#f59e0b' %}
+                                {% endif %}
+                            {% endif %}
+
+                            {# Override for reserved dates #}
+                            {% if isReserved and not isToday %}
+                                {% set bgColor = 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)' %}
+                                {% set borderColor = '#10b981' %}
+                                {% set textColor = '#065f46' %}
+                            {% endif %}
+
+                            <!-- Card -->
+                            <div style="flex-shrink: 0; width: 130px; background: {{ bgColor }}; border: {% if isReserved and not isToday %}2px{% else %}1px{% endif %} solid {{ borderColor }}; border-radius: 8px; padding: 16px 12px; text-align: center; transition: all 0.3s; position: relative;"
+                                 onmouseover="this.style.boxShadow='0 4px 12px rgba(2, 132, 199, 0.15)'; this.style.transform='translateY(-2px)'"
+                                 onmouseout="this.style.boxShadow='none'; this.style.transform='none'">
+                                {% if isReserved %}
+                                    <div style="position: absolute; top: 4px; right: 4px; background: #10b981; color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.15);" title="Vous avez une réservation">
+                                        ✓
+                                    </div>
+                                {% endif %}
+                                <!-- Day name -->
+                                <div style="font-size: 11px; font-weight: 600; color: {{ textColor }}; opacity: 0.8; text-transform: uppercase; margin-bottom: 6px;">
+                                    {{ dayLabel }}
+                                </div>
+                                <!-- Date number -->
+                                <div style="font-size: 28px; font-weight: 700; color: {{ textColor }}; margin-bottom: 10px; line-height: 1;">
+                                    {{ data.date|date('d') }}
+                                </div>
+                                <!-- Number of options with underline -->
+                                <div style="font-size: 13px; font-weight: 600; color: {{ textColor }}; padding-bottom: 8px; border-bottom: 3px solid {{ underlineColor }};">
+                                    {{ data.available }} options
+                                </div>
+                            </div>
+                            {% set displayedDates = displayedDates + 1 %}
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- "Plus de dates" button at the end -->
+                    <div style="flex-shrink: 0; width: 130px; background: white; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 12px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s;"
+                         onclick="openCalendarModal()"
+                         onmouseover="this.style.boxShadow='0 4px 12px rgba(2, 132, 199, 0.15)'; this.style.transform='translateY(-2px)'"
+                         onmouseout="this.style.boxShadow='none'; this.style.transform='none'">
+                        <i class="ti-calendar" style="font-size: 32px; color: #0284c7; margin-bottom: 6px;"></i>
+                        <div style="font-size: 12px; font-weight: 600; color: #0284c7;">Plus de dates</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Modal -->
+        <div id="calendarModal" class="calendar-modal" onclick="closeCalendarModal(event)">
+            <div class="calendar-modal-content" onclick="event.stopPropagation()">
+                <div class="calendar-modal-header">
+                    <h2 class="calendar-modal-title">Sélectionnez une date</h2>
+                    <button class="calendar-close-btn" onclick="closeCalendarModal()">&times;</button>
+                </div>
+
+                <div class="calendar-grid" id="allMonthsCalendar">
+                    {% set today = 'now'|date('Y-m-d') %}
+                    {% set monthsToDisplay = {} %}
+                    
+                    <!-- Group all dates by month -->
+                    {% for dateKey, data in calendarData %}
+                        {% set monthKey = dateKey|slice(0, 7) %}
+                        {% if monthsToDisplay[monthKey] is not defined %}
+                            {% set monthsToDisplay = monthsToDisplay|merge({(monthKey): []}) %}
+                        {% endif %}
+                    {% endfor %}
+
+                    <!-- Generate calendar for each month -->
+                    {% for monthKey in monthsToDisplay|keys|sort %}
+                        {% set month = monthKey|slice(5, 2)|number_format(0) %}
+                        {% set year = monthKey|slice(0, 4) %}
+                        {% set monthDate = (year ~ '-' ~ (month < 10 ? '0' : '') ~ month ~ '-01')|date('Y-m-d') %}
+                        {% set monthName = monthDate|date('F Y', null, 'fr_FR') %}
+                        {% set firstDayOfWeek = monthDate|date('w') %}
+                        {% if firstDayOfWeek == 0 %}{% set firstDayOfWeek = 6 %}{% else %}{% set firstDayOfWeek = firstDayOfWeek - 1 %}{% endif %}
+                        {% set daysInMonth = monthDate|date('t') %}
+
+                        <div class="calendar-month">
+                            <!-- Month title -->
+                            <div class="calendar-month-title">{{ monthName|upper }}</div>
+                            
+                            <!-- Day headers -->
+                            <div class="calendar-day-header">Lun.</div>
+                            <div class="calendar-day-header">Mar.</div>
+                            <div class="calendar-day-header">Mer.</div>
+                            <div class="calendar-day-header">Jeu.</div>
+                            <div class="calendar-day-header">Ven.</div>
+                            <div class="calendar-day-header">Sam.</div>
+                            <div class="calendar-day-header">Dim.</div>
+
+                            <!-- Empty cells before month starts -->
+                            {% for i in 1..firstDayOfWeek %}
+                                <div class="calendar-day-empty"></div>
+                            {% endfor %}
+
+                            <!-- Days of month -->
+                            {% for day in 1..daysInMonth %}
+                                {% set dateStr = (year ~ '-' ~ (month < 10 ? '0' : '') ~ month ~ '-' ~ (day < 10 ? '0' : '') ~ day) %}
+                                {% set data = calendarData[dateStr] ?? {} %}
+                                {% set availabilityPercent = data.total is defined and data.total > 0 ? (data.available / data.total * 100)|round : 0 %}
+                                {% set isToday = (dateStr == today) %}
+                                {% set isReserved = dateStr in userReservedDates %}
+                                {% set className = isToday ? 'calendar-day today' : 'calendar-day' %}
+                                {% if isReserved %}
+                                    {% set className = className ~ ' reserved' %}
+                                {% endif %}
+                                {% if availabilityPercent > 50 %}
+                                    {% set className = className ~ ' available-high' %}
+                                {% else %}
+                                    {% set className = className ~ ' available-low' %}
+                                {% endif %}
+                                
+                                <div class="{{ className }}" onclick="selectDate('{{ dateStr }}')" {% if isReserved %}title="Vous avez une réservation"{% endif %}>
+                                    {% if isReserved %}<div class="reserved-badge"></div>{% endif %}
+                                    <div class="calendar-day-number">{{ day }}</div>
+                                    {% if data.total is defined and data.total > 0 %}
+                                        <div class="calendar-day-options">{{ data.available }} options</div>
+                                        <div class="calendar-day-underline"></div>
+                                    {% else %}
+                                        <div class="calendar-day-options" style="color: #cbd5e1;">0 options</div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="calendar-legend">
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background-color: #06b6d4;"></div>
+                        <span>La plupart des options sont disponibles</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background-color: #f59e0b;"></div>
+                        <span>Peu d'options disponibles</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot" style="background-color: #10b981;"></div>
+                        <span>Vous avez une réservation</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="margin-top: 30px;">
+            {% if events|length > 0 %}
+                {% for event in events %}
+                    {% set remaining = remainingById[event.id] ?? 0 %}
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="event-card">
+                            {% if event.image %}
+                                <div style="width: 100%; height: 200px; overflow: hidden; border-radius: 20px 20px 0 0;">
+                                    <img src="{{ asset(event.image) }}" alt="{{ event.titre }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;">
+                                </div>
+                            {% else %}
+                                <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 100%); display: flex; align-items: center; justify-content: center; border-radius: 20px 20px 0 0;">
+                                    <i class="ti-image" style="font-size: 64px; color: #dbeafe; opacity: 0.5;"></i>
+                                </div>
+                            {% endif %}
+                            <div class="event-card-header">
+                                <h3 class="event-title">{{ event.titre }}</h3>
+                                <div class="event-meta">
+                                    <span><i class="ti-calendar"></i> {{ event.dateEvent|date('d M Y, H:i') }}</span>
+                                    <span><i class="ti-location-pin"></i> {{ event.lieu }}</span>
+                                </div>
+                            </div>
+                            <div class="event-body">
+                                <p class="event-desc">
+                                    {{ event.description|length > 140 ? event.description|slice(0, 140) ~ '...' : event.description }}
+                                </p>
+                                <div class="event-footer">
+                                    {% if remaining > 0 %}
+                                        <span class="event-badge badge-open"><i class="ti-check"></i> {{ remaining }} places</span>
+                                    {% else %}
+                                        <span class="event-badge badge-full"><i class="ti-close"></i> Complet</span>
+                                    {% endif %}
+                                    <a href="{{ path('front_events_show', {id: event.id}) }}" class="event-cta">Voir details</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="empty-state">
+                        <i class="ti-calendar" style="font-size: 64px; opacity: 0.3; margin-bottom: 15px;"></i>
+                        <p>Aucun evenement trouve.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        // Calendar Modal Functions
+        function openCalendarModal() {
+            const modal = document.getElementById('calendarModal');
+            modal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCalendarModal(event) {
+            // If clicking on the background or close button, close the modal
+            if (event && event.target.id !== 'calendarModal') return;
+            
+            const modal = document.getElementById('calendarModal');
+            modal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+        }
+
+        function selectDate(dateStr) {
+            // Add date filter parameter to URL and submit the form
+            const form = document.querySelector('form');
+            const searchInput = document.getElementById('event-search');
+            
+            // Create a hidden input for the date filter
+            let dateInput = document.getElementById('dateFilter');
+            if (!dateInput) {
+                dateInput = document.createElement('input');
+                dateInput.type = 'hidden';
+                dateInput.id = 'dateFilter';
+                dateInput.name = 'date';
+                form.appendChild(dateInput);
+            }
+            
+            // Set the date value
+            dateInput.value = dateStr;
+            
+            // Close modal and submit form
+            closeCalendarModal();
+            form.submit();
+        }
+
+        function clearDateFilter() {
+            // Remove date filter input if it exists
+            let dateInput = document.getElementById('dateFilter');
+            if (dateInput) {
+                dateInput.remove();
+            }
+        }
+
+        // Close modal when pressing ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeCalendarModal();
+            }
+        });
+
+        // Close modal when clicking outside
+        const modal = document.getElementById('calendarModal');
+        if (modal) {
+            modal.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    closeCalendarModal();
+                }
+            });
+        }
+    </script>
+{% endblock %}

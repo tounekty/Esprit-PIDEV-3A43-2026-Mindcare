@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Rendez-vous{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="mb-4">Mes Rendez-vous</h1>
+
+        <!-- Filter and Search Controls -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="btn-group" role="group" aria-label="Status Filter">
+                    <a href="{{ path('student_mes_rendezvous', {status: 'all', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                       class="btn btn-sm {{ currentStatus == 'all' ? 'btn-primary' : 'btn-outline-primary' }}">
+                        Tous
+                    </a>
+                    <a href="{{ path('student_mes_rendezvous', {status: 'pending', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                       class="btn btn-sm {{ currentStatus == 'pending' ? 'btn-warning' : 'btn-outline-warning' }}">
+                        En Attente
+                    </a>
+                    <a href="{{ path('student_mes_rendezvous', {status: 'accepted', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                       class="btn btn-sm {{ currentStatus == 'accepted' ? 'btn-success' : 'btn-outline-success' }}">
+                        Acceptés
+                    </a>
+                    <a href="{{ path('student_mes_rendezvous', {status: 'refused', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                       class="btn btn-sm {{ currentStatus == 'refused' ? 'btn-danger' : 'btn-outline-danger' }}">
+                        Refusés
+                    </a>
+                    <a href="{{ path('student_mes_rendezvous', {status: 'cancelled', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                       class="btn btn-sm {{ currentStatus == 'cancelled' ? 'btn-secondary' : 'btn-outline-secondary' }}">
+                        Annulés
+                    </a>
+                    <a href="{{ path('student_mes_rendezvous', {status: 'completed', search: currentSearch, sort: currentSort, order: currentOrder}) }}" 
+                       class="btn btn-sm {{ currentStatus == 'completed' ? 'btn-info' : 'btn-outline-info' }}">
+                        Terminés
+                    </a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <form method="get" action="{{ path('student_mes_rendezvous') }}" id="searchForm">
+                    <input type="hidden" name="status" value="{{ currentStatus }}">
+                    <input type="hidden" name="sort" value="{{ currentSort }}">
+                    <input type="hidden" name="order" value="{{ currentOrder }}">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control form-control-sm" 
+                               placeholder="Rechercher par psychologue..." 
+                               value="{{ currentSearch }}">
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">
+                            <i class="fa fa-search"></i>
+                        </button>
+                        {% if currentSearch %}
+                            <a href="{{ path('student_mes_rendezvous', {status: currentStatus, sort: currentSort, order: currentOrder}) }}" 
+                               class="btn btn-sm btn-outline-danger">
+                                <i class="fa fa-times"></i>
+                            </a>
+                        {% endif %}
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if appointments is empty %}
+            <div class="alert alert-info">Vous n'avez aucun rendez-vous correspondant à vos critères.</div>
+        {% else %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th style="cursor: pointer;">
+                                <a href="{{ path('student_mes_rendezvous', {
+                                    status: currentStatus, 
+                                    search: currentSearch, 
+                                    sort: 'date', 
+                                    order: (currentSort == 'date' and currentOrder == 'ASC') ? 'DESC' : 'ASC'
+                                }) }}" class="text-decoration-none text-dark">
+                                    Date
+                                    {% if currentSort == 'date' %}
+                                        {% if currentOrder == 'ASC' %}
+                                            <i class="fa fa-arrow-up"></i>
+                                        {% else %}
+                                            <i class="fa fa-arrow-down"></i>
+                                        {% endif %}
+                                    {% else %}
+                                        <i class="fa fa-sort" style="opacity: 0.3;"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>Psychologue</th>
+                            <th>Mode</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in appointments %}
+                            <tr>
+                                <td>{{ appointment.getDate() ? appointment.getDate().format('d/m/Y H:i') : '-' }}</td>
+                                <td>{{ appointment.getPsychologue() ? appointment.getPsychologue().getFirstName() ~ ' ' ~ appointment.getPsychologue().getLastName() : '-' }}</td>
+                                <td>{{ appointment.getLocation() == 'in_office' ? 'En cabinet' : 'En ligne' }}</td>
+                                <td>
+                                    {% if appointment.getStatus() == 'pending' %}
+                                        <span class="badge bg-warning">En attente</span>
+                                    {% elseif appointment.getStatus() == 'accepted' %}
+                                        <span class="badge bg-success">Accepté</span>
+                                    {% elseif appointment.getStatus() == 'refused' %}
+                                        <span class="badge bg-danger">Refusé</span>
+                                    {% elseif appointment.getStatus() == 'cancelled' %}
+                                        <span class="badge bg-secondary">Annulé</span>
+                                    {% elseif appointment.getStatus() == 'in_progress' %}
+                                        <span class="badge bg-primary">En cours</span>
+                                    {% elseif appointment.getStatus() == 'completed' %}
+                                        <span class="badge bg-info">Terminé</span>
+                                    {% elseif appointment.getStatus() == 'absent' %}
+                                        <span class="badge bg-warning">Rendez-vous manqué</span>
+                                    {% elseif appointment.getStatus() == 'archived' %}
+                                        <span class="badge bg-dark">Archivé</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if appointment.getStatus() in ['pending', 'accepted'] %}
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ path('reservation_postpone', {'id': appointment.getId()}) }}" class="btn btn-sm btn-warning">
+                                                <i class="fa fa-clock me-1"></i>Reporter
+                                            </a>
+                                            <form method="post" action="{{ path('reservation_cancel', {'id': appointment.getId()}) }}" style="display:inline-block;" onsubmit="return confirm('Annuler ce rendez-vous ?');">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('cancel' ~ appointment.getId()) }}">
+                                                <button class="btn btn-sm btn-danger">Annuler</button>
+                                            </form>
+                                        </div>
+                                    {% elseif appointment.getStatus() == 'in_progress' %}
+                                        <span class="text-muted small"><i class="fa fa-clock me-1"></i>Séance en cours</span>
+                                    {% elseif appointment.getStatus() == 'absent' %}
+                                        <span class="text-warning small"><i class="fa fa-exclamation-triangle me-1"></i>Vous étiez absent</span>
+                                    {% elseif appointment.getStatus() in ['completed', 'archived'] %}
+                                        <span class="text-muted small"><i class="fa fa-check me-1"></i>Terminé</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        <a href="{{ path('app_home') }}" class="btn btn-link mt-3">Retour</a>
+    </div>
+{% endblock %}

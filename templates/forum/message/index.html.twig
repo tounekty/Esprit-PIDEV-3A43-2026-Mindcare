@@ -1,0 +1,85 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Messages Forum{% endblock %}
+{% block page_title %}Messages Forum{% endblock %}
+
+{% block body %}
+    <div class="container" style="max-width: 1100px; margin: 2rem auto; font-family: Arial, sans-serif;">
+        <h1>Messages Forum</h1>
+        <div style="margin: 1rem 0;">
+            <a href="{{ path('message_forum_new') }}" style="padding: .5rem 1rem; background: #2f6fed; color: #fff; text-decoration: none; border-radius: 4px;">Nouveau message</a>
+            <a href="{{ path('sujet_forum_index') }}" style="padding: .5rem 1rem; margin-left: .5rem; background: #6c757d; color: #fff; text-decoration: none; border-radius: 4px;">Voir sujets</a>
+        </div>
+
+        <form method="get" action="{{ path('message_forum_index') }}" style="margin: 1rem 0; display: flex; gap: .5rem;">
+            <input type="text" name="q" value="{{ q }}" placeholder="Rechercher un message" style="flex: 1; padding: .5rem; border: 1px solid #ddd; border-radius: 4px;">
+            <button type="submit" style="padding: .5rem 1rem; background: #2f6fed; color: #fff; border: none; border-radius: 4px;">Rechercher</button>
+        </form>
+
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th style="text-align: left; border-bottom: 1px solid #ddd; padding: .5rem;">Sujet</th>
+                    <th style="text-align: left; border-bottom: 1px solid #ddd; padding: .5rem;">Contenu</th>
+                    <th style="text-align: left; border-bottom: 1px solid #ddd; padding: .5rem;">Date</th>
+                    <th style="text-align: left; border-bottom: 1px solid #ddd; padding: .5rem;">User</th>
+                    <th style="text-align: left; border-bottom: 1px solid #ddd; padding: .5rem;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for message in messages %}
+                <tr>
+                    <td style="padding: .5rem;">{{ message.sujet ? message.sujet.titre : '-' }}</td>
+                    <td style="padding: .5rem;">
+                        <div>{{ message.contenu }}</div>
+                        <div style="margin-top: .35rem; display: flex; flex-wrap: wrap; gap: .3rem;">
+                            {% set analysis = message.analysis %}
+                            {% if analysis is null %}
+                                <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: #e9ecef; color: #495057; font-size: 12px;">IA: non analysé</span>
+                            {% elseif analysis.status == 'pending' %}
+                                <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: #fff3cd; color: #856404; font-size: 12px;">IA: en attente</span>
+                            {% elseif analysis.status == 'failed' %}
+                                <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: #f8d7da; color: #842029; font-size: 12px;">IA: échec</span>
+                            {% elseif analysis.status == 'success' %}
+                                <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: #d1e7dd; color: #0f5132; font-size: 12px;">IA: analysé</span>
+
+                                {% if analysis.sentimentLabel %}
+                                    <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: #e2e3ff; color: #3f3d9a; font-size: 12px;">
+                                        Sentiment: {{ analysis.sentimentLabel }}{% if analysis.sentimentScore is not null %} ({{ (analysis.sentimentScore * 100)|round(1) }}%){% endif %}
+                                    </span>
+                                {% endif %}
+
+                                <span style="display:inline-block; padding: .2rem .45rem; border-radius: 999px; background: {{ analysis.isUrgent ? '#f8d7da' : '#d1e7dd' }}; color: {{ analysis.isUrgent ? '#842029' : '#0f5132' }}; font-size: 12px;">
+                                    Urgence: {{ analysis.isUrgent ? 'Urgent' : 'Non urgent' }}{% if analysis.urgencyScore is not null %} ({{ (analysis.urgencyScore * 100)|round(1) }}%){% endif %}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td style="padding: .5rem;">{{ message.dateMessage|date('Y-m-d H:i') }}</td>
+                    <td style="padding: .5rem;">
+                        {% if message.user %}
+                            {{ message.user.firstName }} {{ message.user.lastName }}
+                        {% else %}
+                            -
+                        {% endif %}
+                        {% if message.isAnonymous %}
+                            <span class="badge bg-secondary ms-1">Anonyme</span>
+                        {% endif %}
+                    </td>
+                    <td style="padding: .5rem;">
+                        <a href="{{ path('message_forum_show', {id: message.id}) }}">Voir</a> |
+                        <a href="{{ path('message_forum_edit', {id: message.id}) }}">Modifier</a>
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="5" style="padding: .5rem;">Aucun message.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <div style="margin-top: 1rem; display: flex; justify-content: center;">
+            {{ knp_pagination_render(messages) }}
+        </div>
+    </div>
+{% endblock %}

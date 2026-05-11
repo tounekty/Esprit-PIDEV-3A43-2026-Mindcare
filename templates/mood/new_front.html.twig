@@ -1,0 +1,204 @@
+{% extends "base_front.html.twig" %}
+
+{% block title %}Ajouter une Humeur - MoodTracker{% endblock %}
+{% block meta_description %}Enregistrez votre humeur actuelle{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<div class="breadcrumb-area" style="background-image: url({{ asset('front_assets/img/banner/breadcrumb.jpg') }})">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="breadcrumb_content">
+                    <h1 class="breadcrumb_title">Enregistrer une Humeur</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<section class="pt-120 pb-120">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0" style="box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-radius: 15px;">
+                    <div class="card-body p-5">
+                        <h2 class="mb-4">Quelle est votre humeur actuelle?</h2>
+                        <p class="text-muted mb-4">Enregistrez vos émotions pour suivre votre bien-être au fil du temps.</p>
+
+                        {{ form_start(form, {'attr': {'class': 'mood-form'}}) }}
+
+                        <!-- Humeur Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3">😊 Sélectionnez votre humeur</label>
+                            <div class="row g-3">
+                                <div class="col-6 col-md-4">
+                                    <div class="mood-option text-center p-3" style="border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: #f8f9fa;">
+                                        <div style="font-size: 2.5rem; margin-bottom: 10px;">😊</div>
+                                        <small>Heureux</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <div class="mood-option text-center p-3" style="border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: #f8f9fa;">
+                                        <div style="font-size: 2.5rem; margin-bottom: 10px;">😐</div>
+                                        <small>Neutre</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <div class="mood-option text-center p-3" style="border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: #f8f9fa;">
+                                        <div style="font-size: 2.5rem; margin-bottom: 10px;">😢</div>
+                                        <small>Triste</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <div class="mood-option text-center p-3" style="border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: #f8f9fa;">
+                                        <div style="font-size: 2.5rem; margin-bottom: 10px;">😰</div>
+                                        <small>Stressé</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <div class="mood-option text-center p-3" style="border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: #f8f9fa;">
+                                        <div style="font-size: 2.5rem; margin-bottom: 10px;">😡</div>
+                                        <small>Fâché</small>
+                                    </div>
+                                </div>
+                                <div class="col-6 col-md-4">
+                                    <div class="mood-option text-center p-3" style="border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s; background: #f8f9fa;">
+                                        <div style="font-size: 2.5rem; margin-bottom: 10px;">😍</div>
+                                        <small>Inspiré</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {{ form_widget(form.humeur, {'attr': {'class': 'form-control mt-3', 'placeholder': 'Décrivez votre humeur'}}) }}
+                            {{ form_errors(form.humeur) }}
+                        </div>
+
+                        <!-- Intensité -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold mb-3">📊 Intensité (1-10)</label>
+                            {{ form_widget(form.intensite, {'attr': {'class': 'form-range', 'type': 'range', 'min': '1', 'max': '10'}}) }}
+                            {{ form_errors(form.intensite) }}
+                        </div>
+
+                        <!-- Date -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">📅 Date</label>
+                            {{ form_widget(form.datemood, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.datemood) }}
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">📝 Notes (optionnel)</label>
+                            <textarea class="form-control" rows="4" placeholder="Ajoutez des notes sur votre journée..."></textarea>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                                ✅ Enregistrer l'humeur
+                            </button>
+                            <a href="{{ path('app_home') }}" class="btn btn-secondary btn-lg flex-grow-1">
+                                ❌ Annuler
+                            </a>
+                        </div>
+
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+
+                <!-- Info Box -->
+                <div class="card mt-4" style="background: #f0f4ff; border: 1px solid #dde3f5; border-radius: 10px;">
+                    <div class="card-body">
+                        <h5 class="mb-3">💡 Conseil</h5>
+                        <p class="mb-0">Enregistrer vos humeurs régulièrement vous aide à identifier les patterns et à mieux comprendre votre bien-être émotionnel. Soyez honnête et précis dans vos enregistrements!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .mood-form .form-control, 
+    .mood-form .form-range {
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        padding: 0.75rem 1rem;
+        font-size: 1rem;
+    }
+
+    .mood-form .form-range {
+        height: 8px;
+    }
+
+    .mood-form .form-range::-webkit-slider-thumb {
+        background: #667eea;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        cursor: pointer;
+        border: none;
+    }
+
+    .mood-form .form-range::-moz-range-thumb {
+        background: #667eea;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        cursor: pointer;
+        border: none;
+    }
+
+    .mood-option {
+        transition: all 0.3s ease;
+    }
+
+    .mood-option:hover {
+        border-color: #667eea !important;
+        background: #f0f4ff !important;
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-secondary {
+        background: #e0e0e0;
+        color: #333;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-secondary:hover {
+        background: #d0d0d0;
+        color: #333;
+    }
+
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1.5rem !important;
+        }
+
+        .mood-option {
+            padding: 1.5rem 1rem !important;
+        }
+
+        .mood-option div {
+            font-size: 2rem !important;
+        }
+    }
+</style>
+{% endblock %}

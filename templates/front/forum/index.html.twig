@@ -1,0 +1,301 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Forum{% endblock %}
+
+{% block body %}
+    <style>
+        .forum-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 80px 0;
+            color: white;
+            text-align: center;
+        }
+        .forum-topic-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .forum-topic-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.2);
+        }
+        .topic-image-wrapper {
+            width: 100%;
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        }
+        .topic-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s;
+        }
+        .forum-topic-card:hover .topic-image {
+            transform: scale(1.1);
+        }
+        .topic-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 64px;
+            color: rgba(102, 126, 234, 0.3);
+        }
+        .topic-badges {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .topic-badge {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+        .badge-pinned {
+            background: rgba(255, 193, 7, 0.9);
+            color: #fff;
+        }
+        .badge-category {
+            background: rgba(102, 126, 234, 0.9);
+            color: #fff;
+        }
+        .topic-content {
+            padding: 25px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .topic-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+        .topic-description {
+            color: #666;
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        .topic-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 2px solid #f0f0f0;
+            font-size: 13px;
+            color: #999;
+        }
+        .topic-date {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .view-topic-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+        .view-topic-btn:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+        .create-topic-btn {
+            background: white;
+            color: #667eea;
+            padding: 16px 40px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s;
+        }
+        .create-topic-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            color: #667eea;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+        .empty-state-icon {
+            font-size: 80px;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+        .forum-filter-bar {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            padding: 20px;
+            margin-top: -50px;
+            position: relative;
+            z-index: 2;
+        }
+        .forum-filter-bar input,
+        .forum-filter-bar select {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 12px 14px;
+            font-size: 14px;
+        }
+        .forum-filter-bar button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 18px;
+            font-weight: 600;
+        }
+    </style>
+
+    <div class="forum-header">
+        <div class="container">
+            <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 15px;">
+                <i class="ti-comments" style="margin-right: 15px;"></i>Forum de Discussion
+            </h1>
+            <p style="font-size: 18px; opacity: 0.9; max-width: 600px; margin: 0 auto 30px;">
+                Partagez vos questions, expériences et conseils avec notre communauté
+            </p>
+            <a href="{{ path('front_forum_new') }}" class="create-topic-btn">
+                <i class="ti-plus"></i>
+                Créer un nouveau sujet
+            </a>
+        </div>
+    </div>
+
+    <div class="container" style="padding: 80px 0;">
+        <div class="forum-filter-bar">
+            <form method="get" action="{{ path('front_forum_index') }}" class="row g-2 align-items-end">
+                <div class="col-md-6">
+                    <label for="forum-search" style="font-weight: 600; font-size: 13px;">Recherche</label>
+                    <input id="forum-search" type="text" name="q" value="{{ q }}" placeholder="Titre ou description" class="w-100">
+                </div>
+                <div class="col-md-4">
+                    <label for="forum-status" style="font-weight: 600; font-size: 13px;">Statut</label>
+                    <select id="forum-status" name="status" class="w-100">
+                        <option value="">Tous les statuts</option>
+                        {% for label, value in statusChoices %}
+                            <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="w-100">Filtrer</button>
+                </div>
+            </form>
+        </div>
+        <div class="row">
+            {% if sujets|length > 0 %}
+                {% for sujet in sujets %}
+                    <div class="col-xl-4 col-md-6 col-sm-12">
+                        <div class="forum-topic-card">
+                            <div class="topic-image-wrapper">
+                                {% if sujet.imageUrl %}
+                                    {% set image_path = sujet.imageUrl starts with 'http' ? sujet.imageUrl : (sujet.imageUrl starts with '/uploads/resources/' ? sujet.imageUrl : sujet.imageUrl|replace({'/uploads/':'/uploads/resources/'}) ) %}
+                                    <img src="{{ image_path starts with 'http' ? image_path : asset(image_path) }}" alt="{{ sujet.titre }}" class="topic-image">
+                                {% else %}
+                                    <i class="flaticon-first-aid-kit topic-icon"></i>
+                                {% endif %}
+                                <div class="topic-badges">
+                                    {% if sujet.isPinned %}
+                                        <span class="topic-badge badge-pinned">
+                                            <i class="ti-pin"></i> Épinglé
+                                        </span>
+                                    {% endif %}
+                                    {% if sujet.category %}
+                                        <span class="topic-badge badge-category">
+                                            {{ sujet.category }}
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="topic-content">
+                                <h3 class="topic-title">{{ sujet.titre }}</h3>
+                                <p class="topic-description">
+                                    {{ sujet.description|length > 120 ? sujet.description|slice(0, 120) ~ '...' : sujet.description }}
+                                </p>
+                                {% if sujet.taggedPsychologues|length > 0 %}
+                                    <p class="topic-description" style="margin-bottom: 14px; color: #5a5a5a; font-size: 13px;">
+                                        <strong>Psychologues tagués :</strong>
+                                        {% for psychologue in sujet.taggedPsychologues %}
+                                            {{ psychologue.firstName }} {{ psychologue.lastName }}{% if not loop.last %}, {% endif %}
+                                        {% endfor %}
+                                    </p>
+                                {% endif %}
+                                <div class="topic-meta">
+                                    <div class="topic-date">
+                                        <i class="ti-calendar"></i>
+                                        <span title="{{ sujet.dateCreation|date('d M Y H:i') }}">{{ sujet.dateCreation|ago(null, 'fr') }}</span>
+                                    </div>
+                                    <div class="topic-date">
+                                        <i class="ti-user"></i>
+                                        {% if sujet.isAnonymous %}
+                                            Anonyme
+                                        {% elseif sujet.user %}
+                                            {{ sujet.user.firstName }} {{ sujet.user.lastName }}
+                                        {% else %}
+                                            Utilisateur
+                                        {% endif %}
+                                    </div>
+                                    <a href="{{ path('front_forum_show', {id: sujet.id}) }}" class="view-topic-btn">
+                                        Voir le sujet
+                                        <i class="ti-arrow-right"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">
+                            <i class="ti-comments"></i>
+                        </div>
+                        <h3 style="color: #666; margin-bottom: 15px;">Aucun sujet disponible</h3>
+                        <p style="color: #999; margin-bottom: 30px;">Soyez le premier à lancer une discussion !</p>
+                        <a href="{{ path('front_forum_new') }}" class="boxed-btn3">
+                            <i class="ti-plus"></i> Créer le premier sujet
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        <div class="mt-4 d-flex justify-content-center">
+            {{ knp_pagination_render(sujets) }}
+        </div>
+    </div>
+{% endblock %}

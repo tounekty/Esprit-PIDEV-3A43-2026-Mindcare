@@ -1,0 +1,37 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Nouveau message{% endblock %}
+{% block page_title %}Nouveau message{% endblock %}
+
+{% block body %}
+    <div class="container" style="max-width: 700px; margin: 2rem auto; font-family: Arial, sans-serif;">
+        <h1>Nouveau message</h1>
+
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            {{ form_errors(form) }}
+            <div class="mb-3">
+                {{ form_label(form.sujet) }}
+                {{ form_widget(form.sujet) }}
+                {{ form_errors(form.sujet) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.contenu) }}
+                {{ form_widget(form.contenu) }}
+                {{ form_errors(form.contenu) }}
+            </div>
+            <div class="mb-3">
+                {{ form_label(form.isAnonymous) }}
+                {{ form_widget(form.isAnonymous) }}
+                {{ form_errors(form.isAnonymous) }}
+            </div>
+
+            <div class="mb-3">
+                {{ form_label(form.attachmentFile) }}
+                {{ form_widget(form.attachmentFile) }}
+                {{ form_errors(form.attachmentFile) }}
+            </div>
+            <button type="submit" style="padding: .5rem 1rem; background: #2f6fed; color: #fff; border: none; border-radius: 4px;">Enregistrer</button>
+            <a href="{{ path('message_forum_index') }}" style="margin-left: .5rem;">Retour</a>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

@@ -1,0 +1,369 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier l'entrée | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+    <style>
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(127, 191, 255, 0.2);
+        }
+        
+        /* Card */
+        .card-modern {
+            background: white;
+            border: 1px solid #D4E8FF;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(127, 191, 255, 0.1);
+            transition: all 0.3s;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card-modern-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .card-modern-body {
+            padding: 2rem;
+        }
+        
+        /* Textarea */
+        textarea.form-control {
+            border: 2px solid #D4E8FF !important;
+            border-radius: 8px;
+            font-size: 1rem;
+            line-height: 1.6;
+            min-height: 300px;
+            resize: vertical;
+            transition: all 0.3s;
+        }
+        
+        textarea.form-control:focus {
+            border-color: #7FBFFF !important;
+            box-shadow: 0 0 0 0.2rem rgba(127, 191, 255, 0.25) !important;
+        }
+        
+        /* Form Controls */
+        .form-control, .form-select {
+            border: 1px solid #D4E8FF !important;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #7FBFFF !important;
+            box-shadow: 0 0 0 0.2rem rgba(127, 191, 255, 0.25) !important;
+        }
+        
+        /* Stats */
+        .stat-box {
+            background: #f0f7ff;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #D4E8FF;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #7FBFFF;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%) !important;
+            border: none !important;
+            color: #1a365d !important;
+            font-weight: 600 !important;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3) !important;
+        }
+        
+        .btn-outline-secondary {
+            color: #7FBFFF !important;
+            border-color: #D4E8FF !important;
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: #E8F0FF !important;
+            border-color: #A8D8FF !important;
+        }
+        
+        /* Mood Info */
+        .mood-info-box {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.08) 0%, rgba(168, 216, 255, 0.08) 100%);
+            border: 1px solid #D4E8FF;
+            border-left: 4px solid #7FBFFF;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_journal_emotionnel_index') }}" class="text-decoration-none">Mes Entrées</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_journal_emotionnel_show', {'id': journal_emotionnel.id}) }}" class="text-decoration-none">Entrée #{{ journal_emotionnel.id }}</a></li>
+            <li class="breadcrumb-item active">Modifier</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="d-flex align-items-center justify-content-between">
+            <div>
+                <h1 class="h3 mb-1" style="color: white;">
+                    <i class="fas fa-edit me-2"></i>Modifier Entrée #{{ journal_emotionnel.id }}
+                </h1>
+                <p class="mb-0 opacity-75">Créée le {{ journal_emotionnel.dateecriture|date('d/m/Y à H:i') }}</p>
+            </div>
+            <a href="{{ path('app_journal_emotionnel_show', {'id': journal_emotionnel.id}) }}" class="btn btn-outline-light">
+                <i class="fas fa-eye me-1"></i> Voir
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Form Card -->
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Editor Card -->
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-pen-fancy me-2"></i>Contenu
+                </div>
+                <div class="card-modern-body">
+                    {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    
+                    <!-- Initialize Mood Map for JavaScript -->
+                    <script>
+                        // Initialize the mood map from server (maps mood name to mood ID)
+                        window.moodMap = {{ mood_map|json_encode|raw }};
+                    </script>
+                    
+                    <label class="form-label fw-bold mb-3">
+                        <i class="fas fa-edit me-2" style="color: #7FBFFF;"></i>Votre Texte
+                    </label>
+                    {{ form_widget(form.contenu, {
+                        'attr': {
+                            'class': 'form-control',
+                            'rows': '12',
+                            'placeholder': 'Exprimez vos pensées, émotions, réflexions...',
+                            'oninput': 'updateStats()'
+                        }
+                    }) }}
+                    <small class="text-muted d-block mt-2">
+                        <i class="fas fa-lock me-1"></i>Votre journal reste privé et confidentiel
+                    </small>
+                    
+                    <!-- Stats -->
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="stat-box">
+                                <div class="stat-number" id="wordCount">0</div>
+                                <div class="stat-label">Mots</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-box">
+                                <div class="stat-number" id="charCount">0</div>
+                                <div class="stat-label">Caractères</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="stat-box">
+                                <div class="stat-number" id="readingTime">0</div>
+                                <div class="stat-label">Min. Lecture</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date -->
+                    <div class="mt-4">
+                        <label class="form-label fw-bold mb-3">
+                            <i class="far fa-calendar-alt me-2" style="color: #7FBFFF;"></i>Date et Heure
+                        </label>
+                        <div class="input-group mb-2">
+                            <span class="input-group-text">
+                                <i class="far fa-calendar"></i>
+                            </span>
+                            {{ form_widget(form.dateecriture, {
+                                'attr': {
+                                    'class': 'form-control'
+                                }
+                            }) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-lg-4">
+            <!-- Mood Info -->
+            {% if journal_emotionnel.mood %}
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-smile me-2"></i>Humeur Associée
+                </div>
+                <div class="card-modern-body">
+                    <div class="mood-info-box">
+                        <div class="d-flex align-items-center mb-2">
+                            <div style="font-size: 2rem; margin-right: 1rem;">
+                                {% if journal_emotionnel.mood.humeur == 'heureux' %} 😊
+                                {% elseif journal_emotionnel.mood.humeur == 'triste' %} 😢
+                                {% elseif journal_emotionnel.mood.humeur == 'colere' %} 😠
+                                {% elseif journal_emotionnel.mood.humeur == 'stresse' %} 😰
+                                {% elseif journal_emotionnel.mood.humeur == 'calme' %} 😌
+                                {% elseif journal_emotionnel.mood.humeur == 'fatigue' %} 😴
+                                {% elseif journal_emotionnel.mood.humeur == 'excite' %} 😃
+                                {% elseif journal_emotionnel.mood.humeur == 'neutre' %} 😐
+                                {% else %} 😊
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-1">
+                                    {% if journal_emotionnel.mood.humeur == 'heureux' %} Heureux(euse)
+                                    {% elseif journal_emotionnel.mood.humeur == 'triste' %} Triste
+                                    {% elseif journal_emotionnel.mood.humeur == 'colere' %} En colère
+                                    {% elseif journal_emotionnel.mood.humeur == 'stresse' %} Stressé(e)
+                                    {% elseif journal_emotionnel.mood.humeur == 'calme' %} Calme
+                                    {% elseif journal_emotionnel.mood.humeur == 'fatigue' %} Fatigué(e)
+                                    {% elseif journal_emotionnel.mood.humeur == 'excite' %} Excité(e)
+                                    {% elseif journal_emotionnel.mood.humeur == 'neutre' %} Neutre
+                                    {% else %} {{ journal_emotionnel.mood.humeur|capitalize }}
+                                    {% endif %}
+                                </h6>
+                                <small class="text-muted">
+                                    Intensité: {{ journal_emotionnel.mood.intensite }}/5 • {{ journal_emotionnel.mood.datemood|date('d/m/Y') }}
+                                </small>
+                            </div>
+                        </div>
+                        <a href="{{ path('app_mood_show', {'id': journal_emotionnel.mood.id}) }}" class="btn btn-sm btn-outline-primary w-100 mt-2">
+                            <i class="fas fa-external-link-alt me-1"></i> Voir Humeur
+                        </a>
+                    </div>
+
+                    <label class="form-label fw-bold mt-4 mb-3">
+                        <i class="fas fa-sync me-2" style="color: #7FBFFF;"></i>Changer d'Humeur
+                    </label>
+                    {{ form_widget(form.mood) }}
+                </div>
+            </div>
+            {% else %}
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-smile me-2"></i>Humeur
+                </div>
+                <div class="card-modern-body">
+                    <p class="text-muted mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Aucune humeur n'est associée à cette entrée pour le moment.
+                    </p>
+                    <label class="form-label fw-bold mb-2">Associer une Humeur</label>
+                    {{ form_widget(form.mood) }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-cogs me-2"></i>Actions
+                </div>
+                <div class="card-modern-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('app_journal_emotionnel_show', {'id': journal_emotionnel.id}) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i> Aperçu
+                        </a>
+                        <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-1"></i> Toutes les Entrées
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Submit Buttons -->
+    <div class="d-flex gap-2 mt-4 pt-3 border-top justify-content-between">
+        <div class="d-flex gap-2">
+            <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-outline-secondary btn-lg">
+                <i class="fas fa-times me-1"></i> Annuler
+            </a>
+        </div>
+        <button type="submit" form="editForm" class="btn btn-primary btn-lg">
+            <i class="fas fa-save me-1"></i> Enregistrer Modifications
+        </button>
+    </div>
+
+    {{ form_end(form) }}
+</div>
+
+<script>
+    function updateStats() {
+        let textarea = document.querySelector('#journal_emotionnel_contenu, textarea[name*="contenu"]');
+        if (textarea) {
+            const text = textarea.value;
+            const charCount = text.length;
+            const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+            const minutes = Math.ceil(words / 200) || 0;
+            document.getElementById('wordCount').textContent = words;
+            document.getElementById('charCount').textContent = charCount;
+            document.getElementById('readingTime').textContent = minutes;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        let textarea = document.querySelector('#journal_emotionnel_contenu, textarea[name*="contenu"]');
+        if (textarea) {
+            updateStats();
+            textarea.addEventListener('input', updateStats);
+            
+            // Ajouter un ID au formulaire pour le bouton submit
+            const form = textarea.closest('form');
+            if (form) {
+                form.id = 'editForm';
+            }
+        }
+
+        // Validation du formulaire
+        const form = document.querySelector('form.needs-validation');
+        if (form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        }
+    });
+</script>
+{% endblock %}
+
+

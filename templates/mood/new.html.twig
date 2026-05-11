@@ -1,0 +1,527 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Nouvelle Humeur | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+    <style>
+       
+        /* AJOUTEZ CE CSS POUR DÉSACTIVER HTML5 */
+        /* Supprime TOUTE apparence de validation HTML5 */
+        input:invalid, textarea:invalid, select:invalid,
+        input:required:invalid, textarea:required:invalid, select:required:invalid {
+            box-shadow: none !important;
+            border-color: #ced4da !important;
+            background-image: none !important;
+            outline: none !important;
+        }
+        
+        /* Cache les bulles de validation */
+        input::-webkit-validation-bubble-message,
+        textarea::-webkit-validation-bubble-message,
+        select::-webkit-validation-bubble-message {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+        }
+        
+        /* Pour Firefox */
+        :-moz-ui-invalid {
+            box-shadow: none !important;
+        }
+        .mood-card {
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: none;
+        }
+        
+        .mood-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 2rem;
+        }
+        
+        .mood-emoji-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .mood-option {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .mood-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(127, 191, 255, 0.2);
+            border-color: #7FBFFF;
+        }
+
+        .mood-option.active {
+            border-color: #7FBFFF;
+            background: rgba(127, 191, 255, 0.1);
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .intensity-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .intensity-preview {
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        .intensity-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #8B5CF6;
+        }
+        
+        /* Masquer les labels de Symfony */
+        .form-check-label,
+        label[for="mood_humeur"] {
+            display: none !important;
+        }
+        
+        /* Masquer les radios de Symfony mais garder leur fonctionnalité */
+        .form-check-input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card mood-card">
+                <!-- En-tête -->
+                <div class="mood-header">
+                    <div class="d-flex align-items-center">
+                        <a href="{{ path('app_mood_index') }}" class="btn btn-outline-light rounded-pill me-3">
+                            <i class="fas fa-arrow-left"></i>
+                        </a>
+                        <div>
+                            <h1 class="h3 mb-1">
+                                <i class="fas fa-plus-circle me-2"></i>Nouvelle Humeur
+                            </h1>
+                            <p class="mb-0 opacity-85">Comment vous sentez-vous ?</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulaire -->
+                <div class="card-body p-4 p-md-5">
+                    {{ form_start(form, {'attr': {'id': 'moodForm'}}) }}
+                    
+                    <!-- Sélection d'humeur -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">
+                            <i class="fas fa-smile me-2"></i>Sélectionnez votre humeur
+                        </h5>
+                        
+                        <div class="mood-emoji-grid">
+                            {% set moods = {
+                                'heureux': { emoji: '😊', name: 'Heureux(euse)' },
+                                'neutre': { emoji: '😐', name: 'Neutre' },
+                                'triste': { emoji: '😢', name: 'Triste' },
+                                'colere': { emoji: '😠', name: 'En colère' },
+                                'stresse': { emoji: '😰', name: 'Stressé(e)' },
+                                'calme': { emoji: '😌', name: 'Calme' },
+                                'fatigue': { emoji: '😴', name: 'Fatigué(e)' },
+                                'excite': { emoji: '😃', name: 'Excité(e)' }
+                            } %}
+                            {% for key, mood in moods %}
+                                <div class="mood-option" onclick="document.getElementById('mood_humeur_{{ loop.index0 }}').checked = true; updateMoodSelection();">
+                                    <span class="mood-emoji">{{ mood.emoji }}</span>
+                                    <div class="fw-bold">{{ mood.name }}</div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Champ Symfony pour l'humeur (resté visible pour le JS) -->
+                        <div style="display: none;">
+                            {{ form_widget(form.humeur) }}
+                        </div>
+                        <div class="text-danger small mt-2" id="moodError"></div>
+                    </div>
+                    
+                    <!-- Intensité -->
+                    <div class="intensity-container">
+                        <h5 class="mb-3">
+                            <i class="fas fa-sliders-h me-2"></i>Intensité
+                        </h5>
+                        
+                        <div class="intensity-preview">
+                            <div class="intensity-value" id="intensityValue">3</div>
+                        </div>
+                        
+                        <!-- Champ Symfony pour l'intensité -->
+                        {{ form_widget(form.intensite, {
+                            'attr': {
+                                'class': 'form-range',
+                                'min': '1',
+                                'max': '5',
+                                'step': '1',
+                                'id': 'mood_intensite',
+                                'oninput': 'document.getElementById("intensityValue").textContent = this.value'
+                            }
+                        }) }}
+                        
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Faible</span>
+                            <span>Forte</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Date -->
+                    <div class="mb-4">
+                        <h5 class="mb-3">
+                            <i class="far fa-calendar-alt me-2"></i>Date
+                        </h5>
+                        
+                        <!-- Champ Symfony pour la date -->
+                        {{ form_widget(form.datemood, {
+                            'attr': {
+                                'class': 'form-control',
+                                'id': 'mood_datemood'
+                            }
+                        }) }}
+                        
+                        <!-- Bouton de date rapide -->
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="setToday()">
+                                Aujourd'hui
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Boutons -->
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ path('app_mood_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i> Annuler
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check-circle me-1"></i> Enregistrer
+                        </button>
+                    </div>
+                    
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// === AJOUTEZ CE CODE AU DÉBUT DE VOTRE SCRIPT ===
+// DÉSACTIVATION COMPLÈTE HTML5
+
+// 1. Désactive la validation HTML5 sur le formulaire
+const moodForm = document.getElementById('moodForm');
+if (moodForm) {
+    moodForm.setAttribute('novalidate', 'novalidate');
+    moodForm.noValidate = true;
+}
+
+// 2. Supprime les attributs required de tous les champs
+document.querySelectorAll('#moodForm input, #moodForm select, #moodForm textarea').forEach(field => {
+    field.removeAttribute('required');
+    field.required = false;
+    
+    // Empêche les événements 'invalid' du navigateur
+    field.addEventListener('invalid', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+    });
+});
+
+// 3. Override les fonctions de validation
+if (window.HTMLFormElement) {
+    HTMLFormElement.prototype.reportValidity = function() { return true; };
+    HTMLFormElement.prototype.checkValidity = function() { return true; };
+}
+
+// 4. Empêche l'événement global 'invalid'
+document.addEventListener('invalid', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+}, true);
+
+console.log('✅ Validation HTML5 désactivée pour le formulaire humeur');
+
+// === FIN DU CODE DE DÉSACTIVATION HTML5 ===
+// ... VOTRE SCRIPT EXISTANT CONTINUE CI-DESSOUS ...
+    // Fonction pour mettre à jour la sélection d'humeur
+    function updateMoodSelection() {
+        // Retirer la classe active de toutes les options
+        document.querySelectorAll('.mood-option').forEach(option => {
+            option.classList.remove('active');
+        });
+        
+        // Trouver le radio bouton sélectionné
+        const selectedRadio = document.querySelector('input[name="mood[humeur]"]:checked');
+        if (selectedRadio) {
+            // Trouver l'index du radio bouton
+            const radios = document.querySelectorAll('input[name="mood[humeur]"]');
+            const index = Array.from(radios).indexOf(selectedRadio);
+            
+            // Ajouter la classe active à l'option correspondante
+            const moodOption = document.querySelectorAll('.mood-option')[index];
+            if (moodOption) {
+                moodOption.classList.add('active');
+            }
+        }
+    }
+
+    // Fonction pour définir la date à aujourd'hui
+    function setToday() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        
+        document.getElementById('mood_datemood').value = `${year}-${month}-${day}`;
+    }
+
+    // Initialisation
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser l'affichage de l'intensité
+        const intensitySlider = document.getElementById('mood_intensite');
+        if (intensitySlider) {
+            // Mettre à jour l'affichage avec la valeur actuelle
+            document.getElementById('intensityValue').textContent = intensitySlider.value;
+            
+            // Ajouter un écouteur pour les changements futurs
+            intensitySlider.addEventListener('input', function() {
+                document.getElementById('intensityValue').textContent = this.value;
+            });
+        }
+        
+        // Définir la date à aujourd'hui par défaut
+        setToday();
+        
+        // Sélectionner la première humeur par défaut
+        const firstRadio = document.querySelector('input[name="mood[humeur]"]');
+        if (firstRadio) {
+            firstRadio.checked = true;
+            updateMoodSelection();
+        }
+        
+        // Validation du formulaire
+        const form = document.getElementById('moodForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Vérifier qu'une humeur est sélectionnée
+                const selectedMood = document.querySelector('input[name="mood[humeur]"]:checked');
+                if (!selectedMood) {
+                    e.preventDefault();
+                    document.getElementById('moodError').textContent = 'Veuillez sélectionner une humeur';
+                    return false;
+                }
+                
+                return true;
+            });
+        }
+    });
+    // === CONTRÔLE DE SAISIE SANS HTML5 ===
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('moodForm');
+    const moodError = document.getElementById('moodError');
+    
+    if (!form) return;
+    
+    // 1. DÉSACTIVER HTML5 COMPLÈTEMENT
+    form.setAttribute('novalidate', 'novalidate');
+    form.noValidate = true;
+    
+    // Supprimer les attributs required
+    document.querySelectorAll('#moodForm input, #moodForm select, #moodForm textarea').forEach(field => {
+        field.removeAttribute('required');
+        field.required = false;
+    });
+    
+    // 2. VALIDATION PERSONNALISÉE
+    form.addEventListener('submit', function(e) {
+        
+        let isValid = true;
+        const errors = [];
+        
+        // Réinitialiser les erreurs
+        moodError.textContent = '';
+        document.querySelectorAll('.custom-error').forEach(el => el.remove());
+        document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+        
+        // A. VALIDATION HUMEUR (obligatoire)
+        const selectedMood = document.querySelector('input[name="mood[humeur]"]:checked');
+        if (!selectedMood) {
+            isValid = false;
+            moodError.textContent = '❌ Veuillez sélectionner une humeur';
+            moodError.style.color = '#dc3545';
+            moodError.style.fontWeight = 'bold';
+            
+            // Animation
+            document.querySelectorAll('.mood-option').forEach(option => {
+                option.style.animation = 'shake 0.5s ease-in-out';
+                setTimeout(() => option.style.animation = '', 500);
+            });
+        }
+        
+        // B. VALIDATION INTENSITÉ (1-5)
+        const intensityInput = document.getElementById('mood_intensite');
+        if (intensityInput) {
+            const intensity = parseInt(intensityInput.value);
+            
+            if (isNaN(intensity)) {
+                isValid = false;
+                showError(intensityInput, '❌ L\'intensité est requise');
+            } else if (intensity < 1 || intensity > 5) {
+                isValid = false;
+                showError(intensityInput, '❌ L\'intensité doit être entre 1 et 5');
+            }
+        }
+        
+        // C. VALIDATION DATE (pas dans le futur)
+        const dateInput = document.getElementById('mood_datemood');
+        if (dateInput && dateInput.value) {
+            const selectedDate = new Date(dateInput.value);
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+            
+            if (selectedDate > today) {
+                isValid = false;
+                showError(dateInput, '❌ La date ne peut pas être dans le futur');
+            }
+        } else if (dateInput && !dateInput.value) {
+            isValid = false;
+            showError(dateInput, '❌ La date est requise');
+        }
+        
+        // D. VALIDATION COMMENTAIRE (optionnel mais limité)
+        const commentaireInput = form.querySelector('textarea[name="mood[commentaire]"]');
+        if (commentaireInput && commentaireInput.value) {
+            if (commentaireInput.value.length > 500) {
+                isValid = false;
+                showError(commentaireInput, '❌ Le commentaire ne peut pas dépasser 500 caractères');
+            }
+            
+            // Vérification des caractères spéciaux dangereux
+            const dangerousPattern = /<script>|javascript:|onclick=|onload=/i;
+            if (dangerousPattern.test(commentaireInput.value)) {
+                isValid = false;
+                showError(commentaireInput, '❌ Le commentaire contient du code non autorisé');
+            }
+        }
+        
+        // 3. RÉSULTAT DE LA VALIDATION
+        if (!isValid) {
+            e.preventDefault();
+            // Afficher message général
+            if (!document.querySelector('.validation-summary')) {
+                const summary = document.createElement('div');
+                summary.className = 'alert alert-danger validation-summary mt-3';
+                summary.innerHTML = `
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Veuillez corriger les ${errors.length > 0 ? errors.length : 'les'} erreur(s) ci-dessus</strong>
+                    <br><small>Le formulaire n'a pas pu être envoyé.</small>
+                `;
+                form.prepend(summary);
+                
+                // Scroll vers les erreurs
+                const firstError = document.querySelector('.is-invalid, #moodError');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+            
+            // Son d'erreur (optionnel)
+            if (typeof Audio !== 'undefined') {
+                const audio = new Audio('data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ');
+                audio.volume = 0.3;
+                audio.play().catch(() => {});
+            }
+        }
+    });
+    
+    // 4. VALIDATION EN TEMPS RÉEL
+    const intensityInput = document.getElementById('mood_intensite');
+    if (intensityInput) {
+        intensityInput.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            if (!isNaN(value) && value >= 1 && value <= 5) {
+                clearError(this);
+                this.classList.add('is-valid');
+                setTimeout(() => this.classList.remove('is-valid'), 2000);
+            }
+        });
+    }
+    
+    const dateInput = document.getElementById('mood_datemood');
+    if (dateInput) {
+        dateInput.addEventListener('change', function() {
+            if (this.value) {
+                const selectedDate = new Date(this.value);
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+                
+                if (selectedDate <= today) {
+                    clearError(this);
+                    this.classList.add('is-valid');
+                    setTimeout(() => this.classList.remove('is-valid'), 2000);
+                }
+            }
+        });
+    }
+    
+    // 5. FONCTIONS UTILITAIRES
+    function showError(input, message) {
+        input.classList.add('is-invalid');
+        
+        // Créer message d'erreur
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'custom-error text-danger small mt-1';
+        errorDiv.innerHTML = `<i class="fas fa-times-circle me-1"></i> ${message}`;
+        
+        // Animation
+        errorDiv.style.animation = 'fadeIn 0.3s ease-in';
+        
+        // Ajouter après le champ
+        input.parentNode.appendChild(errorDiv);
+        
+        // Animation sur le champ
+        input.style.animation = 'shake 0.5s ease-in-out';
+        setTimeout(() => input.style.animation = '', 500);
+    }
+    
+    function clearError(input) {
+        input.classList.remove('is-invalid');
+        const error = input.parentNode.querySelector('.custom-error');
+        if (error) error.remove();
+    }
+});
+
+// === FIN DU CONTRÔLE DE SAISIE ===
+</script>
+{% endblock %}
+
+

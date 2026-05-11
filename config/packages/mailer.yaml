@@ -1,0 +1,5 @@
+framework:
+    mailer:
+        dsn: '%env(MAILER_DSN)%'
+        # Send emails immediately (no Messenger worker required)
+        message_bus: false

@@ -1,0 +1,178 @@
+{% extends 'admin/base_admin.html.twig' %}
+
+{% block title %}Gestion Journal Émotionnel - Admin{% endblock %}
+{% block page_title %}📔 Gestion des Journaux Émotionnels{% endblock %}
+
+{% block breadcrumb %}
+    <ul class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{{ path('app_admin') }}">Dashboard</a></li>
+        <li class="breadcrumb-item">Journaux</li>
+    </ul>
+{% endblock %}
+
+{% block body %}
+<style>
+    .journal-card {
+        border-left: 4px solid #7FBFFF;
+        transition: all 0.3s ease;
+    }
+
+    .journal-card:hover {
+        box-shadow: 0 4px 12px rgba(127, 191, 255, 0.15);
+    }
+
+    .journal-excerpt {
+        color: #718096;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        max-height: 60px;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+    }
+
+    .mood-emoji {
+        font-size: 1.5rem;
+        display: inline-block;
+        width: 30px;
+        text-align: center;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #F0F7FF;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 8px;
+    }
+
+    .btn-sm {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+
+    .badge-date {
+        background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+        color: white;
+    }
+</style>
+
+    <!-- Statistiques -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Total d'entrées</h6>
+                    <h3 class="mb-0">{{ journals|length }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Moyenne de mots/entrée</h6>
+                    <h3 class="mb-0">
+                        {% set totalWords = 0 %}
+                        {% for journal in journals %}
+                            {% set totalWords = totalWords + (journal.contenu|split(' ')|length) %}
+                        {% endfor %}
+                        {{ journals|length > 0 ? (totalWords / journals|length)|round(0) : 0 }}
+                    </h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted mb-2">Dernière entrée</h6>
+                    <h3 class="mb-0">
+                        {% if journals|length > 0 %}
+                            {{ journals[0].dateecriture|date('d/m') }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des journaux -->
+    <div class="card">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Liste des Journaux
+            </h5>
+            <a href="{{ path('app_journal_emotionnel_new') }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-plus me-1"></i> Nouvelle Entrée
+            </a>
+        </div>
+        <div class="card-body">
+            {% if journals|length > 0 %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Humeur</th>
+                                <th>Contenu</th>
+                                <th>Date</th>
+                                <th>Mots</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for journal in journals %}
+                                <tr>
+                                    <td><span class="badge bg-light text-dark">#{{ journal.id }}</span></td>
+                                    <td>
+                                        <div class="mood-emoji">
+                                            {% if journal.mood %}
+                                                {% if journal.mood.humeur == 'heureux' %} 😊
+                                                {% elseif journal.mood.humeur == 'triste' %} 😢
+                                                {% elseif journal.mood.humeur == 'colere' %} 😠
+                                                {% elseif journal.mood.humeur == 'stresse' %} 😰
+                                                {% else %} 😐
+                                                {% endif %}
+                                            {% else %}
+                                                ❓
+                                            {% endif %}
+                                        </div>
+                                        {% if journal.mood %}
+                                            <small class="text-muted">{{ journal.mood.humeur|capitalize }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="journal-excerpt">
+                                            {{ journal.contenu }}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-date">
+                                            {{ journal.dateecriture|date('d/m/Y H:i') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">{{ journal.contenu|split(' ')|length }} mots</small>
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('app_journal_emotionnel_show', {'id': journal.id}) }}" class="btn btn-outline-primary btn-sm" title="Voir">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Aucune entrée de journal enregistrée pour le moment.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

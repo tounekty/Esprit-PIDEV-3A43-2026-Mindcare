@@ -1,0 +1,550 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Journal Émotionnel | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+    <style>
+        body {
+            background: #f8fafc;
+        }
+
+        .page-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        /* Header */
+        .header-hero {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(127, 191, 255, 0.2);
+        }
+
+        .header-hero h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header-hero p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        /* Controls Card */
+        .controls-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .controls-header {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 1rem;
+        }
+
+        .search-sort-row {
+            display: grid;
+            grid-template-columns: 1fr 150px 150px;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .search-sort-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-control, .form-select {
+            border: 2px solid #E2F0FF !important;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: #7FBFFF !important;
+            box-shadow: 0 0 0 3px rgba(127, 191, 255, 0.1) !important;
+        }
+
+        .input-group-text {
+            border: 2px solid #E2F0FF !important;
+            border-right: none !important;
+            background: white;
+        }
+
+        .input-group .form-control {
+            border-left: none !important;
+        }
+
+        .btn-apply {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-apply:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3);
+        }
+
+        /* Stats Section */
+        .stats-section {
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #E2F0FF;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(127, 191, 255, 0.15);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #718096;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #7FBFFF;
+        }
+
+        /* Distribution Section */
+        .distribution-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .distribution-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 1.5rem;
+        }
+
+        .mood-distribution {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .mood-box {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8fafc;
+            border-radius: 12px;
+            border: 1px solid #E2F0FF;
+            transition: all 0.3s;
+        }
+
+        .mood-box:hover {
+            background: white;
+            border-color: #7FBFFF;
+            transform: translateY(-2px);
+        }
+
+        .mood-emoji {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .mood-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1a365d;
+            text-transform: capitalize;
+            margin-bottom: 0.5rem;
+        }
+
+        .mood-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #7FBFFF;
+        }
+
+        .mood-percent {
+            font-size: 0.75rem;
+            color: #A0AEC0;
+            margin-top: 0.25rem;
+        }
+
+        /* Content Section */
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #1a365d;
+        }
+
+        .add-btn {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .add-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Journal Grid */
+        .journal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .journal-card {
+            background: white;
+            border: 1px solid #E2F0FF;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .journal-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 30px rgba(127, 191, 255, 0.15);
+        }
+
+        .journal-card-header {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.1) 0%, rgba(168, 216, 255, 0.1) 100%);
+            padding: 1.5rem;
+            border-bottom: 1px solid #E2F0FF;
+        }
+
+        .journal-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a365d;
+            margin-bottom: 0.25rem;
+        }
+
+        .journal-meta {
+            font-size: 0.85rem;
+            color: #718096;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .journal-meta i {
+            color: #7FBFFF;
+        }
+
+        .journal-card-body {
+            padding: 1.5rem;
+            flex: 1;
+        }
+
+        .mood-badge {
+            display: inline-block;
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.2) 0%, rgba(168, 216, 255, 0.2) 100%);
+            color: #7FBFFF;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .journal-preview {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #4A5568;
+            margin-bottom: 1rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .journal-stats {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+            color: #718096;
+            padding: 1rem 0;
+            border-top: 1px solid #E2F0FF;
+            border-bottom: 1px solid #E2F0FF;
+        }
+
+        .journal-stat {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .journal-stat i {
+            color: #7FBFFF;
+        }
+
+        .journal-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .btn-view {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+        }
+
+        .btn-view:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(127, 191, 255, 0.3);
+        }
+
+        .btn-edit {
+            background: white;
+            color: #7FBFFF;
+            border: 1px solid #D4E8FF;
+        }
+
+        .btn-edit:hover {
+            background: #f0f7ff;
+            border-color: #7FBFFF;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #CBD5E0;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: #4A5568;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #A0AEC0;
+            margin-bottom: 1.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="page-container">
+    <!-- Header -->
+    <div class="header-hero">
+        <h1><i class="fas fa-book me-2"></i>Journal Émotionnel</h1>
+        <p>Explorez vos pensées et émotions au fil du temps</p>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-card">
+        <div class="controls-header"><i class="fas fa-filter me-2"></i>Recherche et Filtres</div>
+        <form method="GET" class="w-100">
+            <div class="search-sort-row">
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Rechercher par contenu ou humeur..." value="{{ search }}">
+                </div>
+                <select name="sort" class="form-select">
+                    <option value="dateecriture" {{ sort == 'dateecriture' ? 'selected' : '' }}>Date</option>
+                    <option value="mood" {{ sort == 'mood' ? 'selected' : '' }}>Humeur</option>
+                    <option value="id" {{ sort == 'id' ? 'selected' : '' }}>ID</option>
+                </select>
+                <select name="direction" class="form-select">
+                    <option value="desc" {{ direction == 'desc' ? 'selected' : '' }}>Décroissant</option>
+                    <option value="asc" {{ direction == 'asc' ? 'selected' : '' }}>Croissant</option>
+                </select>
+            </div>
+            <button type="submit" class="btn-apply w-100"><i class="fas fa-check me-2"></i>Appliquer</button>
+        </form>
+    </div>
+
+    <!-- Statistics -->
+    {% if stats is defined and stats and stats.total > 0 %}
+    <div class="stats-section">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-list me-1"></i>Total Entrées</div>
+                <div class="stat-value">{{ stats.total }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-pencil me-1"></i>Mots Moyens</div>
+                <div class="stat-value">{{ stats.averageLength }}</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label"><i class="fas fa-calendar me-1"></i>Densité</div>
+                <div class="stat-value">{{ stats.total > 0 ? (stats.total / max(1, (stats.dates|length / stats.total)))|round(1) : 0 }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mood Distribution -->
+    {% if stats.total > 0 %}
+    <div class="distribution-card">
+        <div class="distribution-title"><i class="fas fa-pie-chart me-2"></i>Distribution des Humeurs</div>
+        <div class="mood-distribution">
+            {% for mood, count in stats.moodCounts %}
+            <div class="mood-box">
+                <div class="mood-emoji">
+                    {% if mood == 'heureux' %} 😊
+                    {% elseif mood == 'triste' %} 😢
+                    {% elseif mood == 'colere' %} 😠
+                    {% elseif mood == 'stresse' %} 😰
+                    {% else %} 😐
+                    {% endif %}
+                </div>
+                <div class="mood-name">{{ mood }}</div>
+                <div class="mood-count">{{ count }}</div>
+                <div class="mood-percent">{{ (stats.moodPercentages[mood] ?? 0) }}%</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <!-- Journal Content -->
+    <div class="content-header">
+        <h2 class="content-title"><i class="fas fa-list me-2"></i>Mes Entrées</h2>
+        <a href="{{ path('app_journal_emotionnel_new') }}" class="add-btn">
+            <i class="fas fa-plus-circle"></i>Nouvelle Entrée
+        </a>
+    </div>
+
+    {% if journal_emotionnels|length > 0 %}
+        <div class="journal-grid">
+            {% for entry in journal_emotionnels %}
+            <div class="journal-card">
+                <div class="journal-card-header">
+                    <h5 class="journal-title">Entrée #{{ entry.id }}</h5>
+                    <div class="journal-meta">
+                        <i class="far fa-calendar"></i>
+                        <span>{{ entry.dateecriture|date('d/m/Y') }} à {{ entry.dateecriture|date('H:i') }}</span>
+                    </div>
+                </div>
+                <div class="journal-card-body">
+                    {% if entry.mood %}
+                    <div class="mood-badge">
+                        {% if entry.mood.humeur == 'heureux' %} 😊 Heureux
+                        {% elseif entry.mood.humeur == 'triste' %} 😢 Triste
+                        {% elseif entry.mood.humeur == 'colere' %} 😠 En colère
+                        {% elseif entry.mood.humeur == 'stresse' %} 😰 Stressé
+                        {% else %} 😐 Neutre
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="journal-preview">
+                        {{ entry.contenu|length > 200 ? entry.contenu|slice(0, 200) ~ '...' : entry.contenu }}
+                    </div>
+                    
+                    <div class="journal-stats">
+                        <div class="journal-stat">
+                            <i class="fas fa-pen-fancy"></i>
+                            <span>{{ (entry.contenu|split(' ')|length) }} mots</span>
+                        </div>
+                    </div>
+                    
+                    <div class="journal-actions">
+                        <a href="{{ path('app_journal_emotionnel_show', {'id': entry.id}) }}" class="btn-sm btn-view">
+                            <i class="fas fa-eye me-1"></i> Lire
+                        </a>
+                        <a href="{{ path('app_journal_emotionnel_edit', {'id': entry.id}) }}" class="btn-sm btn-edit">
+                            <i class="fas fa-edit me-1"></i> Modifier
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-feather"></i>
+            <h3>Aucune entrée de journal</h3>
+            <p>Commencez à documenter vos pensées et émotions!</p>
+            <a href="{{ path('app_journal_emotionnel_new') }}" class="add-btn">
+                <i class="fas fa-plus-circle"></i>Créer une Entrée
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+

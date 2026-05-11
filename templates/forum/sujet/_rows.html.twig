@@ -1,0 +1,49 @@
+{% for sujet in sujets %}
+    <tr>
+        <td>
+            {{ sujet.titre }}
+            {% if sujet.isPinned %}<span class="badge bg-warning ms-1">📌</span>{% endif %}
+        </td>
+        <td>{{ sujet.description|slice(0, 50) }}...</td>
+        <td><span title="{{ sujet.dateCreation|date('Y-m-d H:i') }}">{{ sujet.dateCreation|ago(null, 'fr') }}</span></td>
+        <td>
+            {% if sujet.user %}
+                {{ sujet.user.firstName }} {{ sujet.user.lastName }}
+            {% else %}
+                -
+            {% endif %}
+            {% if sujet.isAnonymous %}
+                <span class="badge bg-secondary ms-1">Anonyme</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if sujet.imageUrl %}
+                <img src="{{ sujet.imageUrl }}" alt="img" style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
+            {% else %}
+                <span class="text-muted">-</span>
+            {% endif %}
+        </td>
+        <td>
+            {% if sujet.status %}
+                <span class="badge bg-info">{{ sujet.status }}</span>
+            {% else %}
+                <span class="text-muted">-</span>
+            {% endif %}
+        </td>
+        <td>
+            <div class="dropdown">
+                <a href="#" class="btn btn-sm btn-light dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="feather-more-vertical"></i>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="{{ path('sujet_forum_show', {id: sujet.id}) }}"><i class="feather-eye me-2"></i> Voir</a></li>
+                    <li><a class="dropdown-item" href="{{ path('sujet_forum_edit', {id: sujet.id}) }}"><i class="feather-edit me-2"></i> Modifier</a></li>
+                </ul>
+            </div>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="7" class="text-center">Aucun sujet.</td>
+    </tr>
+{% endfor %}

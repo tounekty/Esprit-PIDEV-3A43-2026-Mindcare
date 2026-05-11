@@ -1,0 +1,419 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails Journal | MindCare{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="{{ asset('front/css/mood-journal-pro.css') }}">
+    <style>
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(127, 191, 255, 0.2);
+        }
+        
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .stat-item {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .stat-item strong {
+            display: block;
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        
+        .stat-item .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 0.25rem;
+        }
+        
+        /* Cards */
+        .card-modern {
+            background: white;
+            border: 1px solid #D4E8FF;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(127, 191, 255, 0.1);
+            transition: all 0.3s;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .card-modern:hover {
+            box-shadow: 0 10px 30px rgba(127, 191, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .card-modern-header {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%);
+            color: white;
+            padding: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .card-modern-body {
+            padding: 2rem;
+        }
+        
+        /* Journal Content */
+        .journal-content {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background: #f0f7ff;
+            padding: 2rem;
+            border-radius: 8px;
+            border-left: 4px solid #7FBFFF;
+            margin-bottom: 2rem;
+        }
+        
+        /* Mood Tag */
+        .mood-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .mood-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(127, 191, 255, 0.2);
+        }
+        
+        /* Meditation Card */
+        .meditation-card {
+            border-left: 4px solid #7FBFFF;
+            background: #f0f7ff;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .meditation-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.15);
+        }
+        
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%) !important;
+            border: none !important;
+            color: #1a365d !important;
+            font-weight: 600 !important;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(127, 191, 255, 0.3) !important;
+        }
+        
+        .btn-outline-secondary {
+            color: #7FBFFF !important;
+            border-color: #D4E8FF !important;
+        }
+        
+        .btn-outline-secondary:hover {
+            background-color: #E8F0FF !important;
+            border-color: #A8D8FF !important;
+        }
+        
+        /* Affirmation Box */
+        .affirmation-box {
+            background: linear-gradient(135deg, rgba(127, 191, 255, 0.08) 0%, rgba(168, 216, 255, 0.08) 100%);
+            border: 1px solid #D4E8FF;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        /* Breathing Exercises */
+        .breathing-exercise {
+            background: #f0f7ff;
+            border-left: 4px solid #A8D8FF;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_journal_emotionnel_index') }}" class="text-decoration-none">Mes Entrées</a></li>
+            <li class="breadcrumb-item active">Entrée #{{ journal_emotionnel.id }}</li>
+        </ol>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <div style="font-size: 48px;">📝</div>
+            </div>
+            <div class="col">
+                <h1 class="h3 mb-1" style="color: white;">
+                    <i class="fas fa-book me-2"></i>Entrée #{{ journal_emotionnel.id }}
+                </h1>
+                <p class="mb-0 opacity-75">{{ journal_emotionnel.dateecriture|date('d/m/Y à H:i') }}</p>
+            </div>
+            <div class="col-auto">
+                <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-1"></i> Retour
+                </a>
+            </div>
+        </div>
+        
+        <div class="stat-grid">
+            <div class="stat-item">
+                <strong>Mots</strong>
+                <div class="value">{{ journal_emotionnel.contenu|split(' ')|length }}</div>
+            </div>
+            <div class="stat-item">
+                <strong>Caractères</strong>
+                <div class="value">{{ journal_emotionnel.contenu|length }}</div>
+            </div>
+            <div class="stat-item">
+                <strong>Lecture</strong>
+                <div class="value">{{ (journal_emotionnel.contenu|length / 1000)|number_format(1) }}m</div>
+            </div>
+            <div class="stat-item">
+                <strong>Humeur</strong>
+                <div class="value">
+                    {% if journal_emotionnel.mood %}
+                        {% if journal_emotionnel.mood.humeur == 'heureux' %} 😊
+                        {% elseif journal_emotionnel.mood.humeur == 'triste' %} 😢
+                        {% elseif journal_emotionnel.mood.humeur == 'colere' %} 😠
+                        {% elseif journal_emotionnel.mood.humeur == 'stresse' %} 😰
+                        {% elseif journal_emotionnel.mood.humeur == 'calme' %} 😌
+                        {% elseif journal_emotionnel.mood.humeur == 'fatigue' %} 😴
+                        {% elseif journal_emotionnel.mood.humeur == 'excite' %} 😃
+                        {% elseif journal_emotionnel.mood.humeur == 'neutre' %} 😐
+                        {% else %} 😊
+                        {% endif %}
+                    {% else %} — {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row g-4">
+        <!-- Left Column -->
+        <div class="col-lg-8">
+            <!-- Journal Content -->
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-pen-fancy me-2"></i>Contenu
+                </div>
+                <div class="card-modern-body">
+                    <div class="journal-content">
+                        {{ journal_emotionnel.contenu|nl2br }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Associated Mood -->
+            {% if journal_emotionnel.mood %}
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-smile me-2"></i>Humeur Associée
+                </div>
+                <div class="card-modern-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div style="font-size: 36px; margin-right: 1rem;">
+                            {% if journal_emotionnel.mood.humeur == 'heureux' %} 😊
+                            {% elseif journal_emotionnel.mood.humeur == 'triste' %} 😢
+                            {% elseif journal_emotionnel.mood.humeur == 'colere' %} 😠
+                            {% elseif journal_emotionnel.mood.humeur == 'stresse' %} 😰
+                            {% elseif journal_emotionnel.mood.humeur == 'calme' %} 😌
+                            {% elseif journal_emotionnel.mood.humeur == 'fatigue' %} 😴
+                            {% elseif journal_emotionnel.mood.humeur == 'excite' %} 😃
+                            {% elseif journal_emotionnel.mood.humeur == 'neutre' %} 😐
+                            {% else %} 😊
+                            {% endif %}
+                        </div>
+                        <div>
+                            <h5 class="mb-1">
+                                <a href="{{ path('app_mood_show', {'id': journal_emotionnel.mood.id}) }}" class="text-decoration-none">
+                                    {% if journal_emotionnel.mood.humeur == 'heureux' %} Heureux(euse)
+                                    {% elseif journal_emotionnel.mood.humeur == 'triste' %} Triste
+                                    {% elseif journal_emotionnel.mood.humeur == 'colere' %} En colère
+                                    {% elseif journal_emotionnel.mood.humeur == 'stresse' %} Stressé(e)
+                                    {% elseif journal_emotionnel.mood.humeur == 'calme' %} Calme
+                                    {% elseif journal_emotionnel.mood.humeur == 'fatigue' %} Fatigué(e)
+                                    {% elseif journal_emotionnel.mood.humeur == 'excite' %} Excité(e)
+                                    {% elseif journal_emotionnel.mood.humeur == 'neutre' %} Neutre
+                                    {% else %} {{ journal_emotionnel.mood.humeur|capitalize }}
+                                    {% endif %}
+                                </a>
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-info">Intensité: {{ journal_emotionnel.mood.intensite }}/5</span>
+                                <span class="badge bg-secondary">{{ journal_emotionnel.mood.datemood|date('d/m/Y') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Meditation Recommendations -->
+            {% if meditations %}
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-spa me-2"></i>Méditations Recommandées
+                </div>
+                <div class="card-modern-body">
+                    <div class="row g-3">
+                        {% for meditation in meditations %}
+                        <div class="col-md-6">
+                            <div class="meditation-card p-3">
+                                <h6 class="fw-bold mb-2">{{ meditation.title }}</h6>
+                                <p class="text-muted small mb-2">{{ meditation.description }}</p>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-info">{{ meditation.duration }}</span>
+                                </div>
+                                <button type="button" class="btn btn-sm btn-primary w-100" data-bs-toggle="modal" data-bs-target="#journalMeditationModal{{ loop.index }}">
+                                    <i class="fab fa-youtube me-1"></i> Regarder
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="col-lg-4">
+            <!-- Actions -->
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-cogs me-2"></i>Actions
+                </div>
+                <div class="card-modern-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ path('app_journal_emotionnel_edit', {'id': journal_emotionnel.id}) }}" class="btn btn-primary">
+                            <i class="fas fa-edit me-1"></i> Modifier
+                        </a>
+                        {% if journal_emotionnel.pdfPath %}
+                        <a href="{{ path('app_journal_emotionnel_download_pdf', {'id': journal_emotionnel.id}) }}" class="btn btn-info">
+                            <i class="fas fa-file-pdf me-1"></i> Télécharger PDF
+                        </a>
+                        {% else %}
+                        <button class="btn btn-info" disabled>
+                            <i class="fas fa-spinner me-1"></i> PDF en cours...
+                        </button>
+                        {% endif %}
+                        <a href="{{ path('app_journal_emotionnel_new') }}" class="btn btn-success">
+                            <i class="fas fa-plus me-1"></i> Nouvelle Entrée
+                        </a>
+                        <a href="{{ path('app_journal_emotionnel_index') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-1"></i> Toutes les Entrées
+                        </a>
+                        <a href="{{ path('app_dashboard') }}" class="btn btn-outline-primary">
+                            <i class="fas fa-home me-1"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Affirmation of the Day -->
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-lightbulb me-2"></i>Affirmation du Jour
+                </div>
+                <div class="card-modern-body">
+                    <div class="affirmation-box">
+                        <p class="mb-0">
+                            <i class="fas fa-quote-left me-2" style="opacity: 0.5;"></i>
+                            {{ random(affirmations) }}
+                            <i class="fas fa-quote-right ms-2" style="opacity: 0.5;"></i>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Breathing Exercises -->
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-wind me-2"></i>Exercices de Respiration
+                </div>
+                <div class="card-modern-body">
+                    {% for exercise in breathing_exercises %}
+                    <div class="breathing-exercise">
+                        <h6 class="fw-bold mb-1">{{ exercise.name }}</h6>
+                        <p class="text-muted small mb-2">{{ exercise.description }}</p>
+                        <div class="d-flex justify-content-between">
+                            <small class="badge bg-secondary">{{ exercise.duration }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Tips -->
+            <div class="card-modern">
+                <div class="card-modern-header">
+                    <i class="fas fa-star me-2"></i>Conseils
+                </div>
+                <div class="card-modern-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Écrivez quotidiennement</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Soyez honnête avec vous-même</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Prenez du recul et relisez</li>
+                        <li><i class="fas fa-check text-success me-2"></i> Célébrez les progrès</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Meditation Modals -->
+{% for meditation in meditations %}
+<div class="modal fade" id="journalMeditationModal{{ loop.index }}" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #7FBFFF 0%, #A8D8FF 100%); border: none;">
+                <h5 class="modal-title text-white">
+                    <i class="fas fa-spa me-2"></i>{{ meditation.title }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div style="padding-bottom: 56.25%; position: relative;">
+                    <iframe width="100%" height="100%" src="https://www.youtube.com/embed/{{ meditation.youtubeId }}" 
+                        style="position: absolute; top: 0; left: 0;" allowfullscreen 
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
